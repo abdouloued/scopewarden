@@ -78,13 +78,32 @@ pub enum Commands {
     Status,
 }
 
-#[derive(ValueEnum, Clone, Debug)]
+#[derive(ValueEnum, Clone, Debug, PartialEq)]
 pub enum AgentKind {
+    /// Anthropic Claude Code
     Claude,
+    /// OpenAI Codex CLI
     Codex,
+    /// OpenAI Codex App (GUI)
+    #[value(name = "codex-app")]
+    CodexApp,
+    /// Cursor AI editor
     Cursor,
+    /// Google Gemini CLI
     Gemini,
+    /// Anomaly's OpenCode
     Opencode,
+    /// OpenClaw personal AI
+    Openclaw,
+    /// Nous Research Hermes Agent
+    Hermes,
+    /// GitHub Copilot CLI
+    Copilot,
+    /// Factory Droid
+    Droid,
+    /// Minimal AI agent toolkit
+    Pi,
+    /// Any other agent
     Custom,
 }
 
@@ -93,9 +112,15 @@ impl std::fmt::Display for AgentKind {
         let s = match self {
             AgentKind::Claude => "claude-code",
             AgentKind::Codex => "codex",
+            AgentKind::CodexApp => "codex-app",
             AgentKind::Cursor => "cursor",
             AgentKind::Gemini => "gemini-cli",
             AgentKind::Opencode => "opencode",
+            AgentKind::Openclaw => "openclaw",
+            AgentKind::Hermes => "hermes",
+            AgentKind::Copilot => "copilot-cli",
+            AgentKind::Droid => "droid",
+            AgentKind::Pi => "pi",
             AgentKind::Custom => "custom",
         };
         write!(f, "{}", s)

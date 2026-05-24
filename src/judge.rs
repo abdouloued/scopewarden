@@ -49,7 +49,7 @@ pub async fn evaluate(
     }
 }
 
-fn build_prompt(mission: &str, files: &[AnnotatedFile]) -> String {
+pub(crate) fn build_prompt(mission: &str, files: &[AnnotatedFile]) -> String {
     let file_list = files
         .iter()
         .map(|f| {
@@ -182,7 +182,7 @@ async fn evaluate_openai(prompt: &str, _config: &JudgeConfig) -> Result<JudgeRes
 
 // ── Parse ─────────────────────────────────────────────────────────────────────
 
-fn parse_judge_response(text: &str, provider: &str, model: &str) -> Result<JudgeResult> {
+pub(crate) fn parse_judge_response(text: &str, provider: &str, model: &str) -> Result<JudgeResult> {
     // Strip <think>...</think> blocks (qwen3.5 fallback)
     let text = if let Some(start) = text.find("<think>") {
         if let Some(end) = text.find("</think>") {
@@ -227,4 +227,123 @@ fn parse_judge_response(text: &str, provider: &str, model: &str) -> Result<Judge
         provider: provider.to_string(),
         model: model.to_string(),
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::git::{DiffStatus, FileDiff};
+    use crate::policy::{AnnotatedFile, FileVerdict};
+    use std::path::PathBuf;
+
+    // ── parse_judge_response tests ─────────────────────────────────────────
+
+    #[test]
+    fn parse_valid_json_matches() {
+        let json = r#"{"confidence": 0.95, "verdict": "MATCHES", "reasoning": "All changes are related."}"#;
+        let result = parse_judge_response(json, "test", "test-model").unwrap();
+        assert_eq!(result.verdict, JudgeVerdict::Matches);
+        assert!((result.confidence - 0.95).abs() < 0.01);
+        assert_eq!(result.reasoning, "All changes are related.");
+        assert_eq!(result.provider, "test");
+        assert_eq!(result.model, "test-model");
+    }
+
+    #[test]
+    fn parse_valid_json_drift() {
+        let json = r#"{"confidence": 0.3, "verdict": "DRIFT", "reasoning": "Unrelated changes found."}"#;
+        let result = parse_judge_response(json, "ollama", "qwen3.5:2b").unwrap();
+        assert_eq!(result.verdict, JudgeVerdict::Drift);
+        assert!((result.confidence - 0.3).abs() < 0.01);
+    }
+
+    #[test]
+    fn parse_unknown_verdict() {
+        let json = r#"{"confidence": 0.5, "verdict": "MAYBE", "reasoning": "Unclear."}"#;
+        let result = parse_judge_response(json, "test", "m").unwrap();
+        assert_eq!(result.verdict, JudgeVerdict::Unknown);
+    }
+
+    #[test]
+    fn parse_markdown_fenced_json() {
+        let text = "```json\n{\"confidence\": 0.8, \"verdict\": \"MATCHES\", \"reasoning\": \"Good.\"}\n```";
+        let result = parse_judge_response(text, "test", "m").unwrap();
+        assert_eq!(result.verdict, JudgeVerdict::Matches);
+    }
+
+    #[test]
+    fn parse_triple_backtick_fenced_json() {
+        let text = "```\n{\"confidence\": 0.9, \"verdict\": \"DRIFT\", \"reasoning\": \"Off topic.\"}\n```";
+        let result = parse_judge_response(text, "test", "m").unwrap();
+        assert_eq!(result.verdict, JudgeVerdict::Drift);
+    }
+
+    #[test]
+    fn parse_with_think_blocks() {
+        let text = "<think>Let me analyze this carefully...</think>{\"confidence\": 0.7, \"verdict\": \"MATCHES\", \"reasoning\": \"Looks good.\"}";
+        let result = parse_judge_response(text, "ollama", "qwen3.5:2b").unwrap();
+        assert_eq!(result.verdict, JudgeVerdict::Matches);
+        assert!((result.confidence - 0.7).abs() < 0.01);
+    }
+
+    #[test]
+    fn parse_invalid_json_returns_error() {
+        let text = "This is not JSON at all";
+        let result = parse_judge_response(text, "test", "m");
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn parse_missing_fields_uses_defaults() {
+        let json = "{}";
+        let result = parse_judge_response(json, "test", "m").unwrap();
+        assert!((result.confidence - 0.5).abs() < 0.01); // default
+        assert_eq!(result.verdict, JudgeVerdict::Unknown); // default
+        assert_eq!(result.reasoning, "No reasoning provided"); // default
+    }
+
+    // ── build_prompt tests ─────────────────────────────────────────────────
+
+    #[test]
+    fn build_prompt_contains_mission() {
+        let files = vec![];
+        let prompt = build_prompt("Fix the login bug", &files);
+        assert!(prompt.contains("Fix the login bug"));
+    }
+
+    #[test]
+    fn build_prompt_contains_file_info() {
+        let files = vec![AnnotatedFile {
+            diff: FileDiff {
+                path: PathBuf::from("src/main.rs"),
+                additions: 10,
+                deletions: 3,
+                status: DiffStatus::Modified,
+            },
+            verdict: FileVerdict::InScope,
+        }];
+        let prompt = build_prompt("Fix bug", &files);
+        assert!(prompt.contains("src/main.rs"));
+        assert!(prompt.contains("+10"));
+        assert!(prompt.contains("-3"));
+        assert!(prompt.contains("IN SCOPE"));
+    }
+
+    #[test]
+    fn build_prompt_requests_json_format() {
+        let prompt = build_prompt("test", &[]);
+        assert!(prompt.contains("JSON"));
+        assert!(prompt.contains("confidence"));
+        assert!(prompt.contains("verdict"));
+        assert!(prompt.contains("reasoning"));
+    }
+
+    // ── JudgeVerdict tests ─────────────────────────────────────────────────
+
+    #[test]
+    fn judge_verdict_labels() {
+        assert_eq!(JudgeVerdict::Matches.label(), "MATCHES MISSION");
+        assert_eq!(JudgeVerdict::Drift.label(), "DRIFT DETECTED");
+        assert_eq!(JudgeVerdict::Unknown.label(), "UNKNOWN");
+    }
 }

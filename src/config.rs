@@ -40,7 +40,7 @@ impl Default for Config {
 
 // ── Policy ────────────────────────────────────────────────────────────────────
 
-#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PolicyConfig {
     /// Glob patterns always blocked regardless of mission
     #[serde(default = "default_blocked")]
@@ -57,6 +57,17 @@ pub struct PolicyConfig {
     /// Max files changed before a warning fires (0 = disabled)
     #[serde(default)]
     pub max_files_changed: usize,
+}
+
+impl Default for PolicyConfig {
+    fn default() -> Self {
+        Self {
+            blocked: default_blocked(),
+            warn: default_warn(),
+            max_lines_changed: 0,
+            max_files_changed: 0,
+        }
+    }
 }
 
 fn default_blocked() -> Vec<String> {
@@ -195,30 +206,55 @@ pub async fn integrate_agent(agent: AgentKind) -> Result<()> {
 
     match agent {
         AgentKind::Claude => {
-            let content = claude_md_content();
-            std::fs::write("CLAUDE.md", content)?;
+            std::fs::write("CLAUDE.md", agent_rules_content("Claude Code"))?;
             p.success("Wrote CLAUDE.md — Claude Code will now respect AgentScope sessions");
         }
         AgentKind::Cursor => {
             std::fs::create_dir_all(".cursor/rules")?;
-            std::fs::write(".cursor/rules/agentscope.md", cursor_rules_content())?;
+            std::fs::write(".cursor/rules/agentscope.md", agent_rules_content("Cursor"))?;
             p.success("Wrote .cursor/rules/agentscope.md");
         }
         AgentKind::Gemini => {
-            std::fs::write("GEMINI.md", gemini_md_content())?;
+            std::fs::write("GEMINI.md", agent_rules_content("Gemini CLI"))?;
             p.success("Wrote GEMINI.md");
         }
-        _ => {
-            p.hint(&format!(
-                "No native integration for {}. Add agentscope check to your workflow manually.",
-                agent
-            ));
+        AgentKind::Codex | AgentKind::CodexApp => {
+            std::fs::write("AGENTS.md", agent_rules_content("Codex"))?;
+            p.success("Wrote AGENTS.md — Codex will now respect AgentScope sessions");
+        }
+        AgentKind::Opencode => {
+            std::fs::write("AGENTS.md", agent_rules_content("OpenCode"))?;
+            p.success("Wrote AGENTS.md — OpenCode will now respect AgentScope sessions");
+        }
+        AgentKind::Openclaw => {
+            std::fs::write("AGENTS.md", agent_rules_content("OpenClaw"))?;
+            p.success("Wrote AGENTS.md — OpenClaw will now respect AgentScope sessions");
+        }
+        AgentKind::Hermes => {
+            std::fs::write("AGENTS.md", agent_rules_content("Hermes Agent"))?;
+            p.success("Wrote AGENTS.md — Hermes will now respect AgentScope sessions");
+        }
+        AgentKind::Copilot => {
+            std::fs::write("AGENTS.md", agent_rules_content("Copilot CLI"))?;
+            p.success("Wrote AGENTS.md — Copilot will now respect AgentScope sessions");
+        }
+        AgentKind::Droid => {
+            std::fs::write("AGENTS.md", agent_rules_content("Droid"))?;
+            p.success("Wrote AGENTS.md — Droid will now respect AgentScope sessions");
+        }
+        AgentKind::Pi => {
+            std::fs::write("AGENTS.md", agent_rules_content("Pi"))?;
+            p.success("Wrote AGENTS.md — Pi will now respect AgentScope sessions");
+        }
+        AgentKind::Custom => {
+            p.hint("Custom agent — add agentscope check to your agent's post-run hook manually.");
+            p.hint("See: agentscope use claude for an example integration file.");
         }
     }
     Ok(())
 }
 
-fn preset_config(preset: &Preset) -> Config {
+pub(crate) fn preset_config(preset: &Preset) -> Config {
     let mut config = Config::default();
     match preset {
         Preset::Solo => {
@@ -239,41 +275,193 @@ fn preset_config(preset: &Preset) -> Config {
     config
 }
 
-fn claude_md_content() -> &'static str {
-    r#"# AgentScope Integration
+fn agent_rules_content(agent_name: &str) -> String {
+    format!(
+        r#"# AgentScope Integration
 
-This repo uses AgentScope to track and audit AI agent sessions.
+This repo uses [AgentScope](https://github.com/abdouloued/agentscopev2) to track and audit AI agent sessions.
 
-## Rules for Claude Code
+## Rules for {agent_name}
 
-1. Before starting work, read the active session with `cat .agentscope/session.json`
+1. Before starting work, read the active session: `cat .agentscope/session.json`
 2. Only modify files that are relevant to the stated mission
-3. Never modify files matching: `.env*`, `src/auth/**`, `**/migrations/**`, `*.pem`, `*.key`
-4. After completing work, confirm with: `agentscope check`
+3. Never modify files matching these blocked patterns:
+   - `.env*` — environment secrets
+   - `src/auth/**` — authentication logic
+   - `**/migrations/**` — database migrations
+   - `*.pem`, `*.key` — cryptographic keys
+4. After completing work, verify with: `agentscope check`
 
 ## Why these rules exist
 
 AgentScope records every file you touch and compares it to the stated mission.
-Edits outside scope are flagged as UNASKED. Blocked-path edits halt the session.
+Edits outside scope are flagged as **UNASKED**. Blocked-path edits **halt the session**.
 This is a safety and audit layer — not a limitation on your capability.
-"#
+
+## Quick reference
+
+```bash
+# Check what the session expects
+cat .agentscope/session.json | jq '.mission'
+
+# Verify your changes when done
+agentscope check
+
+# See detailed status
+agentscope status
+```
+"#,
+        agent_name = agent_name,
+    )
 }
 
-fn cursor_rules_content() -> &'static str {
-    r#"# AgentScope rules for Cursor
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::cli::Preset;
 
-- Read `.agentscope/session.json` before beginning any task
-- Scope your changes to files relevant to the active session mission
-- Never edit `.env*`, `src/auth/**`, `**/migrations/**`, `*.pem`, `*.key`
-- Run `agentscope check` after completing each task
-"#
-}
+    #[test]
+    fn default_config_version_is_one() {
+        let config = Config::default();
+        assert_eq!(config.version, 1);
+    }
 
-fn gemini_md_content() -> &'static str {
-    r#"# AgentScope Integration
+    #[test]
+    fn default_config_judge_model() {
+        let config = Config::default();
+        assert_eq!(config.judge.model, "qwen3.5:2b");
+    }
 
-This repo uses AgentScope for agent session tracking.
-Read `.agentscope/session.json` for the active mission before making changes.
-Run `agentscope check` when done.
-"#
+    #[test]
+    fn default_config_judge_enabled() {
+        let config = Config::default();
+        assert!(config.judge.enabled);
+    }
+
+    #[test]
+    fn default_config_judge_provider_ollama() {
+        let config = Config::default();
+        assert_eq!(config.judge.provider, JudgeProvider::Ollama);
+    }
+
+    #[test]
+    fn default_config_judge_endpoint() {
+        let config = Config::default();
+        assert_eq!(config.judge.endpoint, "http://localhost:11434");
+    }
+
+    #[test]
+    fn default_config_has_blocked_patterns() {
+        let config = Config::default();
+        assert!(!config.policy.blocked.is_empty());
+        assert!(config.policy.blocked.contains(&".env".to_string()));
+    }
+
+    #[test]
+    fn default_config_has_warn_patterns() {
+        let config = Config::default();
+        assert!(!config.policy.warn.is_empty());
+        assert!(config.policy.warn.contains(&"Cargo.lock".to_string()));
+    }
+
+    #[test]
+    fn default_config_team_disabled() {
+        let config = Config::default();
+        assert!(!config.team.enabled);
+    }
+
+    #[test]
+    fn default_config_limits_are_zero() {
+        let config = Config::default();
+        assert_eq!(config.policy.max_files_changed, 0);
+        assert_eq!(config.policy.max_lines_changed, 0);
+    }
+
+    #[test]
+    fn preset_solo_max_files_20() {
+        let config = preset_config(&Preset::Solo);
+        assert_eq!(config.policy.max_files_changed, 20);
+    }
+
+    #[test]
+    fn preset_solo_judge_enabled() {
+        let config = preset_config(&Preset::Solo);
+        assert!(config.judge.enabled);
+    }
+
+    #[test]
+    fn preset_team_max_files_10() {
+        let config = preset_config(&Preset::Team);
+        assert_eq!(config.policy.max_files_changed, 10);
+    }
+
+    #[test]
+    fn preset_team_enables_sharing() {
+        let config = preset_config(&Preset::Team);
+        assert!(config.team.enabled);
+        assert!(config.team.share_logs);
+    }
+
+    #[test]
+    fn preset_ci_judge_disabled() {
+        let config = preset_config(&Preset::Ci);
+        assert!(!config.judge.enabled);
+    }
+
+    #[test]
+    fn preset_ci_max_files_5() {
+        let config = preset_config(&Preset::Ci);
+        assert_eq!(config.policy.max_files_changed, 5);
+    }
+
+    #[test]
+    fn parse_yaml_minimal() {
+        let yaml = "version: 1";
+        let config: Config = serde_yaml::from_str(yaml).unwrap();
+        assert_eq!(config.version, 1);
+        assert!(config.judge.enabled);
+        assert_eq!(config.judge.model, "qwen3.5:2b");
+    }
+
+    #[test]
+    fn parse_yaml_empty_uses_defaults() {
+        let yaml = "{}";
+        let config: Config = serde_yaml::from_str(yaml).unwrap();
+        assert_eq!(config.version, 1);
+        assert_eq!(config.judge.model, "qwen3.5:2b");
+    }
+
+    #[test]
+    fn parse_yaml_custom_model() {
+        let yaml = "version: 1
+judge:
+  enabled: true
+  provider: openai
+  model: gpt-4o
+  endpoint: https://api.openai.com";
+        let config: Config = serde_yaml::from_str(yaml).unwrap();
+        assert_eq!(config.judge.model, "gpt-4o");
+        assert_eq!(config.judge.provider, JudgeProvider::Openai);
+    }
+
+    #[test]
+    fn parse_yaml_with_limits() {
+        let yaml = "policy:
+  max_files_changed: 15
+  max_lines_changed: 500";
+        let config: Config = serde_yaml::from_str(yaml).unwrap();
+        assert_eq!(config.policy.max_files_changed, 15);
+        assert_eq!(config.policy.max_lines_changed, 500);
+    }
+
+    #[test]
+    fn config_yaml_roundtrip() {
+        let config = preset_config(&Preset::Team);
+        let yaml = serde_yaml::to_string(&config).unwrap();
+        let parsed: Config = serde_yaml::from_str(&yaml).unwrap();
+        assert_eq!(parsed.version, config.version);
+        assert_eq!(parsed.judge.model, config.judge.model);
+        assert_eq!(parsed.policy.max_files_changed, config.policy.max_files_changed);
+        assert_eq!(parsed.team.enabled, config.team.enabled);
+    }
 }

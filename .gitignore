@@ -1,0 +1,16 @@
+# Rust build
+/target/
+Cargo.lock
+
+# AgentScope session data
+.agentscope/
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo

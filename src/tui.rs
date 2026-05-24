@@ -9,33 +9,33 @@ use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Line, Span},
-    widgets::{Block, Borders, List, ListItem, Paragraph},
+    widgets::{Bar, BarChart, BarGroup, Block, Borders, List, ListItem, Paragraph},
     Frame, Terminal,
 };
-use std::{io, time::{Duration, Instant}};
+use std::{io, sync::{Arc, Mutex}, time::{Duration, Instant}};
 
 use crate::config;
 use crate::git;
-use crate::policy::{FileVerdict, PolicyEngine};
+use crate::judge::{JudgeResult, JudgeVerdict};
+use crate::policy::{AnnotatedFile, FileVerdict, PolicyEngine};
 use crate::session::load_active_session;
 
-// ── Theme constants (matching the mockup palette) ─────────────────────────────
+// ── Theme constants ───────────────────────────────────────────────────────────
 
-const CLR_BG:        Color = Color::Rgb(14, 17, 23);   // #0e1117
+const CLR_BG:        Color = Color::Rgb(14, 17, 23);
 #[allow(dead_code)]
-const CLR_SURFACE:   Color = Color::Rgb(28, 31, 38);   // #1c1f26
-const CLR_BORDER:    Color = Color::Rgb(42, 45, 54);   // #2a2d36
-const CLR_DIM:       Color = Color::Rgb(74, 78, 92);   // #4a4e5c
-const CLR_MUTED:     Color = Color::Rgb(107, 114, 128); // #6b7280
-const CLR_WHITE:     Color = Color::Rgb(226, 232, 240); // #e2e8f0
-const CLR_GREEN:     Color = Color::Rgb(74, 222, 128);  // #4ade80
-const CLR_RED:       Color = Color::Rgb(248, 113, 113); // #f87171
-const CLR_AMBER:     Color = Color::Rgb(251, 191, 36);  // #fbbf24
-const CLR_CYAN:      Color = Color::Rgb(103, 232, 249); // #67e8f9
-const CLR_BLUE:      Color = Color::Rgb(96, 165, 250);  // #60a5fa
-const CLR_PURPLE:    Color = Color::Rgb(192, 132, 252); // #c084fc
+const CLR_SURFACE:   Color = Color::Rgb(28, 31, 38);
+const CLR_BORDER:    Color = Color::Rgb(42, 45, 54);
+const CLR_DIM:       Color = Color::Rgb(74, 78, 92);
+const CLR_MUTED:     Color = Color::Rgb(107, 114, 128);
+const CLR_WHITE:     Color = Color::Rgb(226, 232, 240);
+const CLR_GREEN:     Color = Color::Rgb(74, 222, 128);
+const CLR_RED:       Color = Color::Rgb(248, 113, 113);
+const CLR_AMBER:     Color = Color::Rgb(251, 191, 36);
+const CLR_CYAN:      Color = Color::Rgb(103, 232, 249);
+const CLR_BLUE:      Color = Color::Rgb(96, 165, 250);
+const CLR_PURPLE:    Color = Color::Rgb(192, 132, 252);
 
-/// Polling interval — 150ms is snappy without thrashing CPU
 const POLL_MS: u64 = 150;
 
 pub async fn run_watch() -> Result<()> {
@@ -58,12 +58,25 @@ pub async fn run_watch() -> Result<()> {
     result
 }
 
-/// TUI state for flash messages, refresh counter, and dashboard toggle
+// ── Judge state (shared with async task) ──────────────────────────────────────
+
+#[derive(Clone)]
+enum JudgeStatus {
+    Idle,
+    Running,
+    Done(JudgeResult),
+    Error(String),
+}
+
+/// TUI state
 struct WatchState {
     flash: Option<(String, Instant)>,
     refresh_count: u64,
     show_dashboard: bool,
     started_at: Instant,
+    judge_status: Arc<Mutex<JudgeStatus>>,
+    /// Track line history for sparkline (last 20 samples)
+    line_history: Vec<u64>,
 }
 
 impl WatchState {
@@ -73,6 +86,8 @@ impl WatchState {
             refresh_count: 0,
             show_dashboard: false,
             started_at: Instant::now(),
+            judge_status: Arc::new(Mutex::new(JudgeStatus::Idle)),
+            line_history: Vec::new(),
         }
     }
 
@@ -99,6 +114,13 @@ impl WatchState {
             format!("{}s", secs)
         }
     }
+
+    fn record_lines(&mut self, total: u64) {
+        self.line_history.push(total);
+        if self.line_history.len() > 20 {
+            self.line_history.remove(0);
+        }
+    }
 }
 
 async fn run_app<B: ratatui::backend::Backend>(terminal: &mut Terminal<B>) -> Result<()> {
@@ -108,7 +130,6 @@ async fn run_app<B: ratatui::backend::Backend>(terminal: &mut Terminal<B>) -> Re
     loop {
         state.refresh_count += 1;
 
-        // Refresh data each frame
         let session = load_active_session().ok();
         let files = if let Some(ref s) = session {
             git::open_repo()
@@ -126,36 +147,69 @@ async fn run_app<B: ratatui::backend::Backend>(terminal: &mut Terminal<B>) -> Re
             None
         };
 
+        // Record line history for sparkline
+        if let Some(ref f) = files {
+            let total: u64 = f.iter().map(|af| (af.diff.additions + af.diff.deletions) as u64).sum();
+            state.record_lines(total);
+        }
+
         terminal.draw(|f| ui(f, session.as_ref(), files.as_deref(), &state))?;
 
         if event::poll(Duration::from_millis(POLL_MS))? {
             if let Event::Key(key) = event::read()? {
                 match (key.code, key.modifiers) {
-                    // Quit
                     (KeyCode::Char('q'), _)
                     | (KeyCode::Esc, _)
                     | (KeyCode::Char('c'), KeyModifiers::CONTROL) => break,
-                    // Force refresh (visual confirmation)
+
                     (KeyCode::Char('r'), _) => {
                         state.set_flash("⟳ refreshed");
                     }
-                    // Toggle dashboard
                     (KeyCode::Char('d'), _) => {
                         state.show_dashboard = !state.show_dashboard;
                         let msg = if state.show_dashboard { "dashboard on" } else { "dashboard off" };
                         state.set_flash(msg);
                     }
-                    // Check hint
+                    // Run judge inline
+                    (KeyCode::Char('j'), _) => {
+                        let current = state.judge_status.lock().unwrap().clone();
+                        if matches!(current, JudgeStatus::Running) {
+                            state.set_flash("judge is already running…");
+                        } else if let Some(ref s) = session {
+                            if let Some(ref file_list) = files {
+                                state.set_flash("🔍 running judge…");
+                                let judge_status = state.judge_status.clone();
+                                *judge_status.lock().unwrap() = JudgeStatus::Running;
+
+                                let mission = s.mission.clone();
+                                let annotated = file_list.clone();
+                                let judge_config = config.judge.clone();
+
+                                tokio::spawn(async move {
+                                    let result = crate::judge::evaluate(
+                                        &mission,
+                                        &annotated,
+                                        &judge_config,
+                                    ).await;
+
+                                    let mut status = judge_status.lock().unwrap();
+                                    match result {
+                                        Ok(r) => *status = JudgeStatus::Done(r),
+                                        Err(e) => *status = JudgeStatus::Error(e.to_string()),
+                                    }
+                                });
+                            } else {
+                                state.set_flash("no files changed yet");
+                            }
+                        } else {
+                            state.set_flash("no active session");
+                        }
+                    }
+                    (KeyCode::Char('?') | KeyCode::Char('h'), _) => {
+                        state.set_flash("r=refresh d=dashboard j=judge c=check q=quit");
+                    }
                     (KeyCode::Char('c'), _) => {
                         state.set_flash("→ run `agentscope check` in another terminal");
-                    }
-                    // Judge hint
-                    (KeyCode::Char('j'), _) => {
-                        state.set_flash("→ run `agentscope judge` in another terminal");
-                    }
-                    // Help
-                    (KeyCode::Char('?') | KeyCode::Char('h'), _) => {
-                        state.set_flash("r=refresh  d=dashboard  j=judge  c=check  q=quit");
                     }
                     _ => {}
                 }
@@ -169,12 +223,10 @@ async fn run_app<B: ratatui::backend::Backend>(terminal: &mut Terminal<B>) -> Re
 fn ui(
     f: &mut Frame,
     session: Option<&crate::session::Session>,
-    files: Option<&[crate::policy::AnnotatedFile]>,
+    files: Option<&[AnnotatedFile]>,
     state: &WatchState,
 ) {
     let area = f.area();
-
-    // Background
     let bg = Block::default().style(Style::default().bg(CLR_BG));
     f.render_widget(bg, area);
 
@@ -183,31 +235,53 @@ fn ui(
         .margin(1)
         .constraints([
             Constraint::Length(3),  // header
-            Constraint::Min(10),   // main content
-            Constraint::Length(3), // summary bar
+            Constraint::Min(10),   // main
+            Constraint::Length(3), // status bar
         ])
         .split(area);
 
     render_header(f, layout[0], session);
 
     if state.show_dashboard {
-        // Two-column layout: files on left, stats on right
         let cols = Layout::default()
             .direction(Direction::Horizontal)
             .constraints([
-                Constraint::Percentage(60),
-                Constraint::Percentage(40),
+                Constraint::Percentage(50),
+                Constraint::Percentage(50),
             ])
             .split(layout[1]);
 
-        render_file_list(f, cols[0], files);
-        render_dashboard_panel(f, cols[1], session, files, state);
+        // Left: file list on top, bar chart on bottom
+        let left_split = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([
+                Constraint::Percentage(55),
+                Constraint::Percentage(45),
+            ])
+            .split(cols[0]);
+
+        render_file_list(f, left_split[0], files);
+        render_bar_chart(f, left_split[1], files);
+
+        // Right: pie chart on top, stats + judge on bottom
+        let right_split = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([
+                Constraint::Length(7),   // pie chart
+                Constraint::Min(5),     // stats + judge
+            ])
+            .split(cols[1]);
+
+        render_pie_chart(f, right_split[0], files);
+        render_stats_and_judge(f, right_split[1], session, files, state);
     } else {
         render_file_list(f, layout[1], files);
     }
 
     render_summary_bar(f, layout[2], files, state);
 }
+
+// ── Header ────────────────────────────────────────────────────────────────────
 
 fn render_header(f: &mut Frame, area: Rect, session: Option<&crate::session::Session>) {
     let block = Block::default()
@@ -234,7 +308,9 @@ fn render_header(f: &mut Frame, area: Rect, session: Option<&crate::session::Ses
     f.render_widget(para, area);
 }
 
-fn render_file_list(f: &mut Frame, area: Rect, files: Option<&[crate::policy::AnnotatedFile]>) {
+// ── File list ─────────────────────────────────────────────────────────────────
+
+fn render_file_list(f: &mut Frame, area: Rect, files: Option<&[AnnotatedFile]>) {
     let block = Block::default()
         .borders(Borders::NONE)
         .style(Style::default().bg(CLR_BG));
@@ -252,43 +328,29 @@ fn render_file_list(f: &mut Frame, area: Rect, files: Option<&[crate::policy::An
                 Style::default().fg(CLR_DIM),
             ))),
             ListItem::new(Line::from(Span::styled(
-                "  watching all files in working tree vs HEAD",
+                "  watching all files vs HEAD",
                 Style::default().fg(CLR_MUTED).add_modifier(Modifier::ITALIC),
             ))),
             ListItem::new(Line::from(Span::raw(""))),
             ListItem::new(Line::from(Span::styled(
-                "  tip: changes will appear here as soon as any file is modified",
+                "  tip: press d for dashboard, j to run judge",
                 Style::default().fg(CLR_MUTED),
             ))),
         ],
         Some(files) => files.iter().map(|af| {
             let (tag, tag_color, path_color) = match &af.verdict {
-                FileVerdict::InScope =>
-                    ("  IN SCOPE ", CLR_GREEN, CLR_BLUE),
-                FileVerdict::Unasked =>
-                    ("  UNASKED  ", CLR_AMBER, CLR_AMBER),
-                FileVerdict::Blocked { .. } =>
-                    ("  BLOCKED  ", CLR_RED, CLR_RED),
-                FileVerdict::Clean =>
-                    ("  CLEAN    ", CLR_DIM, CLR_DIM),
+                FileVerdict::InScope => ("IN SCOPE", CLR_GREEN, CLR_BLUE),
+                FileVerdict::Unasked => ("UNASKED ", CLR_AMBER, CLR_AMBER),
+                FileVerdict::Blocked { .. } => ("BLOCKED ", CLR_RED, CLR_RED),
+                FileVerdict::Clean => ("CLEAN   ", CLR_DIM, CLR_DIM),
             };
 
-            let stats = format!(
-                "  +{} −{}",
-                af.diff.additions,
-                af.diff.deletions,
-            );
-
+            let stats = format!(" +{} −{}", af.diff.additions, af.diff.deletions);
             let line = Line::from(vec![
-                Span::styled(tag, Style::default().fg(tag_color).add_modifier(Modifier::BOLD)),
-                Span::raw("  "),
-                Span::styled(
-                    af.diff.path.display().to_string(),
-                    Style::default().fg(path_color),
-                ),
+                Span::styled(format!("  {} ", tag), Style::default().fg(tag_color).add_modifier(Modifier::BOLD)),
+                Span::styled(af.diff.path.display().to_string(), Style::default().fg(path_color)),
                 Span::styled(stats, Style::default().fg(CLR_DIM)),
             ]);
-
             ListItem::new(line)
         }).collect(),
     };
@@ -297,129 +359,294 @@ fn render_file_list(f: &mut Frame, area: Rect, files: Option<&[crate::policy::An
     f.render_widget(list, area);
 }
 
-// ── Dashboard stats panel (toggled with 'd') ──────────────────────────────────
+// ── Bar chart (verdicts) ──────────────────────────────────────────────────────
 
-fn render_dashboard_panel(
-    f: &mut Frame,
-    area: Rect,
-    session: Option<&crate::session::Session>,
-    files: Option<&[crate::policy::AnnotatedFile]>,
-    state: &WatchState,
-) {
+fn render_bar_chart(f: &mut Frame, area: Rect, files: Option<&[AnnotatedFile]>) {
     let block = Block::default()
-        .title(Span::styled(" Dashboard ", Style::default().fg(CLR_PURPLE).add_modifier(Modifier::BOLD)))
+        .title(Span::styled(" Verdicts ", Style::default().fg(CLR_CYAN).add_modifier(Modifier::BOLD)))
         .borders(Borders::ALL)
         .border_style(Style::default().fg(CLR_BORDER))
         .style(Style::default().bg(CLR_BG));
 
+    if let Some(files) = files {
+        let in_scope = files.iter().filter(|f| f.verdict == FileVerdict::InScope).count() as u64;
+        let unasked = files.iter().filter(|f| f.verdict == FileVerdict::Unasked).count() as u64;
+        let blocked = files.iter().filter(|f| f.verdict.is_blocked()).count() as u64;
+
+        let bar_group = BarGroup::default()
+            .bars(&[
+                Bar::default()
+                    .value(in_scope)
+                    .label("In Scope".into())
+                    .style(Style::default().fg(CLR_GREEN)),
+                Bar::default()
+                    .value(unasked)
+                    .label("Unasked".into())
+                    .style(Style::default().fg(CLR_AMBER)),
+                Bar::default()
+                    .value(blocked)
+                    .label("Blocked".into())
+                    .style(Style::default().fg(CLR_RED)),
+            ]);
+
+        let chart = BarChart::default()
+            .block(block)
+            .data(bar_group)
+            .bar_width(8)
+            .bar_gap(2)
+            .value_style(Style::default().fg(CLR_WHITE).add_modifier(Modifier::BOLD));
+
+        f.render_widget(chart, area);
+    } else {
+        let para = Paragraph::new(Line::from(Span::styled(
+            "  no data",
+            Style::default().fg(CLR_DIM),
+        ))).block(block);
+        f.render_widget(para, area);
+    }
+}
+
+// ── Pie chart (horizontal stacked bar + legend) ──────────────────────────────
+
+fn render_pie_chart(f: &mut Frame, area: Rect, files: Option<&[AnnotatedFile]>) {
+    let block = Block::default()
+        .title(Span::styled(" Scope Distribution ", Style::default().fg(CLR_PURPLE).add_modifier(Modifier::BOLD)))
+        .borders(Borders::ALL)
+        .border_style(Style::default().fg(CLR_BORDER))
+        .style(Style::default().bg(CLR_BG));
+
+    let inner = block.inner(area);
+    f.render_widget(block, area);
+
+    if inner.width < 10 || inner.height < 3 {
+        return;
+    }
+
+    if let Some(files) = files {
+        if files.is_empty() {
+            let para = Paragraph::new(Line::from(Span::styled(
+                "  no changes to chart",
+                Style::default().fg(CLR_DIM),
+            )));
+            f.render_widget(para, inner);
+            return;
+        }
+
+        let total = files.len().max(1);
+        let in_scope = files.iter().filter(|f| f.verdict == FileVerdict::InScope).count();
+        let unasked = files.iter().filter(|f| f.verdict == FileVerdict::Unasked).count();
+        let blocked = files.iter().filter(|f| f.verdict.is_blocked()).count();
+
+        let bar_width = (inner.width as usize).saturating_sub(4);
+
+        // Calculate proportional widths
+        let g_width = (in_scope * bar_width) / total;
+        let a_width = (unasked * bar_width) / total;
+        let r_width = (blocked * bar_width) / total;
+        // Remaining goes to the largest segment
+        let remainder = bar_width.saturating_sub(g_width + a_width + r_width);
+        let g_width = g_width + remainder;
+
+        // Stacked bar
+        let bar_line = Line::from(vec![
+            Span::styled("  ", Style::default()),
+            Span::styled("█".repeat(g_width), Style::default().fg(CLR_GREEN)),
+            Span::styled("█".repeat(a_width), Style::default().fg(CLR_AMBER)),
+            Span::styled("█".repeat(r_width), Style::default().fg(CLR_RED)),
+        ]);
+
+        // Percentages
+        let g_pct = (in_scope * 100) / total;
+        let a_pct = (unasked * 100) / total;
+        let b_pct = (blocked * 100) / total;
+
+        let legend = Line::from(vec![
+            Span::styled("  ", Style::default()),
+            Span::styled("● ", Style::default().fg(CLR_GREEN)),
+            Span::styled(format!("{}% ", g_pct), Style::default().fg(CLR_GREEN)),
+            Span::styled("● ", Style::default().fg(CLR_AMBER)),
+            Span::styled(format!("{}% ", a_pct), Style::default().fg(CLR_AMBER)),
+            Span::styled("● ", Style::default().fg(CLR_RED)),
+            Span::styled(format!("{}%", b_pct), Style::default().fg(CLR_RED)),
+        ]);
+
+        let label_line = Line::from(vec![
+            Span::styled("  ", Style::default()),
+            Span::styled("scope", Style::default().fg(CLR_DIM)),
+            Span::styled("  ", Style::default()),
+            Span::styled("unasked", Style::default().fg(CLR_DIM)),
+            Span::styled("  ", Style::default()),
+            Span::styled("blocked", Style::default().fg(CLR_DIM)),
+        ]);
+
+        let text = vec![bar_line, Line::from(Span::raw("")), legend, label_line];
+
+        let para = Paragraph::new(text);
+        f.render_widget(para, inner);
+    }
+}
+
+// ── Stats + Judge panel ──────────────────────────────────────────────────────
+
+fn render_stats_and_judge(
+    f: &mut Frame,
+    area: Rect,
+    session: Option<&crate::session::Session>,
+    files: Option<&[AnnotatedFile]>,
+    state: &WatchState,
+) {
+    let block = Block::default()
+        .title(Span::styled(" Stats & Judge ", Style::default().fg(CLR_CYAN).add_modifier(Modifier::BOLD)))
+        .borders(Borders::ALL)
+        .border_style(Style::default().fg(CLR_BORDER))
+        .style(Style::default().bg(CLR_BG));
+
+    let inner = block.inner(area);
+    f.render_widget(block, area);
+
     let mut lines: Vec<Line> = Vec::new();
 
-    // Session info
-    if let Some(s) = session {
+    // File & line stats
+    if let Some(files) = files {
+        let total_add: usize = files.iter().map(|f| f.diff.additions).sum();
+        let total_del: usize = files.iter().map(|f| f.diff.deletions).sum();
+        let in_scope = files.iter().filter(|f| f.verdict == FileVerdict::InScope).count();
+
         lines.push(Line::from(vec![
-            Span::styled("  Mission  ", Style::default().fg(CLR_DIM)),
+            Span::styled("  Files  ", Style::default().fg(CLR_DIM)),
+            Span::styled(format!("{}", files.len()), Style::default().fg(CLR_WHITE).add_modifier(Modifier::BOLD)),
+            Span::styled("    Lines  ", Style::default().fg(CLR_DIM)),
+            Span::styled(format!("+{}", total_add), Style::default().fg(CLR_GREEN)),
+            Span::styled(format!(" -{}", total_del), Style::default().fg(CLR_RED)),
         ]));
-        // Truncate mission to fit panel
-        let mission_display = if s.mission.len() > 30 {
-            format!("{}…", &s.mission[..29])
+
+        // Health score
+        let total = files.len().max(1);
+        let health = (in_scope * 100) / total;
+        let filled = (health / 10).min(10);
+        let empty = 10 - filled;
+        let bar_color = if health >= 80 { CLR_GREEN } else if health >= 50 { CLR_AMBER } else { CLR_RED };
+
+        lines.push(Line::from(vec![
+            Span::styled("  Health ", Style::default().fg(CLR_DIM)),
+            Span::styled("█".repeat(filled), Style::default().fg(bar_color)),
+            Span::styled("░".repeat(empty), Style::default().fg(CLR_DIM)),
+            Span::styled(format!(" {}%", health), Style::default().fg(bar_color).add_modifier(Modifier::BOLD)),
+        ]));
+    }
+
+    // Uptime
+    lines.push(Line::from(vec![
+        Span::styled("  Watch  ", Style::default().fg(CLR_DIM)),
+        Span::styled(state.uptime_str(), Style::default().fg(CLR_MUTED)),
+        Span::styled(format!("  ({} cycles)", state.refresh_count), Style::default().fg(CLR_DIM)),
+    ]));
+
+    lines.push(Line::from(Span::raw("")));
+
+    // ── Judge result ──
+    let judge_status = state.judge_status.lock().unwrap().clone();
+    match judge_status {
+        JudgeStatus::Idle => {
+            lines.push(Line::from(vec![
+                Span::styled("  ── Judge ──", Style::default().fg(CLR_DIM)),
+            ]));
+            lines.push(Line::from(vec![
+                Span::styled("  Press ", Style::default().fg(CLR_DIM)),
+                Span::styled("j", Style::default().fg(CLR_CYAN).add_modifier(Modifier::BOLD)),
+                Span::styled(" to run LLM judge", Style::default().fg(CLR_DIM)),
+            ]));
+        }
+        JudgeStatus::Running => {
+            lines.push(Line::from(vec![
+                Span::styled("  ── Judge ──", Style::default().fg(CLR_PURPLE)),
+            ]));
+            let dots = ".".repeat(((state.refresh_count / 3) % 4) as usize);
+            lines.push(Line::from(vec![
+                Span::styled(format!("  ⏳ Analyzing{}", dots), Style::default().fg(CLR_AMBER)),
+            ]));
+        }
+        JudgeStatus::Done(ref result) => {
+            let (verdict_str, verdict_color) = match result.verdict {
+                JudgeVerdict::Matches => ("✓ MATCHES MISSION", CLR_GREEN),
+                JudgeVerdict::Drift => ("✕ DRIFT DETECTED", CLR_RED),
+                JudgeVerdict::Unknown => ("? UNKNOWN", CLR_MUTED),
+            };
+
+            lines.push(Line::from(vec![
+                Span::styled("  ── Judge ──", Style::default().fg(CLR_PURPLE)),
+            ]));
+            lines.push(Line::from(vec![
+                Span::styled(format!("  {}", verdict_str), Style::default().fg(verdict_color).add_modifier(Modifier::BOLD)),
+            ]));
+
+            // Confidence bar
+            let pct = (result.confidence * 100.0) as usize;
+            let filled = (pct / 10).min(10);
+            let empty = 10 - filled;
+            let bar_color = if pct >= 70 { CLR_GREEN } else if pct >= 40 { CLR_AMBER } else { CLR_RED };
+
+            lines.push(Line::from(vec![
+                Span::styled("  Conf.  ", Style::default().fg(CLR_DIM)),
+                Span::styled("█".repeat(filled), Style::default().fg(bar_color)),
+                Span::styled("░".repeat(empty), Style::default().fg(CLR_DIM)),
+                Span::styled(format!(" {}%", pct), Style::default().fg(bar_color)),
+            ]));
+
+            // Reasoning (truncated)
+            let reasoning = if result.reasoning.len() > 40 {
+                format!("{}…", &result.reasoning[..39])
+            } else {
+                result.reasoning.clone()
+            };
+            lines.push(Line::from(vec![
+                Span::styled(format!("  \"{}\"", reasoning), Style::default().fg(CLR_MUTED)),
+            ]));
+
+            lines.push(Line::from(vec![
+                Span::styled(format!("  {} / {}", result.provider, result.model), Style::default().fg(CLR_DIM)),
+            ]));
+        }
+        JudgeStatus::Error(ref msg) => {
+            lines.push(Line::from(vec![
+                Span::styled("  ── Judge ──", Style::default().fg(CLR_RED)),
+            ]));
+            let short = if msg.len() > 35 { format!("{}…", &msg[..34]) } else { msg.clone() };
+            lines.push(Line::from(vec![
+                Span::styled(format!("  ✕ {}", short), Style::default().fg(CLR_RED)),
+            ]));
+            lines.push(Line::from(vec![
+                Span::styled("  Press j to retry", Style::default().fg(CLR_DIM)),
+            ]));
+        }
+    }
+
+    // Mission reminder
+    if let Some(s) = session {
+        lines.push(Line::from(Span::raw("")));
+        lines.push(Line::from(vec![
+            Span::styled("  ── Mission ──", Style::default().fg(CLR_DIM)),
+        ]));
+        let mission = if s.mission.len() > 38 {
+            format!("{}…", &s.mission[..37])
         } else {
             s.mission.clone()
         };
         lines.push(Line::from(vec![
-            Span::styled(format!("  {}", mission_display), Style::default().fg(CLR_WHITE)),
-        ]));
-        lines.push(Line::from(Span::raw("")));
-    }
-
-    // File stats
-    if let Some(files) = files {
-        let in_scope = files.iter().filter(|f| f.verdict == FileVerdict::InScope).count();
-        let unasked = files.iter().filter(|f| f.verdict == FileVerdict::Unasked).count();
-        let blocked = files.iter().filter(|f| f.verdict.is_blocked()).count();
-        let total_add: usize = files.iter().map(|f| f.diff.additions).sum();
-        let total_del: usize = files.iter().map(|f| f.diff.deletions).sum();
-
-        lines.push(Line::from(vec![
-            Span::styled("  ── Files ──", Style::default().fg(CLR_DIM)),
-        ]));
-        lines.push(Line::from(vec![
-            Span::styled(format!("  {} total", files.len()), Style::default().fg(CLR_WHITE)),
-        ]));
-        lines.push(Line::from(vec![
-            Span::styled(format!("  {} in scope", in_scope), Style::default().fg(CLR_GREEN)),
-        ]));
-        lines.push(Line::from(vec![
-            Span::styled(format!("  {} unasked", unasked), Style::default().fg(CLR_AMBER)),
-        ]));
-        lines.push(Line::from(vec![
-            Span::styled(format!("  {} blocked", blocked), Style::default().fg(CLR_RED)),
-        ]));
-        lines.push(Line::from(Span::raw("")));
-
-        lines.push(Line::from(vec![
-            Span::styled("  ── Lines ──", Style::default().fg(CLR_DIM)),
-        ]));
-        lines.push(Line::from(vec![
-            Span::styled(format!("  +{}", total_add), Style::default().fg(CLR_GREEN)),
-            Span::styled(format!("  -{}", total_del), Style::default().fg(CLR_RED)),
-        ]));
-        lines.push(Line::from(Span::raw("")));
-
-        // Health bar
-        let total = files.len().max(1);
-        let health_pct = (in_scope * 100) / total;
-        let filled = (health_pct / 10).min(10);
-        let empty = 10 - filled;
-        let bar_color = if blocked > 0 { CLR_RED } else if unasked > 0 { CLR_AMBER } else { CLR_GREEN };
-
-        lines.push(Line::from(vec![
-            Span::styled("  Health  ", Style::default().fg(CLR_DIM)),
-            Span::styled("█".repeat(filled), Style::default().fg(bar_color)),
-            Span::styled("░".repeat(empty), Style::default().fg(CLR_DIM)),
-            Span::styled(format!(" {}%", health_pct), Style::default().fg(bar_color)),
+            Span::styled(format!("  {}", mission), Style::default().fg(CLR_WHITE)),
         ]));
     }
 
-    lines.push(Line::from(Span::raw("")));
-
-    // Uptime
-    lines.push(Line::from(vec![
-        Span::styled("  ── Watch ──", Style::default().fg(CLR_DIM)),
-    ]));
-    lines.push(Line::from(vec![
-        Span::styled(format!("  Uptime  {}", state.uptime_str()), Style::default().fg(CLR_MUTED)),
-    ]));
-    lines.push(Line::from(vec![
-        Span::styled(format!("  Cycles  {}", state.refresh_count), Style::default().fg(CLR_MUTED)),
-    ]));
-
-    lines.push(Line::from(Span::raw("")));
-
-    // Quick commands
-    lines.push(Line::from(vec![
-        Span::styled("  ── Commands ──", Style::default().fg(CLR_DIM)),
-    ]));
-    lines.push(Line::from(vec![
-        Span::styled("  agentscope judge", Style::default().fg(CLR_CYAN)),
-    ]));
-    lines.push(Line::from(vec![
-        Span::styled("  agentscope report", Style::default().fg(CLR_CYAN)),
-    ]));
-    lines.push(Line::from(vec![
-        Span::styled("  agentscope diff", Style::default().fg(CLR_CYAN)),
-    ]));
-    lines.push(Line::from(vec![
-        Span::styled("  agentscope hook install", Style::default().fg(CLR_CYAN)),
-    ]));
-
-    let para = Paragraph::new(lines).block(block);
-    f.render_widget(para, area);
+    let para = Paragraph::new(lines);
+    f.render_widget(para, inner);
 }
+
+// ── Summary bar ──────────────────────────────────────────────────────────────
 
 fn render_summary_bar(
     f: &mut Frame,
     area: Rect,
-    files: Option<&[crate::policy::AnnotatedFile]>,
+    files: Option<&[AnnotatedFile]>,
     state: &WatchState,
 ) {
     let block = Block::default()
@@ -428,7 +655,6 @@ fn render_summary_bar(
         .style(Style::default().bg(CLR_BG));
 
     let line = if let Some(flash) = state.active_flash() {
-        // Show flash message (green, fades after 2s)
         Line::from(Span::styled(
             format!("  {}", flash),
             Style::default().fg(CLR_GREEN).add_modifier(Modifier::BOLD),
@@ -438,10 +664,20 @@ fn render_summary_bar(
         let unasked = files.iter().filter(|f| f.verdict == FileVerdict::Unasked).count();
         let blocked = files.iter().filter(|f| f.verdict.is_blocked()).count();
 
-        // Pulse indicator — blinks to show the TUI is alive
         let pulse = if state.refresh_count % 4 < 2 { "●" } else { "○" };
+        let dashboard_hint = if state.show_dashboard { "d=hide" } else { "d=dash" };
 
-        let dashboard_hint = if state.show_dashboard { "d=hide" } else { "d=dashboard" };
+        // Show judge status indicator
+        let judge_indicator = match *state.judge_status.lock().unwrap() {
+            JudgeStatus::Idle => "",
+            JudgeStatus::Running => "  ⏳judge",
+            JudgeStatus::Done(ref r) => match r.verdict {
+                JudgeVerdict::Matches => "  ✓judge",
+                JudgeVerdict::Drift => "  ✕judge",
+                JudgeVerdict::Unknown => "  ?judge",
+            },
+            JudgeStatus::Error(_) => "  ✕judge",
+        };
 
         Line::from(vec![
             Span::styled(format!("  {} in scope", in_scope), Style::default().fg(CLR_GREEN)),
@@ -450,13 +686,13 @@ fn render_summary_bar(
             Span::styled("  ·  ", Style::default().fg(CLR_DIM)),
             Span::styled(format!("{} blocked", blocked), Style::default().fg(CLR_RED)),
             Span::styled(
-                format!("    {} live  r=refresh  {}  ?=help", pulse, dashboard_hint),
+                format!("  {} live  j=judge  {}  ?=help{}", pulse, dashboard_hint, judge_indicator),
                 Style::default().fg(CLR_DIM),
             ),
         ])
     } else {
         Line::from(Span::styled(
-            "  no session    d=dashboard  q=quit  ?=help",
+            "  no session    d=dashboard  j=judge  q=quit  ?=help",
             Style::default().fg(CLR_DIM),
         ))
     };

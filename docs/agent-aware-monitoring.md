@@ -31,14 +31,31 @@ Only `--apply` writes `.agentscope/session.json`.
 
 | Agent | Default source |
 |---|---|
-| Claude Code | `~/.claude/projects` |
-| Codex CLI / app | `~/.codex/sessions` |
-| OpenCode | `~/.local/share/opencode/project` |
+| Claude Code | `$CLAUDE_CONFIG_DIR/projects` or `~/.claude/projects` |
+| Codex CLI | `$CODEX_HOME/sessions` or `~/.codex/sessions` |
+| Codex App | `$CODEX_APP_HOME/sessions`, `~/Library/Application Support/Codex/sessions`, or related Codex app session files |
+| OpenCode | `$OPENCODE_DATA_DIR/project` or `~/.local/share/opencode/project` |
+| OpenClaw | `$OPENCLAW_HOME/{agents,sessions}` or `~/.openclaw/{agents,sessions}` |
+| Hermes Agent | `$HERMES_HOME/{agents,sessions}` or `~/.hermes/{agents,sessions}` |
 | Cursor | `~/.cursor/projects` |
 | Gemini CLI | `~/.gemini/tmp` |
-| Copilot CLI | `~/.copilot/session-state` |
+| Antigravity | `~/.gemini/antigravity-cli`, `~/.gemini/antigravity*`, `~/.antigravity`, or `~/Library/Application Support/Antigravity*` |
+| GitHub Copilot CLI / VS Code Copilot Chat | `$COPILOT_HOME/session-state`, `~/.copilot/session-state`, and VS Code `workspaceStorage/**/GitHub.copilot-chat/transcripts` |
 
 AgentScope recursively scans likely JSON, JSONL, text, markdown, chat, transcript, and rollout files under those roots.
+
+Ollama launch aliases that AgentScope recognizes:
+
+```bash
+ollama launch claude --model qwen3.5
+ollama launch codex-app --model qwen3.5
+ollama launch gemini --model qwen3.5
+ollama launch antigravity --model qwen3.5
+ollama launch openclaw --model qwen3.5
+ollama launch hermes --model qwen3.5
+ollama launch codex --model qwen3.5
+ollama launch opencode --model qwen3.5
+```
 
 ## Missing sources
 
@@ -73,18 +90,40 @@ agents:
   auto_attach: false
   preferred:
     - codex
+    - codex-app
     - claude-code
+    - hermes
     - cursor
     - gemini-cli
+    - antigravity
     - opencode
+    - openclaw
     - copilot-cli
   sources:
     codex:
       enabled: true
       paths:
         - "~/.codex/sessions"
+    codex-app:
+      enabled: true
+      paths:
+        - "~/Library/Application Support/Codex/sessions"
+    hermes:
+      enabled: true
+      paths:
+        - "~/.hermes/sessions"
+    copilot-cli:
+      enabled: true
+      paths:
+        - "~/.copilot/session-state"
+        - "~/Library/Application Support/Code/User/workspaceStorage"
     gemini-cli:
       enabled: false
+    antigravity:
+      enabled: true
+      paths:
+        - "~/.gemini/antigravity-cli"
+        - "~/Library/Application Support/Antigravity IDE/User/globalStorage"
 ```
 
 ## Confidence rules

@@ -161,10 +161,7 @@ impl Printer {
         let files = &report.annotated;
         let judge = &report.judge_result;
 
-        let in_scope: Vec<_> = files
-            .iter()
-            .filter(|f| f.verdict == FileVerdict::InScope)
-            .collect();
+        let in_scope: Vec<_> = files.iter().filter(|f| f.verdict.is_accepted()).collect();
         let unasked: Vec<_> = files
             .iter()
             .filter(|f| f.verdict == FileVerdict::Unasked)
@@ -273,6 +270,15 @@ impl Printer {
         let stats = format!("+{} −{}", file.diff.additions, file.diff.deletions);
 
         match &file.verdict {
+            FileVerdict::Allowed => {
+                println!(
+                    "  {}  {}  {}",
+                    theme::tag_ok().apply_to("ALLOWED "),
+                    theme::blue().apply_to(file.diff.path.display()),
+                    theme::dim()
+                        .apply_to(format!("+{} −{}", file.diff.additions, file.diff.deletions))
+                );
+            }
             FileVerdict::InScope => {
                 println!(
                     "  {}  {}  {}",
@@ -454,10 +460,7 @@ impl Printer {
         let session = &report.session;
         let files = &report.annotated;
 
-        let in_scope = files
-            .iter()
-            .filter(|f| f.verdict == FileVerdict::InScope)
-            .count();
+        let in_scope = files.iter().filter(|f| f.verdict.is_accepted()).count();
         let unasked = files
             .iter()
             .filter(|f| f.verdict == FileVerdict::Unasked)
@@ -747,7 +750,7 @@ impl CheckReport {
             })).collect::<Vec<_>>(),
             "blocked": self.annotated.iter().filter(|f| f.verdict.is_blocked()).count(),
             "unasked": self.annotated.iter().filter(|f| f.verdict == FileVerdict::Unasked).count(),
-            "in_scope": self.annotated.iter().filter(|f| f.verdict == FileVerdict::InScope).count(),
+            "in_scope": self.annotated.iter().filter(|f| f.verdict.is_accepted()).count(),
             "judge": self.judge_result.as_ref().map(|j| json!({
                 "confidence": j.confidence,
                 "verdict": j.verdict.label(),
@@ -770,7 +773,7 @@ impl CheckReport {
         let in_scope = self
             .annotated
             .iter()
-            .filter(|f| f.verdict == FileVerdict::InScope)
+            .filter(|f| f.verdict.is_accepted())
             .count();
 
         let status = if blocked > 0 {

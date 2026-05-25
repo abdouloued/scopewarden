@@ -30,6 +30,8 @@ pub async fn list_models() -> Result<()> {
         JudgeProvider::Ollama => "ollama",
         JudgeProvider::Claude => "claude",
         JudgeProvider::Openai => "openai",
+        JudgeProvider::Gemini => "gemini",
+        JudgeProvider::Openrouter => "openrouter",
         JudgeProvider::None => "none",
     };
     println!(
@@ -104,9 +106,14 @@ pub async fn list_models() -> Result<()> {
 
     let claude_active = *current_provider == JudgeProvider::Claude;
     let openai_active = *current_provider == JudgeProvider::Openai;
+    let gemini_active = *current_provider == JudgeProvider::Gemini;
+    let openrouter_active = *current_provider == JudgeProvider::Openrouter;
 
     let claude_key = std::env::var("ANTHROPIC_API_KEY").is_ok();
     let openai_key = std::env::var("OPENAI_API_KEY").is_ok();
+    let gemini_key =
+        std::env::var("GEMINI_API_KEY").is_ok() || std::env::var("GOOGLE_API_KEY").is_ok();
+    let openrouter_key = std::env::var("OPENROUTER_API_KEY").is_ok();
 
     println!(
         "  {}  {}  {}",
@@ -142,6 +149,42 @@ pub async fn list_models() -> Result<()> {
             style("(API key set)").green()
         } else {
             style("(set OPENAI_API_KEY)").dim()
+        },
+    );
+    println!(
+        "  {}  {}  {}",
+        if gemini_active {
+            style("●").green().bold()
+        } else {
+            style("○").dim()
+        },
+        if gemini_active {
+            style("gemini").green().bold()
+        } else {
+            style("gemini").white()
+        },
+        if gemini_key {
+            style("(API key set)").green()
+        } else {
+            style("(set GEMINI_API_KEY or GOOGLE_API_KEY)").dim()
+        },
+    );
+    println!(
+        "  {}  {}  {}",
+        if openrouter_active {
+            style("●").green().bold()
+        } else {
+            style("○").dim()
+        },
+        if openrouter_active {
+            style("openrouter").green().bold()
+        } else {
+            style("openrouter").white()
+        },
+        if openrouter_key {
+            style("(API key set)").green()
+        } else {
+            style("(set OPENROUTER_API_KEY)").dim()
         },
     );
 
@@ -196,6 +239,8 @@ pub async fn set_model(
             crate::cli::JudgeProviderArg::Ollama => JudgeProvider::Ollama,
             crate::cli::JudgeProviderArg::Claude => JudgeProvider::Claude,
             crate::cli::JudgeProviderArg::Openai => JudgeProvider::Openai,
+            crate::cli::JudgeProviderArg::Gemini => JudgeProvider::Gemini,
+            crate::cli::JudgeProviderArg::Openrouter => JudgeProvider::Openrouter,
         };
     }
 
@@ -210,6 +255,8 @@ pub async fn set_model(
         JudgeProvider::Ollama => "ollama",
         JudgeProvider::Claude => "claude",
         JudgeProvider::Openai => "openai",
+        JudgeProvider::Gemini => "gemini",
+        JudgeProvider::Openrouter => "openrouter",
         JudgeProvider::None => "none",
     };
 
@@ -346,6 +393,8 @@ pub async fn config_show() -> Result<()> {
         JudgeProvider::Ollama => "ollama",
         JudgeProvider::Claude => "claude",
         JudgeProvider::Openai => "openai",
+        JudgeProvider::Gemini => "gemini",
+        JudgeProvider::Openrouter => "openrouter",
         JudgeProvider::None => "none (disabled)",
     };
 
@@ -506,10 +555,12 @@ pub async fn config_set(key: String, value: String) -> Result<()> {
             config.judge.provider = match value.as_str() {
                 "ollama" => JudgeProvider::Ollama,
                 "claude" => JudgeProvider::Claude,
-                "openai" => JudgeProvider::Openai,
+                "openai" | "codex" => JudgeProvider::Openai,
+                "gemini" => JudgeProvider::Gemini,
+                "openrouter" => JudgeProvider::Openrouter,
                 "none" => JudgeProvider::None,
                 _ => anyhow::bail!(
-                    "Unknown provider: {}. Use: ollama, claude, openai, none",
+                    "Unknown provider: {}. Use: ollama, claude, openai, gemini, openrouter, none",
                     value
                 ),
             };
@@ -613,9 +664,17 @@ pub async fn config_reset(preset: crate::cli::Preset) -> Result<()> {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-struct OllamaModel {
+pub struct OllamaModel {
     name: String,
     size: String,
+}
+
+pub async fn fetch_ollama_model_names(endpoint: &str) -> Result<Vec<String>> {
+    Ok(fetch_ollama_models(endpoint)
+        .await?
+        .into_iter()
+        .map(|model| model.name)
+        .collect())
 }
 
 async fn fetch_ollama_models(endpoint: &str) -> Result<Vec<OllamaModel>> {

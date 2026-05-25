@@ -6,7 +6,7 @@ use clap::{Parser, Subcommand, ValueEnum};
     version,
     about = "Did your AI agent do only what you asked?",
     long_about = "AgentScope is a scope firewall and audit layer for AI coding agents.\nIt records or detects your mission, watches Git changes,\nand blocks policy violations before they reach git.",
-    after_help = "COMMON FLOWS:\n  agentscope init\n  agentscope start \"Fix the rate-limit bug in api/middleware.ts\" --agent codex\n  agentscope watch\n  agentscope check\n\nAGENT-AWARE FLOW:\n  agentscope agents doctor\n  agentscope agents detect\n  agentscope attach --agent auto\n  agentscope attach --agent auto --apply\n  agentscope monitor --agent auto\n\nOTHER USEFUL COMMANDS:\n  agentscope judge -m qwen3.5:2b\n  agentscope diff --problems\n  agentscope report --markdown\n  agentscope hook install\n  agentscope mcp\n  agentscope skills install --agent all\n  agentscope plugins install --agent all\n",
+    after_help = "COMMON FLOWS:\n  agentscope init\n  agentscope start \"Fix the rate-limit bug in api/middleware.ts\" --agent codex\n  agentscope watch\n  agentscope check\n\nAGENT-AWARE FLOW:\n  agentscope agents doctor\n  agentscope agents detect\n  agentscope attach --agent auto\n  agentscope attach --agent auto --apply\n  agentscope monitor --agent auto\n\nOTHER USEFUL COMMANDS:\n  agentscope judge -m qwen3.5:2b\n  agentscope launchers list\n  agentscope launchers test codex\n  agentscope diff --problems\n  agentscope report --markdown\n  agentscope hook install\n  agentscope mcp\n  agentscope skills install --agent all\n  agentscope plugins install --agent all\n",
     styles = clap_styles(),
 )]
 pub struct Cli {
@@ -72,6 +72,13 @@ pub enum Commands {
         action: ModelAction,
     },
 
+    /// Detect and smoke-test local AI launcher apps
+    #[command(alias = "launcher", alias = "smoke")]
+    Launchers {
+        #[command(subcommand)]
+        action: LauncherAction,
+    },
+
     /// View and edit agentscope configuration
     Config {
         #[command(subcommand)]
@@ -102,6 +109,18 @@ pub enum Commands {
     Agents {
         #[command(subcommand)]
         action: AgentsAction,
+    },
+
+    /// Manage AgentScope-owned chat sessions
+    Chat {
+        #[command(subcommand)]
+        action: ChatAction,
+    },
+
+    /// Browse local assistant sessions discovered from agent folders
+    Sessions {
+        #[command(subcommand)]
+        action: SessionsAction,
     },
 
     /// Infer a mission from a local agent session
@@ -208,6 +227,35 @@ pub enum ModelAction {
     },
 }
 
+// ── Launcher smoke-test subcommands ─────────────────────────────────────────
+
+#[derive(Subcommand, Clone, Debug)]
+pub enum LauncherAction {
+    /// List supported launchers and installation status
+    #[command(alias = "ls")]
+    List,
+
+    /// Run safe startup smoke tests for all launchers or one selected launcher
+    Test {
+        /// Optional launcher: claude-code, codex-app, openclaw, hermes-agent, codex, opencode
+        app: Option<String>,
+
+        /// Per-launcher timeout in seconds
+        #[arg(long, default_value_t = 8)]
+        timeout: u64,
+
+        /// Print only the concise summary line
+        #[arg(long)]
+        summary: bool,
+    },
+
+    /// Alias for `test --summary`
+    Summary {
+        /// Optional launcher: claude-code, codex-app, openclaw, hermes-agent, codex, opencode
+        app: Option<String>,
+    },
+}
+
 // ── Config subcommands ──────────────────────────────────────────────────────
 
 #[derive(Subcommand, Clone, Debug)]
@@ -285,15 +333,85 @@ pub enum IntegrationAction {
     },
 }
 
+#[derive(Subcommand, Clone, Debug)]
+pub enum ChatAction {
+    /// Create a new AgentScope chat session
+    New {
+        /// Optional chat title
+        title: Option<String>,
+    },
+
+    /// List AgentScope chat sessions
+    #[command(alias = "ls")]
+    List,
+
+    /// Show chat metadata and transcript
+    Show {
+        /// Chat ID to show
+        chat_id: String,
+    },
+
+    /// Soft-delete a chat into .agentscope/chats/archive
+    Delete {
+        /// Chat ID to delete
+        chat_id: String,
+    },
+
+    /// Restore a soft-deleted chat
+    Restore {
+        /// Chat ID to restore
+        chat_id: String,
+    },
+
+    /// Permanently delete an archived chat
+    Purge {
+        /// Chat ID to purge
+        chat_id: String,
+
+        /// Confirm permanent deletion
+        #[arg(long)]
+        yes: bool,
+    },
+}
+
+#[derive(Subcommand, Clone, Debug)]
+pub enum SessionsAction {
+    /// List indexed local assistant sessions
+    #[command(alias = "ls")]
+    List {
+        /// Optional agent filter, e.g. codex or claude
+        agent: Option<String>,
+    },
+
+    /// Show the newest local assistant session
+    Latest {
+        /// Optional agent filter, e.g. codex or claude
+        agent: Option<String>,
+    },
+
+    /// Show one indexed local assistant session
+    Show {
+        /// Agent name, e.g. codex or claude
+        agent: String,
+
+        /// Session ID from `agentscope sessions list`
+        session_id: String,
+    },
+}
+
 /// Provider argument for judge/model commands
 #[derive(ValueEnum, Clone, Debug)]
 pub enum JudgeProviderArg {
-    /// Local Ollama (default)
+    /// Local Ollama (private/offline)
     Ollama,
-    /// Anthropic Claude API
+    /// Anthropic Claude API (requires ANTHROPIC_API_KEY)
     Claude,
-    /// OpenAI API
+    /// OpenAI API (requires OPENAI_API_KEY)
     Openai,
+    /// Google Gemini API (requires GEMINI_API_KEY or GOOGLE_API_KEY)
+    Gemini,
+    /// OpenRouter — access 200+ models via one API key (requires OPENROUTER_API_KEY)
+    Openrouter,
 }
 
 #[derive(ValueEnum, Clone, Debug, PartialEq)]
@@ -309,6 +427,8 @@ pub enum AgentKind {
     Cursor,
     /// Google Gemini CLI
     Gemini,
+    /// Google Antigravity IDE / CLI
+    Antigravity,
     /// Anomaly's OpenCode
     Opencode,
     /// OpenClaw personal AI
@@ -333,6 +453,7 @@ impl std::fmt::Display for AgentKind {
             AgentKind::CodexApp => "codex-app",
             AgentKind::Cursor => "cursor",
             AgentKind::Gemini => "gemini-cli",
+            AgentKind::Antigravity => "antigravity",
             AgentKind::Opencode => "opencode",
             AgentKind::Openclaw => "openclaw",
             AgentKind::Hermes => "hermes",

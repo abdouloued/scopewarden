@@ -26,6 +26,9 @@ pub struct Config {
 
     #[serde(default)]
     pub agents: AgentsConfig,
+
+    #[serde(default)]
+    pub tui: TuiConfig,
 }
 
 fn default_version() -> u8 {
@@ -40,6 +43,7 @@ impl Default for Config {
             judge: JudgeConfig::default(),
             team: TeamConfig::default(),
             agents: AgentsConfig::default(),
+            tui: TuiConfig::default(),
         }
     }
 }
@@ -48,6 +52,10 @@ impl Default for Config {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PolicyConfig {
+    /// Glob patterns explicitly allowed even if a blocked/warn pattern matches
+    #[serde(default)]
+    pub allow: Vec<String>,
+
     /// Glob patterns always blocked regardless of mission
     #[serde(default = "default_blocked")]
     pub blocked: Vec<String>,
@@ -68,12 +76,65 @@ pub struct PolicyConfig {
 impl Default for PolicyConfig {
     fn default() -> Self {
         Self {
+            allow: Vec::new(),
             blocked: default_blocked(),
             warn: default_warn(),
             max_lines_changed: 0,
             max_files_changed: 0,
         }
     }
+}
+
+// ── TUI ───────────────────────────────────────────────────────────────────────
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct TuiConfig {
+    #[serde(default = "default_tui_theme")]
+    pub theme: String,
+}
+
+impl Default for TuiConfig {
+    fn default() -> Self {
+        Self {
+            theme: default_tui_theme(),
+        }
+    }
+}
+
+fn default_tui_theme() -> String {
+    "agentscope".into()
+}
+
+pub fn tui_theme_names() -> &'static [&'static str] {
+    &["agentscope", "codex", "claude", "openclaw", "high-contrast"]
+}
+
+pub fn add_policy_allow(config: &mut Config, pattern: &str) -> bool {
+    add_unique(&mut config.policy.allow, pattern)
+}
+
+pub fn add_policy_block(config: &mut Config, pattern: &str) -> bool {
+    add_unique(&mut config.policy.blocked, pattern)
+}
+
+pub fn set_tui_theme(config: &mut Config, theme: &str) -> Result<()> {
+    if !tui_theme_names().contains(&theme) {
+        anyhow::bail!(
+            "Unknown TUI theme `{}`. Available: {}",
+            theme,
+            tui_theme_names().join(", ")
+        );
+    }
+    config.tui.theme = theme.to_string();
+    Ok(())
+}
+
+fn add_unique(values: &mut Vec<String>, pattern: &str) -> bool {
+    if values.iter().any(|existing| existing == pattern) {
+        return false;
+    }
+    values.push(pattern.to_string());
+    true
 }
 
 fn default_blocked() -> Vec<String> {
@@ -116,6 +177,8 @@ pub enum JudgeProvider {
     Ollama,
     Claude,
     Openai,
+    Gemini,
+    Openrouter,
     None,
 }
 
@@ -147,6 +210,8 @@ pub struct AgentsConfig {
     pub auto_detect: bool,
     #[serde(default)]
     pub auto_attach: bool,
+    #[serde(default = "default_active_window_hours")]
+    pub active_window_hours: u64,
     #[serde(default = "default_preferred_agents")]
     pub preferred: Vec<String>,
     #[serde(default)]
@@ -166,6 +231,7 @@ impl Default for AgentsConfig {
         Self {
             auto_detect: true,
             auto_attach: false,
+            active_window_hours: default_active_window_hours(),
             preferred: default_preferred_agents(),
             sources: std::collections::BTreeMap::new(),
         }
@@ -185,13 +251,21 @@ fn default_true() -> bool {
     true
 }
 
+fn default_active_window_hours() -> u64 {
+    24
+}
+
 fn default_preferred_agents() -> Vec<String> {
     vec![
         "claude-code".into(),
         "codex".into(),
+        "codex-app".into(),
         "opencode".into(),
+        "openclaw".into(),
+        "hermes".into(),
         "cursor".into(),
         "gemini-cli".into(),
+        "antigravity".into(),
         "copilot-cli".into(),
     ]
 }
@@ -209,6 +283,13 @@ pub fn load() -> Result<Config> {
 
 pub fn load_or_default() -> Config {
     load().unwrap_or_default()
+}
+
+pub fn save(config: &Config) -> Result<()> {
+    let path = find_config_file()?;
+    let yaml = serde_yaml::to_string(config)?;
+    std::fs::write(&path, yaml).with_context(|| format!("Could not write {}", path.display()))?;
+    Ok(())
 }
 
 fn find_config_file() -> Result<PathBuf> {
@@ -281,6 +362,10 @@ pub async fn integrate_agent(agent: AgentKind) -> Result<()> {
             std::fs::write("GEMINI.md", agent_rules_content("Gemini CLI"))?;
             p.success("Wrote GEMINI.md");
         }
+        AgentKind::Antigravity => {
+            std::fs::write("AGENTS.md", agent_rules_content("Antigravity"))?;
+            p.success("Wrote AGENTS.md — Antigravity will now respect AgentScope sessions");
+        }
         AgentKind::Codex | AgentKind::CodexApp => {
             std::fs::write("AGENTS.md", agent_rules_content("Codex"))?;
             p.success("Wrote AGENTS.md — Codex will now respect AgentScope sessions");
@@ -336,6 +421,44 @@ pub(crate) fn preset_config(preset: &Preset) -> Config {
         }
     }
     config
+}
+
+#[cfg(test)]
+mod tui_policy_tests {
+    use super::*;
+
+    #[test]
+    fn default_config_uses_agentscope_theme_and_empty_allowlist() {
+        let config = Config::default();
+
+        assert_eq!(config.tui.theme, "agentscope");
+        assert!(config.policy.allow.is_empty());
+    }
+
+    #[test]
+    fn add_policy_pattern_ignores_duplicates() {
+        let mut config = Config::default();
+
+        assert!(add_policy_allow(&mut config, "src/auth/session.ts"));
+        assert!(!add_policy_allow(&mut config, "src/auth/session.ts"));
+        assert_eq!(config.policy.allow, vec!["src/auth/session.ts"]);
+
+        assert!(add_policy_block(&mut config, "generated/**"));
+        assert!(!add_policy_block(&mut config, "generated/**"));
+        assert!(config.policy.blocked.contains(&"generated/**".to_string()));
+    }
+
+    #[test]
+    fn set_tui_theme_accepts_known_theme_and_rejects_unknown() {
+        let mut config = Config::default();
+
+        set_tui_theme(&mut config, "openclaw").unwrap();
+        assert_eq!(config.tui.theme, "openclaw");
+
+        let err = set_tui_theme(&mut config, "neon").unwrap_err();
+        assert!(err.to_string().contains("Unknown TUI theme"));
+        assert_eq!(config.tui.theme, "openclaw");
+    }
 }
 
 fn agent_rules_content(agent_name: &str) -> String {
@@ -438,6 +561,7 @@ mod tests {
         let config = Config::default();
         assert!(config.agents.auto_detect);
         assert!(!config.agents.auto_attach);
+        assert_eq!(config.agents.active_window_hours, 24);
         assert!(config.agents.preferred.contains(&"codex".to_string()));
     }
 

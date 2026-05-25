@@ -45,6 +45,23 @@ pub async fn evaluate(
         JudgeProvider::Ollama => evaluate_ollama(&prompt, config).await,
         JudgeProvider::Claude => evaluate_claude(&prompt, config).await,
         JudgeProvider::Openai => evaluate_openai(&prompt, config).await,
+        JudgeProvider::Gemini => evaluate_gemini(&prompt, config).await,
+        JudgeProvider::Openrouter => evaluate_openrouter(&prompt, config).await,
+        JudgeProvider::None => unreachable!(),
+    }
+}
+
+pub async fn chat(prompt: &str, config: &JudgeConfig) -> Result<String> {
+    if config.provider == JudgeProvider::None {
+        anyhow::bail!("Chat model disabled");
+    }
+
+    match config.provider {
+        JudgeProvider::Ollama => chat_ollama(prompt, config).await,
+        JudgeProvider::Claude => chat_claude(prompt, config).await,
+        JudgeProvider::Openai => chat_openai(prompt, config).await,
+        JudgeProvider::Gemini => chat_gemini(prompt, config).await,
+        JudgeProvider::Openrouter => chat_openrouter(prompt, config).await,
         JudgeProvider::None => unreachable!(),
     }
 }
@@ -126,16 +143,47 @@ async fn evaluate_ollama(prompt: &str, config: &JudgeConfig) -> Result<JudgeResu
     parse_judge_response(text, "ollama", &config.model)
 }
 
+async fn chat_ollama(prompt: &str, config: &JudgeConfig) -> Result<String> {
+    let client = reqwest::Client::new();
+    let mut body = serde_json::json!({
+        "model": config.model,
+        "prompt": prompt,
+        "stream": false,
+        "options": {
+            "temperature": 0.2,
+            "num_predict": 700,
+        }
+    });
+    if config.model.starts_with("qwen3") {
+        body.as_object_mut()
+            .unwrap()
+            .insert("think".into(), serde_json::json!(false));
+    }
+    let response = client
+        .post(format!("{}/api/generate", config.endpoint))
+        .json(&body)
+        .timeout(std::time::Duration::from_secs(60))
+        .send()
+        .await?;
+    let raw: serde_json::Value = response.json().await?;
+    Ok(raw["response"].as_str().unwrap_or("").trim().to_string())
+}
+
 // ── Claude ────────────────────────────────────────────────────────────────────
 
-async fn evaluate_claude(prompt: &str, _config: &JudgeConfig) -> Result<JudgeResult> {
+async fn evaluate_claude(prompt: &str, config: &JudgeConfig) -> Result<JudgeResult> {
     let api_key = std::env::var("ANTHROPIC_API_KEY")
         .map_err(|_| anyhow::anyhow!("ANTHROPIC_API_KEY not set"))?;
 
-    let client = reqwest::Client::new();
+    let model = if config.model.is_empty() {
+        "claude-haiku-4-5-20251001"
+    } else {
+        config.model.as_str()
+    };
 
+    let client = reqwest::Client::new();
     let body = serde_json::json!({
-        "model": "claude-haiku-4-5-20251001",
+        "model": model,
         "max_tokens": 300,
         "messages": [{"role": "user", "content": prompt}]
     });
@@ -151,19 +199,53 @@ async fn evaluate_claude(prompt: &str, _config: &JudgeConfig) -> Result<JudgeRes
     let raw: serde_json::Value = response.json().await?;
     let text = raw["content"][0]["text"].as_str().unwrap_or("{}");
 
-    parse_judge_response(text, "claude", "claude-haiku-4-5")
+    parse_judge_response(text, "claude", model)
+}
+
+async fn chat_claude(prompt: &str, config: &JudgeConfig) -> Result<String> {
+    let api_key = std::env::var("ANTHROPIC_API_KEY")
+        .map_err(|_| anyhow::anyhow!("ANTHROPIC_API_KEY not set"))?;
+    let model = if config.model.is_empty() {
+        "claude-haiku-4-5-20251001"
+    } else {
+        config.model.as_str()
+    };
+    let client = reqwest::Client::new();
+    let body = serde_json::json!({
+        "model": model,
+        "max_tokens": 1024,
+        "messages": [{"role": "user", "content": prompt}]
+    });
+    let response = client
+        .post("https://api.anthropic.com/v1/messages")
+        .header("x-api-key", api_key)
+        .header("anthropic-version", "2023-06-01")
+        .json(&body)
+        .send()
+        .await?;
+    let raw: serde_json::Value = response.json().await?;
+    Ok(raw["content"][0]["text"]
+        .as_str()
+        .unwrap_or("")
+        .trim()
+        .to_string())
 }
 
 // ── OpenAI ────────────────────────────────────────────────────────────────────
 
-async fn evaluate_openai(prompt: &str, _config: &JudgeConfig) -> Result<JudgeResult> {
+async fn evaluate_openai(prompt: &str, config: &JudgeConfig) -> Result<JudgeResult> {
     let api_key =
         std::env::var("OPENAI_API_KEY").map_err(|_| anyhow::anyhow!("OPENAI_API_KEY not set"))?;
 
-    let client = reqwest::Client::new();
+    let model = if config.model.is_empty() {
+        "gpt-4o-mini"
+    } else {
+        config.model.as_str()
+    };
 
+    let client = reqwest::Client::new();
     let body = serde_json::json!({
-        "model": "gpt-4o-mini",
+        "model": model,
         "messages": [{"role": "user", "content": prompt}],
         "max_tokens": 300,
         "temperature": 0.1
@@ -181,7 +263,184 @@ async fn evaluate_openai(prompt: &str, _config: &JudgeConfig) -> Result<JudgeRes
         .as_str()
         .unwrap_or("{}");
 
-    parse_judge_response(text, "openai", "gpt-4o-mini")
+    parse_judge_response(text, "openai", model)
+}
+
+async fn chat_openai(prompt: &str, config: &JudgeConfig) -> Result<String> {
+    let api_key =
+        std::env::var("OPENAI_API_KEY").map_err(|_| anyhow::anyhow!("OPENAI_API_KEY not set"))?;
+    let model = if config.model.is_empty() {
+        "gpt-4o-mini"
+    } else {
+        config.model.as_str()
+    };
+    let client = reqwest::Client::new();
+    let body = serde_json::json!({
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": 1024,
+        "temperature": 0.2
+    });
+    let response = client
+        .post("https://api.openai.com/v1/chat/completions")
+        .bearer_auth(api_key)
+        .json(&body)
+        .send()
+        .await?;
+    let raw: serde_json::Value = response.json().await?;
+    Ok(raw["choices"][0]["message"]["content"]
+        .as_str()
+        .unwrap_or("")
+        .trim()
+        .to_string())
+}
+
+// ── Gemini ────────────────────────────────────────────────────────────────────
+
+async fn evaluate_gemini(prompt: &str, config: &JudgeConfig) -> Result<JudgeResult> {
+    let api_key = std::env::var("GEMINI_API_KEY")
+        .or_else(|_| std::env::var("GOOGLE_API_KEY"))
+        .map_err(|_| anyhow::anyhow!("GEMINI_API_KEY or GOOGLE_API_KEY not set"))?;
+
+    let model = if config.model.is_empty() {
+        "gemini-2.0-flash-lite"
+    } else {
+        config.model.as_str()
+    };
+
+    let client = reqwest::Client::new();
+    let url = format!(
+        "https://generativelanguage.googleapis.com/v1beta/models/{}:generateContent?key={}",
+        model, api_key
+    );
+    let body = serde_json::json!({
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"temperature": 0.1, "maxOutputTokens": 300}
+    });
+
+    let response = client
+        .post(&url)
+        .json(&body)
+        .timeout(std::time::Duration::from_secs(60))
+        .send()
+        .await?;
+
+    let raw: serde_json::Value = response.json().await?;
+    let text = raw["candidates"][0]["content"]["parts"][0]["text"]
+        .as_str()
+        .unwrap_or("{}");
+
+    parse_judge_response(text, "gemini", model)
+}
+
+async fn chat_gemini(prompt: &str, config: &JudgeConfig) -> Result<String> {
+    let api_key = std::env::var("GEMINI_API_KEY")
+        .or_else(|_| std::env::var("GOOGLE_API_KEY"))
+        .map_err(|_| anyhow::anyhow!("GEMINI_API_KEY or GOOGLE_API_KEY not set"))?;
+
+    let model = if config.model.is_empty() {
+        "gemini-2.0-flash-lite"
+    } else {
+        config.model.as_str()
+    };
+
+    let client = reqwest::Client::new();
+    let url = format!(
+        "https://generativelanguage.googleapis.com/v1beta/models/{}:generateContent?key={}",
+        model, api_key
+    );
+    let body = serde_json::json!({
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"temperature": 0.2, "maxOutputTokens": 1024}
+    });
+
+    let response = client
+        .post(&url)
+        .json(&body)
+        .timeout(std::time::Duration::from_secs(60))
+        .send()
+        .await?;
+
+    let raw: serde_json::Value = response.json().await?;
+    Ok(raw["candidates"][0]["content"]["parts"][0]["text"]
+        .as_str()
+        .unwrap_or("")
+        .trim()
+        .to_string())
+}
+
+// ── OpenRouter ────────────────────────────────────────────────────────────────
+// Supports 200+ models via one API: set model to e.g. "anthropic/claude-3-haiku",
+// "openai/gpt-4o-mini", "google/gemini-flash-1.5", "mistralai/mistral-7b-instruct"
+
+async fn evaluate_openrouter(prompt: &str, config: &JudgeConfig) -> Result<JudgeResult> {
+    let api_key = std::env::var("OPENROUTER_API_KEY")
+        .map_err(|_| anyhow::anyhow!("OPENROUTER_API_KEY not set"))?;
+
+    let model = if config.model.is_empty() {
+        "openai/gpt-4o-mini"
+    } else {
+        config.model.as_str()
+    };
+
+    let client = reqwest::Client::new();
+    let body = serde_json::json!({
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": 300,
+        "temperature": 0.1
+    });
+
+    let response = client
+        .post("https://openrouter.ai/api/v1/chat/completions")
+        .bearer_auth(api_key)
+        .header("HTTP-Referer", "https://github.com/agentscope")
+        .json(&body)
+        .timeout(std::time::Duration::from_secs(60))
+        .send()
+        .await?;
+
+    let raw: serde_json::Value = response.json().await?;
+    let text = raw["choices"][0]["message"]["content"]
+        .as_str()
+        .unwrap_or("{}");
+
+    parse_judge_response(text, "openrouter", model)
+}
+
+async fn chat_openrouter(prompt: &str, config: &JudgeConfig) -> Result<String> {
+    let api_key = std::env::var("OPENROUTER_API_KEY")
+        .map_err(|_| anyhow::anyhow!("OPENROUTER_API_KEY not set"))?;
+
+    let model = if config.model.is_empty() {
+        "openai/gpt-4o-mini"
+    } else {
+        config.model.as_str()
+    };
+
+    let client = reqwest::Client::new();
+    let body = serde_json::json!({
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": 1024,
+        "temperature": 0.2
+    });
+
+    let response = client
+        .post("https://openrouter.ai/api/v1/chat/completions")
+        .bearer_auth(api_key)
+        .header("HTTP-Referer", "https://github.com/agentscope")
+        .json(&body)
+        .timeout(std::time::Duration::from_secs(60))
+        .send()
+        .await?;
+
+    let raw: serde_json::Value = response.json().await?;
+    Ok(raw["choices"][0]["message"]["content"]
+        .as_str()
+        .unwrap_or("")
+        .trim()
+        .to_string())
 }
 
 // ── Parse ─────────────────────────────────────────────────────────────────────
@@ -326,6 +585,7 @@ mod tests {
                 status: DiffStatus::Modified,
             },
             verdict: FileVerdict::InScope,
+            matched_agents: Vec::new(),
         }];
         let prompt = build_prompt("Fix bug", &files);
         assert!(prompt.contains("src/main.rs"));

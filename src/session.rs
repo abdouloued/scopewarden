@@ -85,7 +85,7 @@ pub async fn check(session_id: Option<String>, json: bool, share: bool) -> Resul
     };
 
     let repo = git::open_repo()?;
-    let diff = git::working_tree_diff(&repo)?;
+    let diff = git::working_tree_diff_from(&repo, Some(&session.git_baseline))?;
 
     let engine = PolicyEngine::from_config(&config.policy)?;
     let annotated = engine.annotate(&diff.files, &session.mission);
@@ -148,12 +148,11 @@ pub async fn judge(
     let session = load_active_session()?;
 
     let repo = git::open_repo()?;
-    let diff = git::working_tree_diff(&repo)?;
+    let diff = git::working_tree_diff_from(&repo, Some(&session.git_baseline))?;
 
     let engine = PolicyEngine::from_config(&config.policy)?;
     let annotated = engine.annotate(&diff.files, &session.mission);
 
-    // Build judge config with CLI overrides
     let judge_config = build_judge_config(&config.judge, provider, model, endpoint);
 
     p.hint(&format!(
@@ -162,6 +161,8 @@ pub async fn judge(
             JudgeProvider::Ollama => "ollama",
             JudgeProvider::Claude => "claude",
             JudgeProvider::Openai => "openai",
+            JudgeProvider::Gemini => "gemini",
+            JudgeProvider::Openrouter => "openrouter",
             JudgeProvider::None => "none",
         },
         judge_config.model,
@@ -199,6 +200,8 @@ fn build_judge_config(
             JudgeProviderArg::Ollama => JudgeProvider::Ollama,
             JudgeProviderArg::Claude => JudgeProvider::Claude,
             JudgeProviderArg::Openai => JudgeProvider::Openai,
+            JudgeProviderArg::Gemini => JudgeProvider::Gemini,
+            JudgeProviderArg::Openrouter => JudgeProvider::Openrouter,
         };
     }
 
@@ -222,7 +225,7 @@ pub async fn report(markdown: bool) -> Result<()> {
     let session = load_active_session()?;
 
     let repo = git::open_repo()?;
-    let diff = git::working_tree_diff(&repo)?;
+    let diff = git::working_tree_diff_from(&repo, Some(&session.git_baseline))?;
 
     let engine = PolicyEngine::from_config(&config.policy)?;
     let annotated = engine.annotate(&diff.files, &session.mission);
@@ -261,7 +264,7 @@ pub async fn diff(problems: bool) -> Result<()> {
     let session = load_active_session()?;
 
     let repo = git::open_repo()?;
-    let diff_result = git::working_tree_diff(&repo)?;
+    let diff_result = git::working_tree_diff_from(&repo, Some(&session.git_baseline))?;
 
     let engine = PolicyEngine::from_config(&config.policy)?;
     let annotated = engine.annotate(&diff_result.files, &session.mission);
@@ -306,10 +309,7 @@ pub async fn diff(problems: bool) -> Result<()> {
         .iter()
         .filter(|f| f.verdict == crate::policy::FileVerdict::Unasked)
         .count();
-    let in_scope = filtered
-        .iter()
-        .filter(|f| f.verdict == crate::policy::FileVerdict::InScope)
-        .count();
+    let in_scope = filtered.iter().filter(|f| f.verdict.is_accepted()).count();
 
     println!(
         "  {} files  {}  {}  {}  {}",

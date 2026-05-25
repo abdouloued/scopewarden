@@ -7,6 +7,9 @@ use crate::git::FileDiff;
 /// How AgentScope classifies a changed file relative to the mission
 #[derive(Debug, Clone, PartialEq)]
 pub enum FileVerdict {
+    /// Explicitly allowed by persistent policy override
+    Allowed,
+
     /// Matches stated mission + not blocked
     InScope,
     /// Not in mission scope but not blocked — warn only
@@ -23,8 +26,13 @@ impl FileVerdict {
         matches!(self, FileVerdict::Blocked { .. })
     }
 
+    pub fn is_accepted(&self) -> bool {
+        matches!(self, FileVerdict::Allowed | FileVerdict::InScope)
+    }
+
     pub fn label(&self) -> &'static str {
         match self {
+            FileVerdict::Allowed => "ALLOWED",
             FileVerdict::InScope => "IN SCOPE",
             FileVerdict::Unasked => "UNASKED",
             FileVerdict::Blocked { .. } => "BLOCKED",
@@ -38,10 +46,12 @@ impl FileVerdict {
 pub struct AnnotatedFile {
     pub diff: FileDiff,
     pub verdict: FileVerdict,
+    pub matched_agents: Vec<String>,
 }
 
 /// The compiled, ready-to-evaluate policy engine
 pub struct PolicyEngine {
+    allow_set: GlobSet,
     blocked_set: GlobSet,
     warn_set: GlobSet,
     blocked_patterns: Vec<String>,
@@ -53,6 +63,11 @@ pub struct PolicyEngine {
 
 impl PolicyEngine {
     pub fn from_config(config: &PolicyConfig) -> anyhow::Result<Self> {
+        let mut allow_builder = GlobSetBuilder::new();
+        for pattern in &config.allow {
+            allow_builder.add(Glob::new(pattern)?);
+        }
+
         let mut blocked_builder = GlobSetBuilder::new();
         for pattern in &config.blocked {
             blocked_builder.add(Glob::new(pattern)?);
@@ -64,6 +79,7 @@ impl PolicyEngine {
         }
 
         Ok(Self {
+            allow_set: allow_builder.build()?,
             blocked_set: blocked_builder.build()?,
             warn_set: warn_builder.build()?,
             blocked_patterns: config.blocked.clone(),
@@ -75,6 +91,10 @@ impl PolicyEngine {
 
     /// Check a single file path against policy
     pub fn check_path(&self, path: &Path) -> FileVerdict {
+        if self.allow_set.is_match(path) {
+            return FileVerdict::Allowed;
+        }
+
         if self.blocked_set.is_match(path) {
             // Find which pattern matched for the error message
             let policy = self
@@ -108,6 +128,7 @@ impl PolicyEngine {
             .iter()
             .map(|diff| {
                 let verdict = match self.check_path(&diff.path) {
+                    allowed @ FileVerdict::Allowed => allowed,
                     blocked @ FileVerdict::Blocked { .. } => blocked,
                     _ => {
                         if is_in_scope(&diff.path, &scope_hints) {
@@ -120,6 +141,41 @@ impl PolicyEngine {
                 AnnotatedFile {
                     diff: diff.clone(),
                     verdict,
+                    matched_agents: Vec::new(),
+                }
+            })
+            .collect()
+    }
+
+    pub fn annotate_with_missions(
+        &self,
+        diffs: &[FileDiff],
+        missions: &[(String, String)],
+    ) -> Vec<AnnotatedFile> {
+        let mission_hints = missions
+            .iter()
+            .map(|(agent, mission)| (agent.clone(), extract_scope_hints(mission)))
+            .collect::<Vec<_>>();
+
+        diffs
+            .iter()
+            .map(|diff| {
+                let base = self.check_path(&diff.path);
+                let matched_agents = mission_hints
+                    .iter()
+                    .filter(|(_, hints)| is_in_scope(&diff.path, hints))
+                    .map(|(agent, _)| agent.clone())
+                    .collect::<Vec<_>>();
+                let verdict = match base {
+                    allowed @ FileVerdict::Allowed => allowed,
+                    blocked @ FileVerdict::Blocked { .. } => blocked,
+                    _ if !matched_agents.is_empty() => FileVerdict::InScope,
+                    _ => FileVerdict::Unasked,
+                };
+                AnnotatedFile {
+                    diff: diff.clone(),
+                    verdict,
+                    matched_agents,
                 }
             })
             .collect()
@@ -218,6 +274,7 @@ mod tests {
         max_lines: usize,
     ) -> PolicyEngine {
         let config = PolicyConfig {
+            allow: Vec::new(),
             blocked: blocked.into_iter().map(String::from).collect(),
             warn: warn.into_iter().map(String::from).collect(),
             max_files_changed: max_files,
@@ -585,6 +642,7 @@ mod tests {
 
     #[test]
     fn file_verdict_labels() {
+        assert_eq!(FileVerdict::Allowed.label(), "ALLOWED");
         assert_eq!(FileVerdict::InScope.label(), "IN SCOPE");
         assert_eq!(FileVerdict::Unasked.label(), "UNASKED");
         assert_eq!(
@@ -600,8 +658,70 @@ mod tests {
     #[test]
     fn file_verdict_is_blocked() {
         assert!(!FileVerdict::InScope.is_blocked());
+        assert!(!FileVerdict::Allowed.is_blocked());
         assert!(!FileVerdict::Unasked.is_blocked());
         assert!(FileVerdict::Blocked { policy: "x".into() }.is_blocked());
         assert!(!FileVerdict::Clean.is_blocked());
+    }
+
+    #[test]
+    fn allowed_and_in_scope_are_accepted() {
+        assert!(FileVerdict::Allowed.is_accepted());
+        assert!(FileVerdict::InScope.is_accepted());
+        assert!(!FileVerdict::Unasked.is_accepted());
+        assert!(!FileVerdict::Blocked { policy: "x".into() }.is_accepted());
+    }
+
+    #[test]
+    fn allow_overrides_blocked_policy() {
+        let config = PolicyConfig {
+            allow: vec!["src/auth/session.ts".into()],
+            blocked: vec!["src/auth/**".into()],
+            warn: Vec::new(),
+            max_files_changed: 0,
+            max_lines_changed: 0,
+        };
+        let engine = PolicyEngine::from_config(&config).unwrap();
+
+        assert_eq!(
+            engine.check_path(Path::new("src/auth/session.ts")),
+            FileVerdict::Allowed
+        );
+    }
+
+    #[test]
+    fn allow_overrides_warn_policy() {
+        let config = PolicyConfig {
+            allow: vec!["Cargo.lock".into()],
+            blocked: Vec::new(),
+            warn: vec!["Cargo.lock".into()],
+            max_files_changed: 0,
+            max_lines_changed: 0,
+        };
+        let engine = PolicyEngine::from_config(&config).unwrap();
+
+        assert_eq!(
+            engine.check_path(Path::new("Cargo.lock")),
+            FileVerdict::Allowed
+        );
+    }
+
+    #[test]
+    fn annotate_with_missions_accepts_any_matching_agent() {
+        let engine = default_engine();
+        let diffs = vec![
+            make_diff("src/tui.rs", 10, 1),
+            make_diff("src/payment.rs", 4, 0),
+        ];
+        let missions = vec![
+            ("codex".to_string(), "Redesign src/tui.rs".to_string()),
+            ("claude-code".to_string(), "Fix checkout flow".to_string()),
+        ];
+
+        let annotated = engine.annotate_with_missions(&diffs, &missions);
+
+        assert_eq!(annotated[0].verdict, FileVerdict::InScope);
+        assert_eq!(annotated[0].matched_agents, vec!["codex"]);
+        assert_eq!(annotated[1].verdict, FileVerdict::Unasked);
     }
 }

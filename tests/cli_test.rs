@@ -124,6 +124,7 @@ fn cli_agent_kinds_accepted() {
         "codex-app",
         "cursor",
         "gemini",
+        "antigravity",
         "opencode",
         "openclaw",
         "hermes",
@@ -199,6 +200,41 @@ fn cli_agents_doctor_explains_missing_sources_without_failing() {
         .stdout(predicate::str::contains("Agent source health"))
         .stdout(predicate::str::contains("Missing sources are normal"))
         .stdout(predicate::str::contains("agentscope start"));
+}
+
+#[test]
+fn cli_launchers_list_reports_all_supported_apps() {
+    let tmp = tempfile::tempdir().unwrap();
+
+    Command::cargo_bin("agentscope")
+        .unwrap()
+        .args(["launchers", "list"])
+        .env("HOME", tmp.path())
+        .env("PATH", tmp.path())
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("AI Launcher Lab"))
+        .stdout(predicate::str::contains("Claude Code"))
+        .stdout(predicate::str::contains("Codex App"))
+        .stdout(predicate::str::contains("OpenClaw"))
+        .stdout(predicate::str::contains("Hermes Agent"))
+        .stdout(predicate::str::contains("OpenCode"));
+}
+
+#[test]
+fn cli_launchers_summary_handles_missing_launcher_cleanly() {
+    let tmp = tempfile::tempdir().unwrap();
+
+    Command::cargo_bin("agentscope")
+        .unwrap()
+        .args(["launchers", "summary", "opencode"])
+        .env("HOME", tmp.path())
+        .env("PATH", tmp.path())
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Summary"))
+        .stdout(predicate::str::contains("OpenCode"))
+        .stdout(predicate::str::contains("1 skipped"));
 }
 
 #[test]
@@ -281,7 +317,11 @@ fn cli_skills_and_plugins_list_supported_agents() {
         .assert()
         .success()
         .stdout(predicate::str::contains("claude-code"))
-        .stdout(predicate::str::contains("codex"));
+        .stdout(predicate::str::contains("codex"))
+        .stdout(predicate::str::contains("codex-app"))
+        .stdout(predicate::str::contains("openclaw"))
+        .stdout(predicate::str::contains("hermes"))
+        .stdout(predicate::str::contains("antigravity"));
 
     Command::cargo_bin("agentscope")
         .unwrap()
@@ -316,10 +356,28 @@ fn cli_agents_context_reads_each_supported_agent_source() {
             "Fix Codex task",
         ),
         (
+            "codex-app",
+            "Library/Application Support/Codex/sessions/session.jsonl",
+            r#"{"message":"Fix Codex App task"}"#,
+            "Fix Codex App task",
+        ),
+        (
             "opencode",
             ".local/share/opencode/project/app/storage/chat.json",
             r#"{"prompt":"Fix OpenCode task"}"#,
             "Fix OpenCode task",
+        ),
+        (
+            "openclaw",
+            ".openclaw/sessions/main/events.jsonl",
+            r#"{"message":"Fix OpenClaw task"}"#,
+            "Fix OpenClaw task",
+        ),
+        (
+            "hermes",
+            ".hermes/sessions/main/events.jsonl",
+            r#"{"message":"Fix Hermes task"}"#,
+            "Fix Hermes task",
         ),
         (
             "cursor",
@@ -334,8 +392,14 @@ fn cli_agents_context_reads_each_supported_agent_source() {
             "Fix Gemini task",
         ),
         (
+            "antigravity",
+            ".gemini/antigravity-cli/sessions/session.jsonl",
+            r#"{"message":"Fix Antigravity task"}"#,
+            "Fix Antigravity task",
+        ),
+        (
             "copilot",
-            ".copilot/session-state/state.json",
+            ".copilot/session-state/session-1/events.jsonl",
             r#"{"lastPrompt":"Fix Copilot task"}"#,
             "Fix Copilot task",
         ),
@@ -357,6 +421,32 @@ fn cli_agents_context_reads_each_supported_agent_source() {
             .success()
             .stdout(predicate::str::contains(expected));
     }
+}
+
+#[test]
+fn cli_agents_context_reads_vscode_copilot_transcripts() {
+    let tmp = tempfile::tempdir().unwrap();
+    std::process::Command::new("git")
+        .args(["init"])
+        .current_dir(tmp.path())
+        .output()
+        .unwrap();
+    std::fs::write(tmp.path().join("agentscope.yaml"), "version: 1\n").unwrap();
+
+    let transcript = tmp.path().join(
+        "Library/Application Support/Code/User/workspaceStorage/ws/GitHub.copilot-chat/transcripts/chat.jsonl",
+    );
+    std::fs::create_dir_all(transcript.parent().unwrap()).unwrap();
+    std::fs::write(transcript, r#"{"message":"Fix VS Code Copilot task"}"#).unwrap();
+
+    Command::cargo_bin("agentscope")
+        .unwrap()
+        .args(["agents", "context", "--agent", "copilot"])
+        .current_dir(tmp.path())
+        .env("HOME", tmp.path())
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Fix VS Code Copilot task"));
 }
 
 #[test]

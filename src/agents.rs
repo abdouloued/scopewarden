@@ -1,4 +1,4 @@
-use anyhow::{Context, Result};
+use anyhow::Result;
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
@@ -22,6 +22,16 @@ pub struct AgentContext {
     pub notes: Vec<String>,
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct ActiveMission {
+    pub agent: String,
+    pub mission: String,
+    pub confidence: f32,
+    pub source_path: Option<PathBuf>,
+    pub timestamp: Option<String>,
+    pub age_seconds: Option<i64>,
+}
+
 impl AgentContext {
     fn missing(agent: &str, notes: Vec<String>) -> Self {
         Self {
@@ -39,15 +49,86 @@ impl AgentContext {
     }
 }
 
+pub fn active_missions(config: &Config) -> Result<(Vec<ActiveMission>, Vec<AgentContext>)> {
+    let contexts = detect_all(config)?;
+    Ok(active_missions_from_contexts(
+        contexts,
+        config.agents.active_window_hours,
+        Utc::now(),
+    ))
+}
+
+pub fn active_missions_from_contexts(
+    contexts: Vec<AgentContext>,
+    active_window_hours: u64,
+    now: chrono::DateTime<Utc>,
+) -> (Vec<ActiveMission>, Vec<AgentContext>) {
+    let window_secs = (active_window_hours as i64).saturating_mul(60 * 60);
+    let mut active = Vec::new();
+    let mut ignored = Vec::new();
+
+    for context in contexts {
+        let Some(mission) = context.mission.clone() else {
+            ignored.push(context);
+            continue;
+        };
+        let age_seconds = context.timestamp.as_deref().and_then(|timestamp| {
+            chrono::DateTime::parse_from_rfc3339(timestamp)
+                .ok()
+                .map(|dt| {
+                    now.signed_duration_since(dt.with_timezone(&Utc))
+                        .num_seconds()
+                })
+        });
+        let fresh = age_seconds
+            .map(|age| age >= 0 && age <= window_secs)
+            .unwrap_or(true);
+        if context.confidence >= HIGH_CONFIDENCE && fresh {
+            active.push(ActiveMission {
+                agent: context.agent.clone(),
+                mission,
+                confidence: context.confidence,
+                source_path: context.source_path.clone(),
+                timestamp: context.timestamp.clone(),
+                age_seconds,
+            });
+        } else {
+            ignored.push(context);
+        }
+    }
+
+    active.sort_by(|a, b| a.agent.cmp(&b.agent));
+    (active, ignored)
+}
+
 pub fn supported_agents() -> Vec<&'static str> {
     vec![
         "claude-code",
         "codex",
+        "codex-app",
         "opencode",
+        "openclaw",
+        "hermes",
         "cursor",
         "gemini-cli",
+        "antigravity",
         "copilot-cli",
     ]
+}
+
+pub(crate) fn launch_command(agent: &str, model: &str) -> Option<String> {
+    let target = match normalize_agent(agent).ok()? {
+        "claude-code" => "claude",
+        "codex" => "codex",
+        "codex-app" => "codex-app",
+        "gemini-cli" => "gemini",
+        "antigravity" => "antigravity",
+        "opencode" => "opencode",
+        "openclaw" => "openclaw",
+        "hermes" => "hermes",
+        _ => return None,
+    };
+    Some(format!("ollama launch {target} --model {model}"))
 }
 
 pub async fn detect_command() -> Result<()> {
@@ -79,6 +160,9 @@ pub async fn doctor_command() -> Result<()> {
             println!("  {:<13} missing", context.agent);
             for path in source_paths(&config, &context.agent) {
                 println!("  {:<13}   checked {}", "", expand_path(&path).display());
+            }
+            if let Some(command) = launch_command(&context.agent, "qwen3.5") {
+                println!("  {:<13}   launch  {}", "", command);
             }
         }
     }
@@ -270,7 +354,7 @@ fn select_context(config: &Config, requested: &str) -> Result<AgentContext> {
 fn detect_agent(config: &Config, agent: &str) -> Result<AgentContext> {
     let paths = source_paths(config, agent);
     let mut notes = Vec::new();
-    let mut newest: Option<(PathBuf, std::time::SystemTime)> = None;
+    let mut candidates: Vec<(PathBuf, std::time::SystemTime)> = Vec::new();
 
     for base in &paths {
         let expanded = expand_path(base);
@@ -283,68 +367,70 @@ fn detect_agent(config: &Config, agent: &str) -> Result<AgentContext> {
                 .metadata()?
                 .modified()
                 .unwrap_or(std::time::UNIX_EPOCH);
-            newest = newer(newest, expanded, modified);
+            candidates.push((expanded, modified));
         } else {
-            for file in collect_files(&expanded)? {
-                let modified = file.metadata()?.modified().unwrap_or(std::time::UNIX_EPOCH);
-                newest = newer(newest, file, modified);
+            for file in collect_files(agent, &expanded)? {
+                if let Ok(metadata) = file.metadata() {
+                    let modified = metadata.modified().unwrap_or(std::time::UNIX_EPOCH);
+                    candidates.push((file, modified));
+                }
             }
         }
     }
 
-    let Some((path, modified)) = newest else {
-        return Ok(AgentContext::missing(agent, notes));
-    };
+    candidates.sort_by(|(_, a), (_, b)| b.cmp(a));
+    let had_candidates = !candidates.is_empty();
 
-    let contents = std::fs::read_to_string(&path)
-        .with_context(|| format!("Could not read {}", path.display()))?;
-    let mission = extract_mission(&contents);
-    let confidence = mission
-        .as_ref()
-        .map(|m| confidence_for(agent, m, &path))
-        .unwrap_or(0.0);
-    let timestamp = modified
-        .duration_since(std::time::UNIX_EPOCH)
-        .ok()
-        .and_then(|duration| chrono::DateTime::<Utc>::from_timestamp(duration.as_secs() as i64, 0))
-        .map(|dt| dt.to_rfc3339());
+    for (path, modified) in candidates {
+        let Ok(contents) = std::fs::read_to_string(&path) else {
+            continue;
+        };
+        let mission = extract_mission(&contents);
+        let Some(mission_text) = mission else {
+            continue;
+        };
+        let confidence = confidence_for(agent, &mission_text, &path);
+        let timestamp = modified
+            .duration_since(std::time::UNIX_EPOCH)
+            .ok()
+            .and_then(|duration| {
+                chrono::DateTime::<Utc>::from_timestamp(duration.as_secs() as i64, 0)
+            })
+            .map(|dt| dt.to_rfc3339());
 
-    let mut notes = notes;
-    notes.push("newest source selected".into());
+        notes.push("newest mission-bearing source selected".into());
 
-    Ok(AgentContext {
-        agent: agent.to_string(),
-        mission,
-        source_path: Some(path),
-        timestamp,
-        confidence,
-        notes,
-    })
-}
-
-fn newer(
-    current: Option<(PathBuf, std::time::SystemTime)>,
-    path: PathBuf,
-    modified: std::time::SystemTime,
-) -> Option<(PathBuf, std::time::SystemTime)> {
-    match current {
-        Some((old_path, old_modified)) if old_modified >= modified => {
-            Some((old_path, old_modified))
-        }
-        _ => Some((path, modified)),
+        return Ok(AgentContext {
+            agent: agent.to_string(),
+            mission: Some(mission_text),
+            source_path: Some(path),
+            timestamp,
+            confidence,
+            notes,
+        });
     }
+
+    if !had_candidates {
+        return Ok(AgentContext::missing(agent, notes));
+    }
+
+    notes.push("sources found but no mission text extracted".into());
+    Ok(AgentContext::missing(agent, notes))
 }
 
-fn collect_files(root: &Path) -> Result<Vec<PathBuf>> {
+fn collect_files(agent: &str, root: &Path) -> Result<Vec<PathBuf>> {
     let mut files = Vec::new();
     let mut stack = vec![root.to_path_buf()];
     while let Some(path) = stack.pop() {
-        for entry in std::fs::read_dir(&path)? {
+        let Ok(entries) = std::fs::read_dir(&path) else {
+            continue;
+        };
+        for entry in entries {
             let entry = entry?;
             let entry_path = entry.path();
             if entry_path.is_dir() {
                 stack.push(entry_path);
-            } else if is_context_file(&entry_path) {
+            } else if is_context_file_for_agent(agent, &entry_path) {
                 files.push(entry_path);
             }
         }
@@ -352,17 +438,54 @@ fn collect_files(root: &Path) -> Result<Vec<PathBuf>> {
     Ok(files)
 }
 
+fn is_context_file_for_agent(agent: &str, path: &Path) -> bool {
+    let path_text = path.to_string_lossy();
+    if agent == "copilot-cli" {
+        return path
+            .file_name()
+            .and_then(|f| f.to_str())
+            .is_some_and(|name| name == "events.jsonl")
+            || path_text.contains("GitHub.copilot-chat/transcripts") && is_context_file(path)
+            || path_text.contains(".copilot/session-state")
+                && path
+                    .file_name()
+                    .and_then(|f| f.to_str())
+                    .is_some_and(|name| name == "events.jsonl");
+    }
+
+    if agent == "openclaw" {
+        return path_text.contains(".openclaw/agents")
+            || path_text.contains(".openclaw/sessions")
+            || is_context_file(path);
+    }
+
+    if agent == "hermes" {
+        return path_text.contains(".hermes/agents")
+            || path_text.contains(".hermes/sessions")
+            || is_context_file(path);
+    }
+
+    if agent == "antigravity" {
+        return (path_text.contains(".gemini/antigravity")
+            || path_text.contains("Antigravity")
+            || path_text.contains(".antigravity"))
+            && is_context_file(path);
+    }
+
+    is_context_file(path)
+}
+
 fn is_context_file(path: &Path) -> bool {
     matches!(
         path.extension().and_then(|e| e.to_str()),
-        Some("jsonl" | "json" | "txt" | "md")
+        Some("jsonl" | "json" | "txt" | "md" | "yaml" | "yml")
     ) || path
         .file_name()
         .and_then(|f| f.to_str())
         .is_some_and(|n| n.contains("transcript") || n.contains("chat") || n.contains("rollout"))
 }
 
-fn extract_mission(contents: &str) -> Option<String> {
+pub(crate) fn extract_mission(contents: &str) -> Option<String> {
     if let Ok(value) = serde_json::from_str::<serde_json::Value>(contents) {
         if let Some(text) = extract_json_text(&value) {
             let cleaned = clean_mission(text);
@@ -441,6 +564,7 @@ fn extract_json_text(value: &serde_json::Value) -> Option<String> {
                 "lastPrompt",
                 "message",
                 "content",
+                "transformedContent",
                 "text",
                 "input",
             ] {
@@ -450,7 +574,10 @@ fn extract_json_text(value: &serde_json::Value) -> Option<String> {
             }
             map.iter()
                 .filter(|(key, _)| {
-                    matches!(key.as_str(), "payload" | "goal" | "params" | "request")
+                    matches!(
+                        key.as_str(),
+                        "payload" | "data" | "goal" | "params" | "request"
+                    )
                 })
                 .map(|(_, value)| value)
                 .find_map(extract_json_text)
@@ -494,12 +621,19 @@ fn is_mission_line(line: &str) -> bool {
         && !lower.contains("authentication_failed")
         && !looks_like_context_header(&lower)
         && !looks_like_json_field_noise(&lower)
+        && !looks_like_json_blob(line)
         && !looks_like_agent_command(line)
         && !looks_like_patch_marker(&lower)
         && !looks_like_diff_line(line)
         && !looks_like_timestamp(line)
         && !looks_like_file_path(line)
         && line.len() > 3
+}
+
+fn looks_like_json_blob(line: &str) -> bool {
+    let trimmed = line.trim_start();
+    (trimmed.starts_with('{') && trimmed.contains("\":"))
+        || (trimmed.starts_with('[') && trimmed.contains('{'))
 }
 
 fn looks_like_context_header(lower: &str) -> bool {
@@ -520,6 +654,9 @@ fn looks_like_json_field_noise(lower: &str) -> bool {
         || trimmed.starts_with("metadata")
         || trimmed.starts_with("created_at")
         || trimmed.starts_with("updated_at")
+        || trimmed.starts_with("summary_count")
+        || trimmed.starts_with("session_id")
+        || trimmed.starts_with("workspace")
 }
 
 fn looks_like_agent_command(line: &str) -> bool {
@@ -535,6 +672,13 @@ fn looks_like_agent_command(line: &str) -> bool {
         first,
         "login"
             | "logout"
+            | "/ask"
+            | "/status"
+            | "/diff"
+            | "/judge"
+            | "/judge-provider"
+            | "/judge-model"
+            | "/ollama-model"
             | "/model"
             | "/login"
             | "/logout"
@@ -547,7 +691,9 @@ fn looks_like_agent_command(line: &str) -> bool {
 }
 
 fn looks_like_patch_marker(lower: &str) -> bool {
-    lower.starts_with("*** begin patch")
+    (lower.starts_with('<') && lower.ends_with('>'))
+        || lower.starts_with('|')
+        || lower.starts_with("*** begin patch")
         || lower.starts_with("*** end patch")
         || lower.starts_with("*** update file:")
         || lower.starts_with("*** add file:")
@@ -671,15 +817,180 @@ fn integration_command(kind: &str, action: crate::cli::IntegrationAction) -> Res
 }
 
 fn install_integration(kind: &str, agent: &str) -> Result<()> {
+    // Also write agent-native config files in the locations each agent reads
+    if kind == "skill" {
+        install_skill_native(agent)?;
+    } else {
+        install_plugin_native(agent)?;
+    }
+
+    // Always write the .agentscope/{kind}/{agent}/README.md record
     let dir = format!(".agentscope/{}/{}", kind, agent);
     std::fs::create_dir_all(&dir)?;
     let file = Path::new(&dir).join("README.md");
-    std::fs::write(
-        file,
-        format!(
-            "# AgentScope {kind} for {agent}\n\nRun `agentscope status` before work and `agentscope check` before finishing.\n"
+    std::fs::write(file, integration_content(kind, agent))?;
+    Ok(())
+}
+
+fn integration_content(kind: &str, agent: &str) -> String {
+    let header = match kind {
+        "skill" => format!(
+            "# AgentScope skill · {agent}\n\n\
+             This file instructs `{agent}` to use AgentScope as a scope firewall \
+             before and after making changes.\n"
         ),
-    )?;
+        _ => format!(
+            "# AgentScope plugin · {agent}\n\n\
+             AgentScope is a scope firewall and audit cockpit for AI coding agents.\n\
+             It checks whether your Git changes match the active mission.\n"
+        ),
+    };
+    format!(
+        "{header}\n\
+         ## When to run AgentScope\n\n\
+         | Trigger | Command |\n\
+         |---------|--------|\n\
+         | Before starting work | `agentscope status` |\n\
+         | While working | `agentscope watch` (live TUI cockpit) |\n\
+         | Before finishing | `agentscope check` |\n\
+         | Before committing | `agentscope diff --problems` |\n\n\
+         ## Quick reference\n\n\
+         ```\n\
+         agentscope init                          # one-time repo setup\n\
+         agentscope start \"your mission\"          # record what you're doing\n\
+         agentscope watch                         # live cockpit (1=review 2=chat 3=dash 4=sessions 5=live)\n\
+         agentscope check                         # policy check + scope audit\n\
+         agentscope check --json                  # machine-readable output\n\
+         agentscope judge                         # ask the LLM judge\n\
+         agentscope diff --problems               # show suspicious/blocked files only\n\
+         agentscope attach --agent auto --apply   # infer mission from this agent's logs\n\
+         ```\n\n\
+         ## Status labels\n\n\
+         | Badge | Meaning |\n\
+         |-------|---------|\n\
+         | `EXPECTED` | File matches the active mission scope |\n\
+         | `SUSPICIOUS` | Changed but no mission rule matches |\n\
+         | `BLOCKED` | Matched a blocked policy path — hard stop |\n\
+         | `IGNORED` | Clean, stale, or explicitly excluded |\n\n\
+         ## TUI keyboard shortcuts\n\n\
+         | Key | Action |\n\
+         |-----|--------|\n\
+         | `1`–`5` | Switch mode (Review/Chat/Dashboard/Sessions/Live) |\n\
+         | `Enter` | Open diff overlay for selected file |\n\
+         | `j` | Run judge on selected file |\n\
+         | `a` / `b` | Allow / block selected file |\n\
+         | `t` | Cycle themes (agentscope/codex/claude/openclaw/high-contrast) |\n\
+         | `?` | Help overlay |\n\
+         | `q` | Quit |\n\n\
+         ## Judge providers\n\n\
+         AgentScope supports Ollama (local/private), Claude, OpenAI, Gemini, and OpenRouter.\n\n\
+         ```\n\
+         agentscope config set judge.provider ollama      # local, private\n\
+         agentscope config set judge.provider claude      # requires ANTHROPIC_API_KEY\n\
+         agentscope config set judge.provider openai      # requires OPENAI_API_KEY\n\
+         agentscope config set judge.provider gemini      # requires GEMINI_API_KEY\n\
+         agentscope config set judge.provider openrouter  # requires OPENROUTER_API_KEY\n\
+         ```\n\n\
+         ## Policy config (`agentscope.yaml`)\n\n\
+         ```yaml\n\
+         policy:\n\
+           blocked:\n\
+             - \".env\"\n\
+             - \"**/.env.*\"\n\
+             - \"**/secrets/**\"\n\
+             - \"**/*.pem\"\n\
+             - \"**/*.key\"\n\
+           warn:\n\
+             - \"package-lock.json\"\n\
+             - \"yarn.lock\"\n\
+             - \"Cargo.lock\"\n\
+           max_files_changed: 20\n\
+           max_lines_changed: 800\n\
+         ```\n\n\
+         Blocked patterns are enforced deterministically — no model can override them.\n\n\
+         ## More info\n\n\
+         Run `agentscope --help` or visit https://github.com/abdouloued/agentscopev2\n"
+    )
+}
+
+/// Write the instruction file into the location the agent natively reads.
+fn install_skill_native(agent: &str) -> Result<()> {
+    let content = integration_content("skill", agent);
+    match agent {
+        "claude-code" => {
+            // Claude Code reads CLAUDE.md at repo root
+            let path = Path::new("CLAUDE.md");
+            merge_or_write(path, "## AgentScope", &content)?;
+        }
+        "codex" => {
+            // Codex CLI reads AGENTS.md at repo root
+            std::fs::create_dir_all(".codex")?;
+            let path = Path::new("AGENTS.md");
+            merge_or_write(path, "## AgentScope", &content)?;
+        }
+        "cursor" => {
+            std::fs::create_dir_all(".cursor/rules")?;
+            std::fs::write(".cursor/rules/agentscope.md", &content)?;
+        }
+        "openclaw" | "hermes" | "codex-app" | "opencode" | "gemini-cli" | "antigravity"
+        | "copilot-cli" => {
+            // Write into .agentscope/skill/{agent}/instructions.md — agents can pick it up
+        }
+        _ => {}
+    }
+    Ok(())
+}
+
+/// Write plugin file into agent-native locations (non-instruction assets).
+fn install_plugin_native(agent: &str) -> Result<()> {
+    let content = integration_content("plugin", agent);
+    match agent {
+        "claude-code" => {
+            // Claude Code — CLAUDE.md
+            let path = Path::new("CLAUDE.md");
+            merge_or_write(path, "## AgentScope", &content)?;
+        }
+        "codex" => {
+            // Codex — AGENTS.md
+            let path = Path::new("AGENTS.md");
+            merge_or_write(path, "## AgentScope", &content)?;
+        }
+        "cursor" => {
+            std::fs::create_dir_all(".cursor/rules")?;
+            std::fs::write(".cursor/rules/agentscope.md", &content)?;
+        }
+        "copilot-cli" => {
+            std::fs::create_dir_all(".github")?;
+            std::fs::write(".github/copilot-instructions.md", &content)?;
+        }
+        _ => {
+            // Generic: write into the .agentscope record dir only
+        }
+    }
+    Ok(())
+}
+
+/// Append an AgentScope section to an existing file, or create it if it doesn't exist.
+/// Idempotent: if the section marker already exists, overwrites only that section.
+fn merge_or_write(path: &Path, section_marker: &str, content: &str) -> Result<()> {
+    if path.exists() {
+        let existing = std::fs::read_to_string(path)?;
+        if existing.contains(section_marker) {
+            // Already present — overwrite the section
+            let before = existing
+                .find(section_marker)
+                .map(|i| &existing[..i])
+                .unwrap_or("");
+            std::fs::write(path, format!("{before}{content}"))?;
+        } else {
+            // Append
+            let mut f = std::fs::OpenOptions::new().append(true).open(path)?;
+            use std::io::Write;
+            writeln!(f, "\n---\n\n{content}")?;
+        }
+    } else {
+        std::fs::write(path, content)?;
+    }
     Ok(())
 }
 
@@ -690,13 +1001,17 @@ fn matching_agents(agent: &str) -> Result<Vec<&'static str>> {
     Ok(vec![normalize_agent(agent)?])
 }
 
-fn normalize_agent(agent: &str) -> Result<&'static str> {
+pub(crate) fn normalize_agent(agent: &str) -> Result<&'static str> {
     match agent {
         "claude" | "claude-code" => Ok("claude-code"),
         "codex" | "codex-cli" => Ok("codex"),
+        "codex-app" => Ok("codex-app"),
         "opencode" => Ok("opencode"),
+        "openclaw" => Ok("openclaw"),
+        "hermes" | "hermes-agent" => Ok("hermes"),
         "cursor" => Ok("cursor"),
         "gemini" | "gemini-cli" => Ok("gemini-cli"),
+        "antigravity" | "antigravity-cli" | "antigravity-ide" => Ok("antigravity"),
         "copilot" | "copilot-cli" => Ok("copilot-cli"),
         other => anyhow::bail!("Unsupported agent: {}", other),
     }
@@ -711,7 +1026,7 @@ fn source_enabled(config: &Config, agent: &str) -> bool {
         .unwrap_or(true)
 }
 
-fn source_paths(config: &Config, agent: &str) -> Vec<String> {
+pub(crate) fn source_paths(config: &Config, agent: &str) -> Vec<String> {
     if let Some(source) = config.agents.sources.get(agent) {
         if !source.paths.is_empty() {
             return source.paths.clone();
@@ -719,17 +1034,71 @@ fn source_paths(config: &Config, agent: &str) -> Vec<String> {
     }
 
     match agent {
-        "claude-code" => vec!["~/.claude/projects".into()],
-        "codex" => vec!["~/.codex/sessions".into()],
-        "opencode" => vec!["~/.local/share/opencode/project".into()],
+        "claude-code" => env_or_default("CLAUDE_CONFIG_DIR", "~/.claude")
+            .into_iter()
+            .map(|base| format!("{base}/projects"))
+            .collect(),
+        "codex" => env_or_default("CODEX_HOME", "~/.codex")
+            .into_iter()
+            .map(|base| format!("{base}/sessions"))
+            .collect(),
+        "codex-app" => env_or_default("CODEX_APP_HOME", "~/Library/Application Support/Codex")
+            .into_iter()
+            .flat_map(|base| [format!("{base}/sessions"), base])
+            .collect(),
+        "opencode" => env_or_default("OPENCODE_DATA_DIR", "~/.local/share/opencode")
+            .into_iter()
+            .map(|base| format!("{base}/project"))
+            .collect(),
+        "openclaw" => env_or_default("OPENCLAW_HOME", "~/.openclaw")
+            .into_iter()
+            .flat_map(|base| [format!("{base}/agents"), format!("{base}/sessions"), base])
+            .collect(),
+        "hermes" => env_or_default("HERMES_HOME", "~/.hermes")
+            .into_iter()
+            .flat_map(|base| [format!("{base}/agents"), format!("{base}/sessions"), base])
+            .collect(),
         "cursor" => vec!["~/.cursor/projects".into()],
         "gemini-cli" => vec!["~/.gemini/tmp".into()],
-        "copilot-cli" => vec!["~/.copilot/session-state".into()],
+        "antigravity" => vec![
+            "~/.gemini/antigravity-cli".into(),
+            "~/.gemini/antigravity".into(),
+            "~/.gemini/antigravity-ide".into(),
+            "~/.antigravity".into(),
+            "~/Library/Application Support/Antigravity".into(),
+            "~/Library/Application Support/Antigravity IDE/User/globalStorage".into(),
+        ],
+        "copilot-cli" => {
+            let mut paths: Vec<String> = env_or_default("COPILOT_HOME", "~/.copilot")
+                .into_iter()
+                .map(|base| format!("{base}/session-state"))
+                .collect();
+            paths.extend([
+                "~/Library/Application Support/Code/User/workspaceStorage".into(),
+                "~/Library/Application Support/Code - Insiders/User/workspaceStorage".into(),
+                "~/.config/Code/User/workspaceStorage".into(),
+                "~/.config/Code - Insiders/User/workspaceStorage".into(),
+                "~/.vscode-server/data/User/workspaceStorage".into(),
+            ]);
+            paths
+        }
         _ => Vec::new(),
     }
 }
 
-fn expand_path(path: &str) -> PathBuf {
+fn env_or_default(env_name: &str, default: &str) -> Vec<String> {
+    let mut paths = Vec::new();
+    if let Some(value) = std::env::var_os(env_name) {
+        let value = PathBuf::from(value).display().to_string();
+        if !value.is_empty() {
+            paths.push(value);
+        }
+    }
+    paths.push(default.into());
+    paths
+}
+
+pub(crate) fn expand_path(path: &str) -> PathBuf {
     if path == "~" {
         return home_dir();
     }
@@ -760,6 +1129,121 @@ mod tests {
     fn normalize_accepts_aliases() {
         assert_eq!(normalize_agent("gemini").unwrap(), "gemini-cli");
         assert_eq!(normalize_agent("copilot").unwrap(), "copilot-cli");
+        assert_eq!(normalize_agent("codex-app").unwrap(), "codex-app");
+        assert_eq!(normalize_agent("openclaw").unwrap(), "openclaw");
+        assert_eq!(normalize_agent("hermes-agent").unwrap(), "hermes");
+        assert_eq!(normalize_agent("antigravity-ide").unwrap(), "antigravity");
+    }
+
+    #[test]
+    fn launch_commands_match_ollama_application_names() {
+        assert_eq!(
+            launch_command("claude", "qwen3.5").as_deref(),
+            Some("ollama launch claude --model qwen3.5")
+        );
+        assert_eq!(
+            launch_command("codex-app", "qwen3.5").as_deref(),
+            Some("ollama launch codex-app --model qwen3.5")
+        );
+        assert_eq!(
+            launch_command("gemini", "qwen3.5").as_deref(),
+            Some("ollama launch gemini --model qwen3.5")
+        );
+        assert_eq!(
+            launch_command("antigravity", "qwen3.5").as_deref(),
+            Some("ollama launch antigravity --model qwen3.5")
+        );
+        assert_eq!(
+            launch_command("openclaw", "qwen3.5").as_deref(),
+            Some("ollama launch openclaw --model qwen3.5")
+        );
+        assert_eq!(
+            launch_command("hermes", "qwen3.5").as_deref(),
+            Some("ollama launch hermes --model qwen3.5")
+        );
+        assert_eq!(
+            launch_command("codex", "qwen3.5").as_deref(),
+            Some("ollama launch codex --model qwen3.5")
+        );
+        assert_eq!(
+            launch_command("opencode", "qwen3.5").as_deref(),
+            Some("ollama launch opencode --model qwen3.5")
+        );
+    }
+
+    #[test]
+    fn active_missions_filters_stale_and_low_confidence_contexts() {
+        let now = chrono::DateTime::parse_from_rfc3339("2026-05-25T12:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let recent = "2026-05-25T11:00:00Z".to_string();
+        let stale = "2026-05-23T11:00:00Z".to_string();
+        let contexts = vec![
+            AgentContext {
+                agent: "codex".into(),
+                mission: Some("Implement TUI".into()),
+                source_path: None,
+                timestamp: Some(recent.clone()),
+                confidence: 0.8,
+                notes: Vec::new(),
+            },
+            AgentContext {
+                agent: "claude-code".into(),
+                mission: Some("Old task".into()),
+                source_path: None,
+                timestamp: Some(stale),
+                confidence: 0.9,
+                notes: Vec::new(),
+            },
+            AgentContext {
+                agent: "gemini-cli".into(),
+                mission: Some("Maybe task".into()),
+                source_path: None,
+                timestamp: Some(recent),
+                confidence: 0.4,
+                notes: Vec::new(),
+            },
+        ];
+
+        let (active, ignored) = active_missions_from_contexts(contexts, 24, now);
+
+        assert_eq!(active.len(), 1);
+        assert_eq!(active[0].agent, "codex");
+        assert_eq!(ignored.len(), 2);
+    }
+
+    #[test]
+    fn detect_agent_skips_newer_files_without_missions() {
+        let dir = tempfile::tempdir().unwrap();
+        let source = dir.path().join("copilot");
+        std::fs::create_dir_all(&source).unwrap();
+        std::fs::write(
+            source.join("events.jsonl"),
+            r#"{"lastPrompt":"Fix real task"}"#,
+        )
+        .unwrap();
+        std::fs::write(source.join("workspace.yaml"), "summary_count: 6\n").unwrap();
+
+        let mut config = Config::default();
+        config.agents.sources.insert(
+            "copilot-cli".into(),
+            crate::config::AgentSourceConfig {
+                enabled: true,
+                paths: vec![source.display().to_string()],
+            },
+        );
+
+        let context = detect_agent(&config, "copilot-cli").unwrap();
+        assert_eq!(context.mission.as_deref(), Some("Fix real task"));
+    }
+
+    #[test]
+    fn extracts_github_copilot_user_message_event() {
+        let contents = r#"{"id":"1","type":"user.message","data":{"content":"Fix Copilot transcript parsing","transformedContent":"<ide_selection>noise</ide_selection>\n\nFix Copilot transcript parsing"}}"#;
+        assert_eq!(
+            extract_mission(contents).unwrap(),
+            "Fix Copilot transcript parsing"
+        );
     }
 
     #[test]

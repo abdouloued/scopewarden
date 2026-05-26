@@ -1,6 +1,6 @@
 //! All terminal output for AgentScope.
 //! Implements the exact visual design from the UI spec:
-//! dark-terminal aesthetic, IN SCOPE / UNASKED / BLOCKED tags,
+//! dark-terminal aesthetic, EXPECTED / SUSPICIOUS / BLOCKED tags,
 //! red BLOCK banner, LLM judge verdict, summary stats.
 
 use console::{style, Term};
@@ -188,7 +188,7 @@ impl Printer {
         self.rule();
         println!(
             "  {}",
-            theme::muted().apply_to("  scanning working tree against git baseline..."),
+            theme::muted().apply_to("scanning working tree against git baseline..."),
         );
         self.blank();
 
@@ -235,7 +235,7 @@ impl Printer {
             self.print_block_banner(&blocked);
         }
 
-        // UNASKED warning
+        // SUSPICIOUS warning
         if !unasked.is_empty() && !has_blocks {
             self.print_unasked_banner(&unasked);
         }
@@ -273,7 +273,7 @@ impl Printer {
             FileVerdict::Allowed => {
                 println!(
                     "  {}  {}  {}",
-                    theme::tag_ok().apply_to("ALLOWED "),
+                    theme::tag_ok().apply_to(format!("{:<10}", "ALLOWED")),
                     theme::blue().apply_to(file.diff.path.display()),
                     theme::dim()
                         .apply_to(format!("+{} −{}", file.diff.additions, file.diff.deletions))
@@ -361,7 +361,7 @@ impl Printer {
         let preview = names[..names.len().min(3)].join(" · ");
 
         println!(
-            "  {}  {} unasked file{} — review before committing",
+            "  {}  {} suspicious file{} — review before committing",
             style("⚠").color256(214).bold(),
             unasked.len(),
             if unasked.len() == 1 { "" } else { "s" },
@@ -439,9 +439,9 @@ impl Printer {
 
         println!(
             "  {}  {}  {}  {}  {}",
-            style(format!("{} in scope", in_scope)).green(),
+            style(format!("{} expected", in_scope)).green(),
             theme::dim().apply_to("·"),
-            style(format!("{} unasked", unasked)).color256(214),
+            style(format!("{} suspicious", unasked)).color256(214),
             theme::dim().apply_to("·"),
             style(format!("{} blocked", blocked)).red(),
         );
@@ -554,18 +554,18 @@ impl Printer {
         self.blank();
 
         // ── Stats grid ──
-        println!("  {}", style("  Files                    Lines").dim(),);
+        println!("  {}", style("Files                      Lines").dim(),);
         println!(
             "  {}  {}  {}  {}  {}",
-            style(format!("  {} total", files.len())).white(),
-            style(format!("{} in scope", in_scope)).green(),
+            style(format!("{} total", files.len())).white(),
+            style(format!("{} expected", in_scope)).green(),
             style("│").dim(),
             style(format!("+{}", total_add)).green(),
             style(format!("-{}", total_del)).red(),
         );
         println!(
             "  {}  {}",
-            style(format!("  {} unasked", unasked)).color256(214),
+            style(format!("{} suspicious", unasked)).color256(214),
             style(format!("{} blocked", blocked)).red(),
         );
 
@@ -574,7 +574,7 @@ impl Printer {
         self.blank();
 
         // ── File list ──
-        println!("  {}", style("  Changed Files").white().bold());
+        println!("  {}", style("Changed Files").white().bold());
         self.blank();
 
         for file in files.iter().take(25) {
@@ -619,7 +619,7 @@ impl Printer {
         self.blank();
 
         // ── Recommended actions ──
-        println!("  {}", style("  Next Steps").white().bold());
+        println!("  {}", style("Next Steps").white().bold());
         self.blank();
 
         if blocked > 0 {
@@ -642,7 +642,7 @@ impl Printer {
             println!(
                 "    {}  {}",
                 style("1.").color256(214).bold(),
-                style("Review unasked files — are they part of the mission?").color256(214),
+                style("Review suspicious files — are they part of the mission?").color256(214),
             );
             println!(
                 "    {}  {}",
@@ -670,35 +670,35 @@ impl Printer {
         self.blank();
 
         // ── Quick commands reference ──
-        println!("  {}", theme::dim().apply_to("  ─── Quick Commands ───"));
+        println!("  {}", theme::dim().apply_to("─── Quick Commands ───"));
         println!(
             "  {}  {}",
-            theme::muted().apply_to("  agentscope diff"),
+            theme::muted().apply_to("agentscope diff"),
             theme::dim().apply_to("— annotated file list"),
         );
         println!(
             "  {}  {}",
-            theme::muted().apply_to("  agentscope diff --problems"),
-            theme::dim().apply_to("— only blocked/unasked"),
+            theme::muted().apply_to("agentscope diff --problems"),
+            theme::dim().apply_to("— only blocked/suspicious"),
         );
         println!(
             "  {}  {}",
-            theme::muted().apply_to("  agentscope judge"),
+            theme::muted().apply_to("agentscope judge"),
             theme::dim().apply_to("— re-run LLM judge"),
         );
         println!(
             "  {}  {}",
-            theme::muted().apply_to("  agentscope judge -m llama3"),
+            theme::muted().apply_to("agentscope judge -m llama3"),
             theme::dim().apply_to("— judge with a different model"),
         );
         println!(
             "  {}  {}",
-            theme::muted().apply_to("  agentscope hook install"),
+            theme::muted().apply_to("agentscope hook install"),
             theme::dim().apply_to("— auto-check on every commit"),
         );
         println!(
             "  {}  {}",
-            theme::muted().apply_to("  agentscope check --json"),
+            theme::muted().apply_to("agentscope check --json"),
             theme::dim().apply_to("— CI-friendly output"),
         );
 
@@ -708,20 +708,20 @@ impl Printer {
 
 // ── Tag formatters ─────────────────────────────────────────────────────────────
 
-fn fmt_tag_ok() -> console::StyledObject<&'static str> {
-    style("  IN SCOPE ").green().bold()
+fn fmt_tag_ok() -> console::StyledObject<String> {
+    style(format!("{:<10}", "EXPECTED")).green().bold()
 }
 
-fn fmt_tag_warn() -> console::StyledObject<&'static str> {
-    style("  UNASKED  ").color256(214).bold()
+fn fmt_tag_warn() -> console::StyledObject<String> {
+    style(format!("{:<10}", "SUSPICIOUS")).color256(214).bold()
 }
 
-fn fmt_tag_block() -> console::StyledObject<&'static str> {
-    style("  BLOCKED  ").red().bold()
+fn fmt_tag_block() -> console::StyledObject<String> {
+    style(format!("{:<10}", "BLOCKED")).red().bold()
 }
 
-fn fmt_tag_skip() -> console::StyledObject<&'static str> {
-    style("  CLEAN    ").color256(245)
+fn fmt_tag_skip() -> console::StyledObject<String> {
+    style(format!("{:<10}", "IGNORED")).color256(245)
 }
 
 // ── CheckReport (shared data structure) ─────────────────────────────────────
@@ -779,9 +779,9 @@ impl CheckReport {
         let status = if blocked > 0 {
             "🔴 BLOCKED"
         } else if unasked > 0 {
-            "🟡 UNASKED FILES"
+            "🟡 SUSPICIOUS FILES"
         } else {
-            "🟢 IN SCOPE"
+            "🟢 EXPECTED"
         };
 
         let mut md = format!(
@@ -790,8 +790,8 @@ impl CheckReport {
             **Agent:** {agent} · **Session:** `{id}`\n\n\
             | Verdict | Count |\n\
             |---------|-------|\n\
-            | ✅ In scope | {in_scope} |\n\
-            | ⚠️ Unasked | {unasked} |\n\
+            | ✅ Expected | {in_scope} |\n\
+            | ⚠️ Suspicious | {unasked} |\n\
             | 🚫 Blocked | {blocked} |\n\n",
             status = status,
             mission = self.session.mission,

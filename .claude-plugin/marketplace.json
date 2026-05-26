@@ -1,0 +1,15 @@
+{
+  "name": "agentscope",
+  "owner": {
+    "name": "AgentScope"
+  },
+  "description": "AgentScope Claude Code plugins for scope checks and Git-diff accountability.",
+  "version": "1.0.0",
+  "plugins": [
+    {
+      "name": "agentscope",
+      "source": "./plugins/agentscope",
+      "description": "Adds AgentScope workflow guidance for Claude Code: status before work, watch while editing, check before handoff, and diff review before commit."
+    }
+  ]
+}

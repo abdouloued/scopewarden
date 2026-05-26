@@ -1,0 +1,11 @@
+{
+  "name": "agentscope",
+  "description": "Scope firewall guidance for Claude Code sessions working in AgentScope-protected repositories.",
+  "version": "0.1.0",
+  "author": {
+    "name": "AgentScope"
+  },
+  "homepage": "https://abdouloued.github.io/",
+  "repository": "https://github.com/abdouloued/agentscopev2",
+  "license": "MIT"
+}

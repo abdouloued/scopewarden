@@ -574,6 +574,41 @@
   }
   .agent-card-cmd:hover { color: var(--text); }
 
+  .app-launch-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+    margin-top: 18px;
+  }
+  .app-launch-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    transition: border-color 0.2s;
+  }
+  .app-launch-card:hover { border-color: rgba(184,245,62,0.25); }
+  .app-launch-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+  .app-launch-cmd {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--off-black);
+    border-radius: 5px;
+    padding: 8px 10px;
+    user-select: all;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .app-launch-cmd:hover { color: var(--text); }
+
   /* ── LOCAL DEV SECTION ── */
   .local-dev-grid {
     display: grid;
@@ -1398,6 +1433,38 @@
 
     </div>
 
+    <div class="reveal" style="margin: 8px 0 32px;">
+      <p class="section-label">Applications</p>
+      <h3 style="font-size: 18px; font-weight: 400; color: var(--text); margin-bottom: 8px;">Launch with Ollama</h3>
+      <p class="section-sub" style="margin-bottom: 16px;">Pick an app and a model. These examples use <code style="color:var(--lime);background:var(--surface2);padding:1px 6px;border-radius:3px;font-size:0.9em;">qwen3.5</code>.</p>
+      <div class="app-launch-grid">
+        <div class="app-launch-card">
+          <p class="app-launch-name">Claude Code</p>
+          <div class="app-launch-cmd">ollama launch claude --model qwen3.5</div>
+        </div>
+        <div class="app-launch-card">
+          <p class="app-launch-name">Codex App</p>
+          <div class="app-launch-cmd">ollama launch codex-app --model qwen3.5</div>
+        </div>
+        <div class="app-launch-card">
+          <p class="app-launch-name">OpenClaw</p>
+          <div class="app-launch-cmd">ollama launch openclaw --model qwen3.5</div>
+        </div>
+        <div class="app-launch-card">
+          <p class="app-launch-name">Hermes Agent</p>
+          <div class="app-launch-cmd">ollama launch hermes --model qwen3.5</div>
+        </div>
+        <div class="app-launch-card">
+          <p class="app-launch-name">Codex</p>
+          <div class="app-launch-cmd">ollama launch codex --model qwen3.5</div>
+        </div>
+        <div class="app-launch-card">
+          <p class="app-launch-name">OpenCode</p>
+          <div class="app-launch-cmd">ollama launch opencode --model qwen3.5</div>
+        </div>
+      </div>
+    </div>
+
     <div class="terminal reveal" style="box-shadow:none;">
       <div class="terminal-bar">
         <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
@@ -1632,7 +1699,7 @@
   <div class="container">
     <p class="section-label">Plugin Integration Workflow</p>
     <h2 class="section-title">No manual exit.<br><em>Agent holds itself accountable.</em></h2>
-    <p class="section-sub">Install AgentScope as a native plugin for Claude or Codex. The agent reads your instructions from <code>CLAUDE.md</code> / <code>AGENTS.md</code>, and the pre-commit hook enforces scope at every commit — no wrapper command, no manual review step.</p>
+    <p class="section-sub">Use AgentScope in two ways: local instruction files for any agent, or Claude Code's plugin marketplace flow. The pre-commit hook still enforces scope at every commit — no wrapper command, no manual review step.</p>
 
     <!-- Workflow Flow -->
     <div class="plugin-flow">
@@ -1666,39 +1733,39 @@
 
       <!-- Claude Code install -->
       <div>
-        <p style="font-family:var(--mono);font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;">Claude</p>
+        <p style="font-family:var(--mono);font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;">Claude Code marketplace</p>
         <div class="terminal" style="box-shadow:none;">
           <div class="terminal-bar">
             <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
             <span class="terminal-title">install + activate</span>
           </div>
           <div class="terminal-body">
-<span class="t-line t-muted"># Write AgentScope guidance into CLAUDE.md (once per project)</span>
-<span class="t-line"><span class="t-cmd">agentscope plugins install</span> <span class="t-info">--agent claude</span></span>
+<span class="t-line t-muted"># Add the AgentScope plugin marketplace</span>
+<span class="t-line"><span class="t-cmd">/plugin marketplace add</span> <span class="t-info">abdouloued/agentscopev2</span></span>
 <span class="t-line">&nbsp;</span>
-<span class="t-line t-muted"># Claude Code reads CLAUDE.md automatically — no flags needed</span>
-<span class="t-line"><span class="t-cmd">agentscope attach</span> <span class="t-info">--agent auto --apply</span></span>
-<span class="t-line"><span class="t-cmd">claude</span></span>
+<span class="t-line t-muted"># Install the plugin from that marketplace</span>
+<span class="t-line"><span class="t-cmd">/plugin install</span> <span class="t-info">agentscope@agentscope</span></span>
 <span class="t-line">&nbsp;</span>
-<span class="t-line t-muted"># Watch live in the cockpit while Claude works</span>
-<span class="t-line"><span class="t-cmd">agentscope watch</span></span>
+<span class="t-line t-muted"># Local development before publishing:</span>
+<span class="t-line"><span class="t-cmd">/plugin marketplace add</span> <span class="t-info">/path/to/agentscopev2</span></span>
           </div>
         </div>
       </div>
 
       <!-- Codex install -->
       <div>
-        <p style="font-family:var(--mono);font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;">Codex</p>
+        <p style="font-family:var(--mono);font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;">Local instruction files</p>
         <div class="terminal" style="box-shadow:none;">
           <div class="terminal-bar">
             <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
             <span class="terminal-title">install + activate</span>
           </div>
           <div class="terminal-body">
-<span class="t-line t-muted"># Write AgentScope guidance into AGENTS.md (once per project)</span>
-<span class="t-line"><span class="t-cmd">agentscope plugins install</span> <span class="t-info">--agent codex</span></span>
+<span class="t-line t-muted"># Write AgentScope guidance into native files</span>
+<span class="t-line"><span class="t-cmd">agentscope plugins install</span> <span class="t-info">--agent claude</span>  <span class="t-muted"># CLAUDE.md</span></span>
+<span class="t-line"><span class="t-cmd">agentscope plugins install</span> <span class="t-info">--agent codex</span>   <span class="t-muted"># AGENTS.md</span></span>
 <span class="t-line">&nbsp;</span>
-<span class="t-line t-muted"># Codex reads AGENTS.md automatically — no flags needed</span>
+<span class="t-line t-muted"># Then run your agent normally</span>
 <span class="t-line"><span class="t-cmd">agentscope attach</span> <span class="t-info">--agent auto --apply</span></span>
 <span class="t-line"><span class="t-cmd">codex</span></span>
 <span class="t-line">&nbsp;</span>
@@ -2022,6 +2089,12 @@
 <span class="t-line"><span class="t-cmd">agentscope monitor</span> <span class="t-info">--agent auto</span>                   <span class="t-muted"># watch live + auto-attach on high confidence</span></span>
 <span class="t-line"><span class="t-cmd">agentscope watch</span>                                   <span class="t-muted"># live TUI dashboard (scope + diff + history)</span></span>
 <span class="t-line">&nbsp;</span>
+<span class="t-line t-muted">## Launcher Lab</span>
+<span class="t-line"><span class="t-cmd">agentscope launchers list</span>                          <span class="t-muted"># list supported launcher apps</span></span>
+<span class="t-line"><span class="t-cmd">agentscope launchers test</span>                          <span class="t-muted"># safe startup test for all launchers</span></span>
+<span class="t-line"><span class="t-cmd">agentscope launchers test</span> <span class="t-info">codex</span>                    <span class="t-muted"># safe startup test for one launcher</span></span>
+<span class="t-line"><span class="t-cmd">agentscope launchers summary</span>                       <span class="t-muted"># compact launcher status summary</span></span>
+<span class="t-line">&nbsp;</span>
 <span class="t-line t-muted">## LLM Judge</span>
 <span class="t-line"><span class="t-cmd">agentscope judge</span>                                   <span class="t-muted"># judge with default provider + model</span></span>
 <span class="t-line"><span class="t-cmd">agentscope judge</span> <span class="t-info">-m qwen3.5:2b</span>                    <span class="t-muted"># specify model (ollama)</span></span>
@@ -2046,7 +2119,19 @@
 <span class="t-line"><span class="t-cmd">agentscope plugins install</span> <span class="t-info">--agent all</span>           <span class="t-muted"># write guidance files for all agents</span></span>
 <span class="t-line"><span class="t-cmd">agentscope plugins install</span> <span class="t-info">--agent claude</span>        <span class="t-muted"># writes to CLAUDE.md only</span></span>
 <span class="t-line"><span class="t-cmd">agentscope skills install</span> <span class="t-info">--agent all</span>            <span class="t-muted"># write skill instructions for all agents</span></span>
+<span class="t-line"><span class="t-cmd">agentscope use</span> <span class="t-info">codex-app</span>                         <span class="t-muted"># write helper integration files for one agent</span></span>
 <span class="t-line"><span class="t-cmd">agentscope mcp</span>                                    <span class="t-muted"># start persistent JSON-RPC MCP server</span></span>
+<span class="t-line">&nbsp;</span>
+<span class="t-line t-muted">## Chats &amp; Sessions</span>
+<span class="t-line"><span class="t-cmd">agentscope chat new</span> <span class="t-warn">"Fix checkout"</span>              <span class="t-muted"># create an AgentScope-owned chat</span></span>
+<span class="t-line"><span class="t-cmd">agentscope chat list</span>                              <span class="t-muted"># list AgentScope chats</span></span>
+<span class="t-line"><span class="t-cmd">agentscope chat show</span> <span class="t-info">&lt;id&gt;</span>                       <span class="t-muted"># show chat metadata + transcript</span></span>
+<span class="t-line"><span class="t-cmd">agentscope chat delete</span> <span class="t-info">&lt;id&gt;</span>                     <span class="t-muted"># soft-delete a chat</span></span>
+<span class="t-line"><span class="t-cmd">agentscope chat restore</span> <span class="t-info">&lt;id&gt;</span>                    <span class="t-muted"># restore an archived chat</span></span>
+<span class="t-line"><span class="t-cmd">agentscope chat purge</span> <span class="t-info">&lt;id&gt;</span>                      <span class="t-muted"># permanently delete archived chat</span></span>
+<span class="t-line"><span class="t-cmd">agentscope sessions list</span>                          <span class="t-muted"># list indexed local assistant sessions</span></span>
+<span class="t-line"><span class="t-cmd">agentscope sessions latest</span>                        <span class="t-muted"># show newest local assistant session</span></span>
+<span class="t-line"><span class="t-cmd">agentscope sessions show</span> <span class="t-info">&lt;id&gt;</span>                   <span class="t-muted"># show one indexed session</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted">## Config</span>
 <span class="t-line"><span class="t-cmd">agentscope config show</span>                            <span class="t-muted"># print current config</span></span>
@@ -2463,6 +2548,14 @@
       { group: 'Agent Workflow', name: '/attach', desc: 'Infer and write session', cli: 'agentscope attach --agent auto --apply' },
       { group: 'Agent Workflow', name: '/monitor', desc: 'Watch + auto-attach', cli: 'agentscope monitor --agent auto' },
       { group: 'Agent Workflow', name: '/watch', desc: 'Live TUI dashboard', cli: 'agentscope watch' },
+      { group: 'Launcher Lab', name: '/launchers', desc: 'List launcher apps', cli: 'agentscope launchers list' },
+      { group: 'Launcher Lab', name: '/launcher-test', desc: 'Safe startup test', cli: 'agentscope launchers test codex' },
+      { group: 'Launcher Lab', name: '/ollama-claude', desc: 'Launch Claude Code with Ollama', cli: 'ollama launch claude --model qwen3.5' },
+      { group: 'Launcher Lab', name: '/ollama-codex-app', desc: 'Launch Codex App with Ollama', cli: 'ollama launch codex-app --model qwen3.5' },
+      { group: 'Launcher Lab', name: '/ollama-openclaw', desc: 'Launch OpenClaw with Ollama', cli: 'ollama launch openclaw --model qwen3.5' },
+      { group: 'Launcher Lab', name: '/ollama-hermes', desc: 'Launch Hermes with Ollama', cli: 'ollama launch hermes --model qwen3.5' },
+      { group: 'Launcher Lab', name: '/ollama-codex', desc: 'Launch Codex with Ollama', cli: 'ollama launch codex --model qwen3.5' },
+      { group: 'Launcher Lab', name: '/ollama-opencode', desc: 'Launch OpenCode with Ollama', cli: 'ollama launch opencode --model qwen3.5' },
       { group: 'LLM Judge', name: '/judge', desc: 'Run LLM judge', cli: 'agentscope judge' },
       { group: 'LLM Judge', name: '/judge-local', desc: 'Judge with local model', cli: 'agentscope judge -m qwen3.5:2b' },
       { group: 'LLM Judge', name: '/models', desc: 'List available models', cli: 'agentscope model list' },
@@ -2471,7 +2564,12 @@
       { group: 'Reports & Audit', name: '/audit', desc: 'Audit recent sessions', cli: 'agentscope audit last-5' },
       { group: 'Integrations', name: '/hook', desc: 'Install git hook', cli: 'agentscope hook install' },
       { group: 'Integrations', name: '/plugins', desc: 'Install plugins', cli: 'agentscope plugins install --agent all' },
+      { group: 'Integrations', name: '/use', desc: 'Write helper files', cli: 'agentscope use codex-app' },
       { group: 'Integrations', name: '/mcp', desc: 'Start MCP server', cli: 'agentscope mcp' },
+      { group: 'Chats & Sessions', name: '/chat-new', desc: 'Create AgentScope chat', cli: 'agentscope chat new "Fix checkout"' },
+      { group: 'Chats & Sessions', name: '/chat-list', desc: 'List AgentScope chats', cli: 'agentscope chat list' },
+      { group: 'Chats & Sessions', name: '/sessions', desc: 'List local sessions', cli: 'agentscope sessions list' },
+      { group: 'Chats & Sessions', name: '/latest', desc: 'Show newest session', cli: 'agentscope sessions latest' },
     ];
 
     const overlay = document.getElementById('cmdPaletteOverlay');

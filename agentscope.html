@@ -1332,7 +1332,7 @@
 <!-- SUPPORTED AGENTS -->
 <section>
   <div class="container">
-    <h2 class="section-title reveal">12 supported agents.<br><em>One command.</em></h2>
+    <h2 class="section-title reveal">10 supported agents.<br><em>One command.</em></h2>
     <p class="section-sub" style="margin-bottom:40px;">Declare your mission and pick your agent. AgentScope records the git baseline, then checks every changed file against your goal when you're done.</p>
 
     <div class="agent-grid reveal">
@@ -1392,21 +1392,9 @@
       </div>
 
       <div class="agent-card">
-        <p class="agent-card-id">--agent droid</p>
-        <p class="agent-card-name">Factory Droid</p>
-        <div class="agent-card-cmd">agentscope start "Fix bug" --agent droid</div>
-      </div>
-
-      <div class="agent-card">
-        <p class="agent-card-id">--agent pi</p>
-        <p class="agent-card-name">Pi (minimal toolkit)</p>
-        <div class="agent-card-cmd">agentscope start "Fix bug" --agent pi</div>
-      </div>
-
-      <div class="agent-card">
-        <p class="agent-card-id">--agent custom</p>
-        <p class="agent-card-name">Any other agent</p>
-        <div class="agent-card-cmd">agentscope start "Fix bug" --agent custom</div>
+        <p class="agent-card-id">--agent antigravity</p>
+        <p class="agent-card-name">Antigravity IDE</p>
+        <div class="agent-card-cmd">agentscope start "Fix bug" --agent antigravity</div>
       </div>
 
     </div>
@@ -1645,18 +1633,18 @@
   <div class="container">
     <p class="section-label">Plugin Integration Workflow</p>
     <h2 class="section-title">No manual exit.<br><em>Agent holds itself accountable.</em></h2>
-    <p class="section-sub">Install AgentScope as a native plugin for Claude or Codex. Every turn is automatically checked against your goal — no wrapper command, no exit, no manual review step. This is the <strong>Mode 3</strong> integration from above.</p>
+    <p class="section-sub">Install AgentScope as a native plugin for Claude or Codex. The agent reads your instructions from <code>CLAUDE.md</code> / <code>AGENTS.md</code>, and the pre-commit hook enforces scope at every commit — no wrapper command, no manual review step.</p>
 
-    <!-- Stop Hook Flow -->
+    <!-- Workflow Flow -->
     <div class="plugin-flow">
       <div class="plugin-flow-step">
         <p class="plugin-flow-step-label">agent</p>
-        <p class="plugin-flow-step-name">Claude / Codex<br>finishes a turn</p>
+        <p class="plugin-flow-step-name">Claude / Codex<br>makes changes</p>
       </div>
       <div class="plugin-flow-arrow">→</div>
       <div class="plugin-flow-step highlight">
-        <p class="plugin-flow-step-label">stop hook</p>
-        <p class="plugin-flow-step-name">scope-check.sh<br>fires automatically</p>
+        <p class="plugin-flow-step-label">pre-commit hook</p>
+        <p class="plugin-flow-step-name">agentscope check<br>runs automatically</p>
       </div>
       <div class="plugin-flow-arrow">→</div>
       <div class="plugin-flow-step">
@@ -1666,12 +1654,12 @@
       <div class="plugin-flow-arrow">→</div>
       <div class="plugin-flow-step action-ok">
         <p class="plugin-flow-step-label">continue</p>
-        <p class="plugin-flow-step-name">✓ silent<br>agent continues</p>
+        <p class="plugin-flow-step-name">✓ commit allowed<br>agent continues</p>
       </div>
       <div class="plugin-flow-arrow">|</div>
       <div class="plugin-flow-step action-block">
-        <p class="plugin-flow-step-label">block / ask</p>
-        <p class="plugin-flow-step-name">↩ message injected<br>agent self-corrects</p>
+        <p class="plugin-flow-step-label">block</p>
+        <p class="plugin-flow-step-name">✗ commit halted<br>violations shown</p>
       </div>
     </div>
 
@@ -1686,14 +1674,15 @@
             <span class="terminal-title">install + activate</span>
           </div>
           <div class="terminal-body">
-<span class="t-line t-muted"># Install plugin files (once per project)</span>
+<span class="t-line t-muted"># Write AgentScope guidance into CLAUDE.md (once per project)</span>
 <span class="t-line"><span class="t-cmd">agentscope plugins install</span> <span class="t-info">--agent claude</span></span>
 <span class="t-line">&nbsp;</span>
-<span class="t-line t-muted"># Launch with plugin — auto-checks every turn</span>
-<span class="t-line"><span class="t-cmd">claude</span> <span class="t-warn">--plugin-dir ./plugins/claude</span> <span class="t-info">"Fix the auth bug"</span></span>
+<span class="t-line t-muted"># Claude Code reads CLAUDE.md automatically — no flags needed</span>
+<span class="t-line"><span class="t-cmd">agentscope attach</span> <span class="t-info">--agent auto --apply</span></span>
+<span class="t-line"><span class="t-cmd">claude</span></span>
 <span class="t-line">&nbsp;</span>
-<span class="t-line t-muted"># Or add to ~/.claude/settings.json permanently:</span>
-<span class="t-line t-muted">{ "plugins": ["./plugins/claude"] }</span>
+<span class="t-line t-muted"># Watch live in the cockpit while Claude works</span>
+<span class="t-line"><span class="t-cmd">agentscope watch</span></span>
           </div>
         </div>
       </div>
@@ -1707,14 +1696,14 @@
             <span class="terminal-title">install + activate</span>
           </div>
           <div class="terminal-body">
-<span class="t-line t-muted"># Install plugin files + marketplace entry</span>
+<span class="t-line t-muted"># Write AgentScope guidance into AGENTS.md (once per project)</span>
 <span class="t-line"><span class="t-cmd">agentscope plugins install</span> <span class="t-info">--agent codex</span></span>
 <span class="t-line">&nbsp;</span>
-<span class="t-line t-muted"># In Codex: open /plugins tab → Install "agentscope"</span>
-<span class="t-line t-muted"># Or via CLI:</span>
-<span class="t-line"><span class="t-cmd">codex plugin marketplace add</span> <span class="t-info">./</span></span>
+<span class="t-line t-muted"># Codex reads AGENTS.md automatically — no flags needed</span>
+<span class="t-line"><span class="t-cmd">agentscope attach</span> <span class="t-info">--agent auto --apply</span></span>
+<span class="t-line"><span class="t-cmd">codex</span></span>
 <span class="t-line">&nbsp;</span>
-<span class="t-line t-muted"># Install both with one command:</span>
+<span class="t-line t-muted"># Install for all agents at once:</span>
 <span class="t-line"><span class="t-cmd">agentscope plugins install</span> <span class="t-info">--agent all</span></span>
           </div>
         </div>
@@ -1729,14 +1718,15 @@
             <span class="terminal-title">install + activate</span>
           </div>
           <div class="terminal-body">
-<span class="t-line t-muted"># Install skill + MCP + project plugin</span>
+<span class="t-line t-muted"># Write AgentScope guidance into .agentscope/plugin/opencode/</span>
 <span class="t-line"><span class="t-cmd">agentscope plugins install</span> <span class="t-info">--agent opencode</span></span>
 <span class="t-line">&nbsp;</span>
-<span class="t-line t-muted"># OpenCode reads opencode.json + .opencode/</span>
-<span class="t-line"><span class="t-cmd">opencode</span> <span class="t-info">"Fix the auth bug"</span></span>
+<span class="t-line t-muted"># Attach mission from current agent context</span>
+<span class="t-line"><span class="t-cmd">agentscope attach</span> <span class="t-info">--agent auto --apply</span></span>
+<span class="t-line"><span class="t-cmd">opencode</span></span>
 <span class="t-line">&nbsp;</span>
-<span class="t-line t-muted"># Install all integrations:</span>
-<span class="t-line"><span class="t-cmd">agentscope plugins install</span> <span class="t-info">--agent all</span></span>
+<span class="t-line t-muted"># Watch and check</span>
+<span class="t-line"><span class="t-cmd">agentscope watch</span></span>
           </div>
         </div>
       </div>
@@ -1775,20 +1765,20 @@
     <!-- What the plugin contains -->
     <div style="margin-top:32px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px;">
-        <p style="font-family:var(--mono);font-size:10px;color:var(--lime);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">plugin.json</p>
-        <p style="font-size:12px;color:var(--text-muted);line-height:1.5;">Manifest declaring the Stop hook. One file per agent format.</p>
+        <p style="font-family:var(--mono);font-size:10px;color:var(--lime);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">CLAUDE.md / AGENTS.md</p>
+        <p style="font-size:12px;color:var(--text-muted);line-height:1.5;">Agent-specific instruction file. Written to the location each agent reads automatically.</p>
       </div>
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px;">
-        <p style="font-family:var(--mono);font-size:10px;color:var(--lime);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">scope-check.sh</p>
-        <p style="font-size:12px;color:var(--text-muted);line-height:1.5;">Stop hook script. Runs on every turn, injects correction on BLOCK/ASK.</p>
+        <p style="font-family:var(--mono);font-size:10px;color:var(--lime);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">.cursor/rules/</p>
+        <p style="font-size:12px;color:var(--text-muted);line-height:1.5;">Cursor rules file. Automatically picked up by Cursor's agent context.</p>
       </div>
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px;">
-        <p style="font-family:var(--mono);font-size:10px;color:var(--lime);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">MCP config</p>
-        <p style="font-size:12px;color:var(--text-muted);line-height:1.5;">Registers <code>agentscope mcp</code> through <code>.mcp.json</code> or <code>opencode.json</code>.</p>
+        <p style="font-family:var(--mono);font-size:10px;color:var(--lime);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">.github/copilot-instructions.md</p>
+        <p style="font-size:12px;color:var(--text-muted);line-height:1.5;">Copilot custom instructions file. Read by GitHub Copilot Chat.</p>
       </div>
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px;">
-        <p style="font-family:var(--mono);font-size:10px;color:var(--lime);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">SKILL.md</p>
-        <p style="font-size:12px;color:var(--text-muted);line-height:1.5;">Teaches the agent when/how to call <code>scope_check</code> proactively.</p>
+        <p style="font-family:var(--mono);font-size:10px;color:var(--lime);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">.agentscope/plugin/</p>
+        <p style="font-size:12px;color:var(--text-muted);line-height:1.5;">Local record of installed plugins. Used by <code>agentscope plugins list</code>.</p>
       </div>
     </div>
 
@@ -2046,13 +2036,12 @@
 <span class="t-line"><span class="t-cmd">agentscope audit</span> <span class="t-info">HEAD~5..HEAD</span>                     <span class="t-muted"># audit a git range</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted">## Integrations</span>
-<span class="t-line"><span class="t-cmd">agentscope hook install</span>                            <span class="t-muted"># install pre-commit scope-check hook</span></span>
+<span class="t-line"><span class="t-cmd">agentscope hook install</span>                            <span class="t-muted"># install pre-commit hook</span></span>
 <span class="t-line"><span class="t-cmd">agentscope hook uninstall</span>                          <span class="t-muted"># remove hook</span></span>
-<span class="t-line"><span class="t-cmd">agentscope plugins install</span> <span class="t-info">--agent all</span>           <span class="t-muted"># install plugin for all agents</span></span>
-<span class="t-line"><span class="t-cmd">agentscope plugins install</span> <span class="t-info">--agent claude</span>        <span class="t-muted"># claude stop-hook plugin only</span></span>
-<span class="t-line"><span class="t-cmd">agentscope skills install</span> <span class="t-info">--agent all</span>            <span class="t-muted"># inject SKILL.md for all agents</span></span>
+<span class="t-line"><span class="t-cmd">agentscope plugins install</span> <span class="t-info">--agent all</span>           <span class="t-muted"># write guidance files for all agents</span></span>
+<span class="t-line"><span class="t-cmd">agentscope plugins install</span> <span class="t-info">--agent claude</span>        <span class="t-muted"># writes to CLAUDE.md only</span></span>
+<span class="t-line"><span class="t-cmd">agentscope skills install</span> <span class="t-info">--agent all</span>            <span class="t-muted"># write skill instructions for all agents</span></span>
 <span class="t-line"><span class="t-cmd">agentscope mcp</span>                                    <span class="t-muted"># start persistent JSON-RPC MCP server</span></span>
-<span class="t-line"><span class="t-cmd">agentscope use</span> <span class="t-info">claude</span>                             <span class="t-muted"># write integration helper files</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted">## Config</span>
 <span class="t-line"><span class="t-cmd">agentscope config show</span>                            <span class="t-muted"># print current config</span></span>
@@ -2199,17 +2188,17 @@
           <p class="phase-name">Core engine</p>
           <ul class="phase-items">
             <li><code>agentscope.yaml</code></li>
-            <li>Git diff engine</li>
+            <li>Git diff engine with line numbers</li>
             <li>Policy engine (all rules)</li>
-            <li>warn / block / ask / continue</li>
-            <li>Ollama CLI judge support</li>
-            <li>Terminal card output</li>
+            <li>EXPECTED / SUSPICIOUS / BLOCKED / IGNORED labels</li>
+            <li>Ollama, Claude, OpenAI, Gemini, OpenRouter judge</li>
+            <li>5-mode TUI cockpit (Review/Chat/Dashboard/Sessions/Live)</li>
             <li>JSON + Markdown reports</li>
-            <li>Generic wrapper (run any agent, check on exit)</li>
-            <li>Native Claude plugin (Stop hook)</li>
-            <li>Native Codex plugin (marketplace)</li>
-            <li>Persistent MCP stdio server</li>
-            <li>Skills injection for all agents</li>
+            <li>Pre-commit hook (<code>agentscope hook install</code>)</li>
+            <li>Plugin install → CLAUDE.md / AGENTS.md / .cursor/rules/</li>
+            <li>Agent auto-detection (Claude, Codex, Cursor, Gemini, Copilot…)</li>
+            <li>MCP stdio server</li>
+            <li>5 TUI themes</li>
           </ul>
         </div>
         <div class="roadmap-phase">
@@ -2314,7 +2303,7 @@
   <div class="container">
     <p class="hero-eyebrow" style="justify-content: center;">open source · mit license</p>
     <h2 style="font-size: clamp(32px, 5vw, 56px); font-weight: 300; letter-spacing: 0; color: var(--text); margin-bottom: 16px; line-height: 1.1;">Give agents write access.<br>Hold them <em style="color: var(--lime);">accountable.</em></h2>
-    <p style="font-size: 15px; color: var(--text-muted); max-width: 460px; margin: 0 auto 36px; line-height: 1.7;">AgentScope records the goal, checks every changed file against it, and stops drift automatically — as a Stop hook, MCP tool, or standalone CLI. Before review, merge, or handoff.</p>
+    <p style="font-size: 15px; color: var(--text-muted); max-width: 460px; margin: 0 auto 36px; line-height: 1.7;">AgentScope records the goal, checks every changed file against it, and stops drift automatically — as a pre-commit hook, MCP tool, or standalone CLI. Before review, merge, or handoff.</p>
     <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
       <a href="https://github.com/abdouloued/agentscope" class="btn-primary">Star on GitHub</a>
       <a href="#plugins" class="btn-ghost">See native plugins</a>

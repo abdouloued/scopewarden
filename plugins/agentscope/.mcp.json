@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "agentscope": {
+      "command": "agentscope",
+      "args": ["mcp"],
+      "env": {}
+    }
+  }
+}

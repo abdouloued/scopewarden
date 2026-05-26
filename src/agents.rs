@@ -946,9 +946,14 @@ fn install_plugin_native(agent: &str) -> Result<()> {
     let content = integration_content("plugin", agent);
     match agent {
         "claude-code" => {
-            // Claude Code — CLAUDE.md
+            // Claude Code — CLAUDE.md (project context)
             let path = Path::new("CLAUDE.md");
             merge_or_write(path, "## AgentScope", &content)?;
+            // Also register with Claude Code's plugin system
+            if let Err(e) = register_claude_code_plugin() {
+                eprintln!("  note: could not register Claude Code plugin: {e}");
+                eprintln!("  tip:  manually add agentscopev2 marketplace in Claude Code /plugins settings");
+            }
         }
         "codex" => {
             // Codex — AGENTS.md
@@ -967,6 +972,106 @@ fn install_plugin_native(agent: &str) -> Result<()> {
             // Generic: write into the .agentscope record dir only
         }
     }
+    Ok(())
+}
+
+/// Register AgentScope with Claude Code's plugin system.
+/// Writes plugin files to the Claude cache, registers the marketplace,
+/// updates installed_plugins.json, and enables the plugin in settings.json.
+fn register_claude_code_plugin() -> Result<()> {
+    use serde_json::Value;
+
+    let claude_base = std::env::var("CLAUDE_CONFIG_DIR").unwrap_or_else(|_| "~/.claude".into());
+    let claude_dir = expand_path(&claude_base);
+    let plugins_dir = claude_dir.join("plugins");
+
+    // ── 1. Write plugin files to cache ──────────────────────────────────────
+    let cache_dir = plugins_dir
+        .join("cache")
+        .join("agentscopev2")
+        .join("agentscope")
+        .join("1.0.0");
+    std::fs::create_dir_all(cache_dir.join(".claude-plugin"))?;
+    std::fs::create_dir_all(cache_dir.join("skills").join("scope-guard"))?;
+    std::fs::create_dir_all(cache_dir.join("skills").join("scope-check"))?;
+
+    std::fs::write(
+        cache_dir.join(".claude-plugin").join("plugin.json"),
+        r#"{"name":"agentscope","version":"1.0.0","description":"AgentScope scope firewall for AI coding agents.","repository":"https://github.com/abdouloued/agentscopev2","license":"MIT","skills":"./skills/","mcpServers":"./.mcp.json","keywords":["scope","policy","git","ai-agent","firewall","audit","mission","agentscope"]}"#,
+    )?;
+    std::fs::write(
+        cache_dir.join(".mcp.json"),
+        r#"{"mcpServers":{"agentscope":{"command":"agentscope","args":["mcp"],"env":{}}}}"#,
+    )?;
+    std::fs::write(cache_dir.join("CLAUDE.md"), include_str!("../plugins/agentscope/CLAUDE.md"))?;
+    std::fs::write(
+        cache_dir.join("skills").join("scope-guard").join("SKILL.md"),
+        include_str!("../plugins/agentscope/skills/scope-guard/SKILL.md"),
+    )?;
+    std::fs::write(
+        cache_dir.join("skills").join("scope-check").join("SKILL.md"),
+        include_str!("../plugins/agentscope/skills/scope-check/SKILL.md"),
+    )?;
+
+    // ── 2. Register marketplace in known_marketplaces.json ─────────────────
+    let km_path = plugins_dir.join("known_marketplaces.json");
+    let mut km: Value = if km_path.exists() {
+        serde_json::from_str(&std::fs::read_to_string(&km_path)?).unwrap_or(serde_json::json!({}))
+    } else {
+        serde_json::json!({})
+    };
+    if km.get("agentscopev2").is_none() {
+        km["agentscopev2"] = serde_json::json!({
+            "source": { "source": "github", "repo": "abdouloued/agentscopev2" },
+            "installLocation": plugins_dir.join("marketplaces").join("agentscopev2").display().to_string(),
+            "lastUpdated": Utc::now().to_rfc3339()
+        });
+        std::fs::write(&km_path, serde_json::to_string_pretty(&km)?)?;
+    }
+
+    // ── 3. Add entry to installed_plugins.json ──────────────────────────────
+    let ip_path = plugins_dir.join("installed_plugins.json");
+    let mut ip: Value = if ip_path.exists() {
+        serde_json::from_str(&std::fs::read_to_string(&ip_path)?)
+            .unwrap_or(serde_json::json!({"version":2,"plugins":{}}))
+    } else {
+        serde_json::json!({"version":2,"plugins":{}})
+    };
+    let now = Utc::now().to_rfc3339();
+    ip["plugins"]["agentscope@agentscopev2"] = serde_json::json!([{
+        "scope": "user",
+        "installPath": cache_dir.display().to_string(),
+        "version": "1.0.0",
+        "installedAt": now,
+        "lastUpdated": now
+    }]);
+    std::fs::write(&ip_path, serde_json::to_string_pretty(&ip)?)?;
+
+    // ── 4. Enable plugin + register marketplace in settings.json ───────────
+    let settings_path = claude_dir.join("settings.json");
+    if settings_path.exists() {
+        let raw = std::fs::read_to_string(&settings_path)?;
+        if let Ok(mut settings) = serde_json::from_str::<Value>(&raw) {
+            if let Some(obj) = settings.as_object_mut() {
+                // extraKnownMarketplaces
+                let mkts = obj
+                    .entry("extraKnownMarketplaces")
+                    .or_insert(serde_json::json!({}));
+                if mkts.get("agentscopev2").is_none() {
+                    mkts["agentscopev2"] = serde_json::json!({
+                        "source": { "source": "github", "repo": "abdouloued/agentscopev2" }
+                    });
+                }
+                // enabledPlugins
+                let enabled = obj
+                    .entry("enabledPlugins")
+                    .or_insert(serde_json::json!({}));
+                enabled["agentscope@agentscopev2"] = serde_json::json!(true);
+            }
+            std::fs::write(&settings_path, serde_json::to_string_pretty(&settings)?)?;
+        }
+    }
+
     Ok(())
 }
 

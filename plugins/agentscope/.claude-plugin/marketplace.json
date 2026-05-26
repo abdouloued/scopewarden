@@ -1,0 +1,9 @@
+{
+  "marketplace": "agentscopev2",
+  "plugins": [
+    {
+      "name": "agentscope",
+      "path": "."
+    }
+  ]
+}

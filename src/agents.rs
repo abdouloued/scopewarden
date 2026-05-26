@@ -271,14 +271,30 @@ pub async fn monitor_command(agent: String, auto_attach: bool) -> Result<()> {
                         .map(|s| s.mission.as_str())
                         .unwrap_or("<no active mission>");
                     let policy = crate::policy::PolicyEngine::from_config(&config.policy)
-                        .unwrap_or_else(|_| crate::policy::PolicyEngine::from_config(&crate::config::PolicyConfig::default()).unwrap());
+                        .unwrap_or_else(|_| {
+                            crate::policy::PolicyEngine::from_config(
+                                &crate::config::PolicyConfig::default(),
+                            )
+                            .unwrap()
+                        });
                     let annotated = policy.annotate(&wt.files, mission);
-                    let expected = annotated.iter().filter(|f| matches!(f.verdict, crate::policy::FileVerdict::InScope)).count();
-                    let suspicious = annotated.iter().filter(|f| matches!(f.verdict, crate::policy::FileVerdict::Unasked)).count();
-                    let blocked = annotated.iter().filter(|f| matches!(f.verdict, crate::policy::FileVerdict::Blocked { .. })).count();
+                    let expected = annotated
+                        .iter()
+                        .filter(|f| matches!(f.verdict, crate::policy::FileVerdict::InScope))
+                        .count();
+                    let suspicious = annotated
+                        .iter()
+                        .filter(|f| matches!(f.verdict, crate::policy::FileVerdict::Unasked))
+                        .count();
+                    let blocked = annotated
+                        .iter()
+                        .filter(|f| matches!(f.verdict, crate::policy::FileVerdict::Blocked { .. }))
+                        .count();
                     let ts = chrono::Utc::now().format("%H:%M:%S");
-                    println!("  [{}]  {} expected  {} suspicious  {} blocked  |  mission: {}",
-                        ts, expected, suspicious, blocked, mission);
+                    println!(
+                        "  [{}]  {} expected  {} suspicious  {} blocked  |  mission: {}",
+                        ts, expected, suspicious, blocked, mission
+                    );
                 }
             }
         }
@@ -399,26 +415,35 @@ pub async fn mcp_command() -> Result<()> {
                             s.mission,
                             s.started_at
                         ),
-                        Err(_) => {
-                            "No active session.\nRun: agentscope start \"<your mission>\"".to_string()
-                        }
+                        Err(_) => "No active session.\nRun: agentscope start \"<your mission>\""
+                            .to_string(),
                     },
 
-                    "scope_check" => {
-                        match session::load_active_session() {
-                            Ok(s) => {
-                                let cfg = config::load_or_default();
-                                match git::open_repo().and_then(|repo| git::working_tree_diff(&repo)) {
-                                    Ok(wt) => {
-                                        let policy = match crate::policy::PolicyEngine::from_config(&cfg.policy) {
+                    "scope_check" => match session::load_active_session() {
+                        Ok(s) => {
+                            let cfg = config::load_or_default();
+                            match git::open_repo().and_then(|repo| git::working_tree_diff(&repo)) {
+                                Ok(wt) => {
+                                    let policy =
+                                        match crate::policy::PolicyEngine::from_config(&cfg.policy)
+                                        {
                                             Ok(p) => p,
                                             Err(e) => return Err(e),
                                         };
-                                        let annotated = policy.annotate(&wt.files, &s.mission);
-                                        let expected = annotated.iter().filter(|f| f.verdict.is_accepted()).count();
-                                        let suspicious = annotated.iter().filter(|f| f.verdict == crate::policy::FileVerdict::Unasked).count();
-                                        let blocked = annotated.iter().filter(|f| f.verdict.is_blocked()).count();
-                                        format!(
+                                    let annotated = policy.annotate(&wt.files, &s.mission);
+                                    let expected = annotated
+                                        .iter()
+                                        .filter(|f| f.verdict.is_accepted())
+                                        .count();
+                                    let suspicious = annotated
+                                        .iter()
+                                        .filter(|f| {
+                                            f.verdict == crate::policy::FileVerdict::Unasked
+                                        })
+                                        .count();
+                                    let blocked =
+                                        annotated.iter().filter(|f| f.verdict.is_blocked()).count();
+                                    format!(
                                             "Mission: {}\nFiles: {} total  |  {} expected  |  {} suspicious  |  {} blocked",
                                             s.mission,
                                             annotated.len(),
@@ -426,16 +451,22 @@ pub async fn mcp_command() -> Result<()> {
                                             suspicious,
                                             blocked
                                         )
-                                    }
-                                    Err(e) => format!("Git diff error: {}", e),
                                 }
+                                Err(e) => format!("Git diff error: {}", e),
                             }
-                            Err(_) => "No active session. Run: agentscope start \"<mission>\"".to_string(),
                         }
-                    }
+                        Err(_) => {
+                            "No active session. Run: agentscope start \"<mission>\"".to_string()
+                        }
+                    },
 
                     "scope_start" => {
-                        let mission = args.get("mission").and_then(|v| v.as_str()).unwrap_or("").trim().to_string();
+                        let mission = args
+                            .get("mission")
+                            .and_then(|v| v.as_str())
+                            .unwrap_or("")
+                            .trim()
+                            .to_string();
                         let agent = args.get("agent").and_then(|v| v.as_str()).unwrap_or("auto");
                         if mission.is_empty() {
                             "Error: 'mission' is required.".to_string()
@@ -1184,7 +1215,8 @@ fn register_claude_code_plugin() -> Result<()> {
         .join("1.0.0");
 
     const PLUGIN_JSON: &str = r#"{"name":"agentscope","version":"1.0.0","description":"AgentScope scope firewall for AI coding agents.","repository":"https://github.com/abdouloued/agentscopev2","license":"MIT","skills":"./skills/","mcpServers":"./.mcp.json","keywords":["scope","policy","git","ai-agent","firewall","audit","mission","agentscope"]}"#;
-    const MCP_JSON: &str = r#"{"mcpServers":{"agentscope":{"command":"agentscope","args":["mcp"],"env":{}}}}"#;
+    const MCP_JSON: &str =
+        r#"{"mcpServers":{"agentscope":{"command":"agentscope","args":["mcp"],"env":{}}}}"#;
     const CLAUDE_MD: &str = include_str!("../plugins/agentscope/CLAUDE.md");
     const SCOPE_GUARD: &str = include_str!("../plugins/agentscope/skills/scope-guard/SKILL.md");
     const SCOPE_CHECK: &str = include_str!("../plugins/agentscope/skills/scope-check/SKILL.md");
@@ -1197,11 +1229,26 @@ fn register_claude_code_plugin() -> Result<()> {
     ] {
         std::fs::create_dir_all(&dir)?;
     }
-    std::fs::write(cache_dir.join(".claude-plugin").join("plugin.json"), PLUGIN_JSON)?;
+    std::fs::write(
+        cache_dir.join(".claude-plugin").join("plugin.json"),
+        PLUGIN_JSON,
+    )?;
     std::fs::write(cache_dir.join(".mcp.json"), MCP_JSON)?;
     std::fs::write(cache_dir.join("CLAUDE.md"), CLAUDE_MD)?;
-    std::fs::write(cache_dir.join("skills").join("scope-guard").join("SKILL.md"), SCOPE_GUARD)?;
-    std::fs::write(cache_dir.join("skills").join("scope-check").join("SKILL.md"), SCOPE_CHECK)?;
+    std::fs::write(
+        cache_dir
+            .join("skills")
+            .join("scope-guard")
+            .join("SKILL.md"),
+        SCOPE_GUARD,
+    )?;
+    std::fs::write(
+        cache_dir
+            .join("skills")
+            .join("scope-check")
+            .join("SKILL.md"),
+        SCOPE_CHECK,
+    )?;
 
     // ── 2. Write marketplace directory (mirrors openai-codex structure) ─────
     {
@@ -1233,11 +1280,26 @@ fn register_claude_code_plugin() -> Result<()> {
                 }]
             }))?,
         )?;
-        std::fs::write(mkt_plugin_dir.join(".claude-plugin").join("plugin.json"), PLUGIN_JSON)?;
+        std::fs::write(
+            mkt_plugin_dir.join(".claude-plugin").join("plugin.json"),
+            PLUGIN_JSON,
+        )?;
         std::fs::write(mkt_plugin_dir.join(".mcp.json"), MCP_JSON)?;
         std::fs::write(mkt_plugin_dir.join("CLAUDE.md"), CLAUDE_MD)?;
-        std::fs::write(mkt_plugin_dir.join("skills").join("scope-guard").join("SKILL.md"), SCOPE_GUARD)?;
-        std::fs::write(mkt_plugin_dir.join("skills").join("scope-check").join("SKILL.md"), SCOPE_CHECK)?;
+        std::fs::write(
+            mkt_plugin_dir
+                .join("skills")
+                .join("scope-guard")
+                .join("SKILL.md"),
+            SCOPE_GUARD,
+        )?;
+        std::fs::write(
+            mkt_plugin_dir
+                .join("skills")
+                .join("scope-check")
+                .join("SKILL.md"),
+            SCOPE_CHECK,
+        )?;
     }
 
     // ── 3. Register marketplace in known_marketplaces.json ─────────────────
@@ -1460,10 +1522,7 @@ mod tests {
             launch_command("claude", "qwen3.5").as_deref(),
             Some("ollama launch claude --model qwen3.5")
         );
-        assert_eq!(
-            launch_command("codex-app", "qwen3.5").as_deref(),
-            None
-        );
+        assert_eq!(launch_command("codex-app", "qwen3.5").as_deref(), None);
         assert_eq!(
             launch_command("openclaw", "qwen3.5").as_deref(),
             Some("ollama launch openclaw --model qwen3.5")

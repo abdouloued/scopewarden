@@ -12,19 +12,19 @@ AgentScope does not replace Codex, Claude Code, Cursor, Gemini CLI, OpenCode, or
 
 **Option 1 — pre-built binary (no Rust required):**
 
-Download the latest binary for your platform from [GitHub Releases](https://github.com/agentscope2/agentscope/releases):
+Download the latest binary for your platform from [GitHub Releases](https://github.com/abdouloued/agentscopev2/releases):
 
 ```bash
 # macOS Apple Silicon
-curl -L https://github.com/agentscope2/agentscope/releases/latest/download/agentscope-aarch64-apple-darwin.tar.gz | tar xz
+curl -L https://github.com/abdouloued/agentscopev2/releases/latest/download/agentscope-aarch64-apple-darwin.tar.gz | tar xz
 sudo mv agentscope-aarch64-apple-darwin /usr/local/bin/agentscope
 
 # macOS Intel
-curl -L https://github.com/agentscope2/agentscope/releases/latest/download/agentscope-x86_64-apple-darwin.tar.gz | tar xz
+curl -L https://github.com/abdouloued/agentscopev2/releases/latest/download/agentscope-x86_64-apple-darwin.tar.gz | tar xz
 sudo mv agentscope-x86_64-apple-darwin /usr/local/bin/agentscope
 
 # Linux x86_64
-curl -L https://github.com/agentscope2/agentscope/releases/latest/download/agentscope-x86_64-linux.tar.gz | tar xz
+curl -L https://github.com/abdouloued/agentscopev2/releases/latest/download/agentscope-x86_64-linux.tar.gz | tar xz
 sudo mv agentscope-x86_64-linux /usr/local/bin/agentscope
 ```
 
@@ -37,7 +37,7 @@ cargo install agentscope
 **Option 3 — build from source:**
 
 ```bash
-git clone https://github.com/agentscope2/agentscope.git
+git clone https://github.com/abdouloued/agentscopev2.git
 cd agentscope
 cargo install --path . --force
 ```

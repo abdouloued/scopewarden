@@ -42,6 +42,32 @@ cd agentscope
 cargo install --path . --force
 ```
 
+## Uninstall
+
+**If installed via `cargo install`:**
+
+```bash
+cargo uninstall agentscope
+```
+
+**If installed via pre-built binary:**
+
+```bash
+sudo rm /usr/local/bin/agentscope
+```
+
+**If installed via build from source into `~/.local/bin`:**
+
+```bash
+rm ~/.local/bin/agentscope
+```
+
+To also remove all AgentScope data (sessions, config):
+
+```bash
+rm -rf ~/.config/agentscope ~/.local/share/agentscope
+```
+
 ## The 30-second version
 
 ```bash
@@ -207,6 +233,8 @@ cd agentscopev2
 cargo build --release
 cp target/release/agentscope ~/.local/bin/
 ```
+
+To uninstall: `rm ~/.local/bin/agentscope`
 
 For local development:
 

@@ -6,31 +6,31 @@ use std::path::Path;
 /// Test that --help exits cleanly
 #[test]
 fn cli_help_exits_zero() {
-    Command::cargo_bin("agentscope")
+    Command::cargo_bin("scopewarden")
         .unwrap()
         .arg("--help")
         .assert()
         .success()
-        .stdout(predicate::str::contains("AgentScope"));
+        .stdout(predicate::str::contains("ScopeWarden"));
 }
 
 /// Test that --version exits cleanly
 #[test]
 fn cli_version_exits_zero() {
-    Command::cargo_bin("agentscope")
+    Command::cargo_bin("scopewarden")
         .unwrap()
         .arg("--version")
         .assert()
         .success()
-        .stdout(predicate::str::contains("agentscope"));
+        .stdout(predicate::str::contains("scopewarden"));
 }
 
-/// Test that init creates agentscope.yaml in a temp git repo
+/// Test that init creates scopewarden.yaml in a temp git repo
 #[test]
 fn cli_init_creates_config() {
     let tmp = tempfile::tempdir().unwrap();
 
-    // Init a git repo first (required for agentscope)
+    // Init a git repo first (required for scopewarden)
     std::process::Command::new("git")
         .args(["init"])
         .current_dir(tmp.path())
@@ -40,16 +40,16 @@ fn cli_init_creates_config() {
     // Create .gitignore so init can append to it
     std::fs::write(tmp.path().join(".gitignore"), "target/\n").unwrap();
 
-    Command::cargo_bin("agentscope")
+    Command::cargo_bin("scopewarden")
         .unwrap()
         .arg("init")
         .current_dir(tmp.path())
         .assert()
         .success()
-        .stdout(predicate::str::contains("Created agentscope.yaml"));
+        .stdout(predicate::str::contains("Created scopewarden.yaml"));
 
-    assert!(tmp.path().join("agentscope.yaml").exists());
-    assert!(tmp.path().join(".agentscope").exists());
+    assert!(tmp.path().join("scopewarden.yaml").exists());
+    assert!(tmp.path().join(".scopewarden").exists());
 }
 
 /// Test that init --preset ci works
@@ -62,14 +62,14 @@ fn cli_init_preset_ci() {
         .output()
         .unwrap();
 
-    Command::cargo_bin("agentscope")
+    Command::cargo_bin("scopewarden")
         .unwrap()
         .args(["init", "--preset", "ci"])
         .current_dir(tmp.path())
         .assert()
         .success();
 
-    let contents = std::fs::read_to_string(tmp.path().join("agentscope.yaml")).unwrap();
+    let contents = std::fs::read_to_string(tmp.path().join("scopewarden.yaml")).unwrap();
     assert!(contents.contains("Ci"));
 }
 
@@ -89,7 +89,7 @@ fn cli_check_without_session() {
         .output()
         .unwrap();
 
-    Command::cargo_bin("agentscope")
+    Command::cargo_bin("scopewarden")
         .unwrap()
         .arg("check")
         .current_dir(tmp.path())
@@ -107,7 +107,7 @@ fn cli_status_without_session() {
         .output()
         .unwrap();
 
-    Command::cargo_bin("agentscope")
+    Command::cargo_bin("scopewarden")
         .unwrap()
         .arg("status")
         .current_dir(tmp.path())
@@ -136,7 +136,7 @@ fn cli_agent_kinds_accepted() {
 
     for _agent in agents {
         // Just test that the CLI parses the value (--help won't error)
-        Command::cargo_bin("agentscope")
+        Command::cargo_bin("scopewarden")
             .unwrap()
             .args(["start", "--help"])
             .assert()
@@ -151,7 +151,7 @@ fn cli_agent_kinds_accepted() {
         .output()
         .unwrap();
 
-    Command::cargo_bin("agentscope")
+    Command::cargo_bin("scopewarden")
         .unwrap()
         .args(["start", "test mission", "--agent", "nonexistent"])
         .current_dir(tmp.path())
@@ -168,7 +168,7 @@ fn cli_agents_detect_reports_supported_sources() {
         .output()
         .unwrap();
 
-    Command::cargo_bin("agentscope")
+    Command::cargo_bin("scopewarden")
         .unwrap()
         .args(["agents", "detect"])
         .current_dir(tmp.path())
@@ -188,9 +188,9 @@ fn cli_agents_doctor_explains_missing_sources_without_failing() {
         .current_dir(tmp.path())
         .output()
         .unwrap();
-    std::fs::write(tmp.path().join("agentscope.yaml"), "version: 1\n").unwrap();
+    std::fs::write(tmp.path().join("scopewarden.yaml"), "version: 1\n").unwrap();
 
-    Command::cargo_bin("agentscope")
+    Command::cargo_bin("scopewarden")
         .unwrap()
         .args(["agents", "doctor"])
         .current_dir(tmp.path())
@@ -199,14 +199,14 @@ fn cli_agents_doctor_explains_missing_sources_without_failing() {
         .success()
         .stdout(predicate::str::contains("Agent source health"))
         .stdout(predicate::str::contains("Missing sources are normal"))
-        .stdout(predicate::str::contains("agentscope start"));
+        .stdout(predicate::str::contains("scopewarden start"));
 }
 
 #[test]
 fn cli_launchers_list_reports_all_supported_apps() {
     let tmp = tempfile::tempdir().unwrap();
 
-    Command::cargo_bin("agentscope")
+    Command::cargo_bin("scopewarden")
         .unwrap()
         .args(["launchers", "list"])
         .env("HOME", tmp.path())
@@ -225,7 +225,7 @@ fn cli_launchers_list_reports_all_supported_apps() {
 fn cli_launchers_summary_handles_missing_launcher_cleanly() {
     let tmp = tempfile::tempdir().unwrap();
 
-    Command::cargo_bin("agentscope")
+    Command::cargo_bin("scopewarden")
         .unwrap()
         .args(["launchers", "summary", "opencode"])
         .env("HOME", tmp.path())
@@ -245,7 +245,7 @@ fn cli_attach_dry_run_does_not_write_session() {
         .current_dir(tmp.path())
         .output()
         .unwrap();
-    std::fs::write(tmp.path().join("agentscope.yaml"), "version: 1\n").unwrap();
+    std::fs::write(tmp.path().join("scopewarden.yaml"), "version: 1\n").unwrap();
 
     let codex_dir = tmp.path().join(".codex/sessions/2026/05/24");
     std::fs::create_dir_all(&codex_dir).unwrap();
@@ -255,7 +255,7 @@ fn cli_attach_dry_run_does_not_write_session() {
     )
     .unwrap();
 
-    Command::cargo_bin("agentscope")
+    Command::cargo_bin("scopewarden")
         .unwrap()
         .args(["attach", "--agent", "codex"])
         .current_dir(tmp.path())
@@ -265,7 +265,7 @@ fn cli_attach_dry_run_does_not_write_session() {
         .stdout(predicate::str::contains("Implement agent detection"))
         .stdout(predicate::str::contains("dry run"));
 
-    assert!(!tmp.path().join(".agentscope/session.json").exists());
+    assert!(!tmp.path().join(".scopewarden/session.json").exists());
 }
 
 #[test]
@@ -281,7 +281,7 @@ fn cli_attach_apply_writes_detected_session_metadata() {
         .current_dir(tmp.path())
         .output()
         .unwrap();
-    std::fs::write(tmp.path().join("agentscope.yaml"), "version: 1\n").unwrap();
+    std::fs::write(tmp.path().join("scopewarden.yaml"), "version: 1\n").unwrap();
 
     let codex_dir = tmp.path().join(".codex/sessions/2026/05/24");
     std::fs::create_dir_all(&codex_dir).unwrap();
@@ -291,7 +291,7 @@ fn cli_attach_apply_writes_detected_session_metadata() {
     )
     .unwrap();
 
-    Command::cargo_bin("agentscope")
+    Command::cargo_bin("scopewarden")
         .unwrap()
         .args(["attach", "--agent", "codex", "--apply"])
         .current_dir(tmp.path())
@@ -301,7 +301,7 @@ fn cli_attach_apply_writes_detected_session_metadata() {
         .stdout(predicate::str::contains("Attached"));
 
     let session_json =
-        std::fs::read_to_string(tmp.path().join(".agentscope/session.json")).unwrap();
+        std::fs::read_to_string(tmp.path().join(".scopewarden/session.json")).unwrap();
     let session: Value = serde_json::from_str(&session_json).unwrap();
     assert_eq!(session["mission"], "Wire attach apply");
     assert_eq!(session["detected_agent"], "codex");
@@ -311,7 +311,7 @@ fn cli_attach_apply_writes_detected_session_metadata() {
 
 #[test]
 fn cli_skills_and_plugins_list_supported_agents() {
-    Command::cargo_bin("agentscope")
+    Command::cargo_bin("scopewarden")
         .unwrap()
         .args(["skills", "list", "--agent", "all"])
         .assert()
@@ -323,7 +323,7 @@ fn cli_skills_and_plugins_list_supported_agents() {
         .stdout(predicate::str::contains("hermes"))
         .stdout(predicate::str::contains("antigravity"));
 
-    Command::cargo_bin("agentscope")
+    Command::cargo_bin("scopewarden")
         .unwrap()
         .args(["plugins", "list", "--agent", "all"])
         .assert()
@@ -340,7 +340,7 @@ fn cli_agents_context_reads_each_supported_agent_source() {
         .current_dir(tmp.path())
         .output()
         .unwrap();
-    std::fs::write(tmp.path().join("agentscope.yaml"), "version: 1\n").unwrap();
+    std::fs::write(tmp.path().join("scopewarden.yaml"), "version: 1\n").unwrap();
 
     let fixtures = [
         (
@@ -412,7 +412,7 @@ fn cli_agents_context_reads_each_supported_agent_source() {
     }
 
     for (agent, _, _, expected) in fixtures {
-        Command::cargo_bin("agentscope")
+        Command::cargo_bin("scopewarden")
             .unwrap()
             .args(["agents", "context", "--agent", agent])
             .current_dir(tmp.path())
@@ -431,7 +431,7 @@ fn cli_agents_context_reads_vscode_copilot_transcripts() {
         .current_dir(tmp.path())
         .output()
         .unwrap();
-    std::fs::write(tmp.path().join("agentscope.yaml"), "version: 1\n").unwrap();
+    std::fs::write(tmp.path().join("scopewarden.yaml"), "version: 1\n").unwrap();
 
     let transcript = tmp.path().join(
         "Library/Application Support/Code/User/workspaceStorage/ws/GitHub.copilot-chat/transcripts/chat.jsonl",
@@ -439,7 +439,7 @@ fn cli_agents_context_reads_vscode_copilot_transcripts() {
     std::fs::create_dir_all(transcript.parent().unwrap()).unwrap();
     std::fs::write(transcript, r#"{"message":"Fix VS Code Copilot task"}"#).unwrap();
 
-    Command::cargo_bin("agentscope")
+    Command::cargo_bin("scopewarden")
         .unwrap()
         .args(["agents", "context", "--agent", "copilot"])
         .current_dir(tmp.path())
@@ -465,7 +465,7 @@ fn cli_agents_context_honors_config_path_override() {
     )
     .unwrap();
     std::fs::write(
-        tmp.path().join("agentscope.yaml"),
+        tmp.path().join("scopewarden.yaml"),
         format!(
             "version: 1\nagents:\n  sources:\n    codex:\n      paths:\n        - \"{}\"\n",
             custom_dir.display()
@@ -473,7 +473,7 @@ fn cli_agents_context_honors_config_path_override() {
     )
     .unwrap();
 
-    Command::cargo_bin("agentscope")
+    Command::cargo_bin("scopewarden")
         .unwrap()
         .args(["agents", "context", "--agent", "codex"])
         .current_dir(tmp.path())
@@ -491,9 +491,9 @@ fn cli_mcp_agent_detect_returns_json_rpc_response() {
         .current_dir(tmp.path())
         .output()
         .unwrap();
-    std::fs::write(tmp.path().join("agentscope.yaml"), "version: 1\n").unwrap();
+    std::fs::write(tmp.path().join("scopewarden.yaml"), "version: 1\n").unwrap();
 
-    Command::cargo_bin("agentscope")
+    Command::cargo_bin("scopewarden")
         .unwrap()
         .arg("mcp")
         .current_dir(tmp.path())
@@ -509,29 +509,29 @@ fn cli_mcp_agent_detect_returns_json_rpc_response() {
 #[test]
 fn cli_skills_and_plugins_install_project_assets() {
     let tmp = tempfile::tempdir().unwrap();
-    Command::cargo_bin("agentscope")
+    Command::cargo_bin("scopewarden")
         .unwrap()
         .args(["skills", "install", "--agent", "codex"])
         .current_dir(tmp.path())
         .assert()
         .success();
-    Command::cargo_bin("agentscope")
+    Command::cargo_bin("scopewarden")
         .unwrap()
         .args(["plugins", "install", "--agent", "gemini"])
         .current_dir(tmp.path())
         .assert()
         .success();
 
-    assert!(Path::new(&tmp.path().join(".agentscope/skill/codex/README.md")).exists());
-    assert!(Path::new(&tmp.path().join(".agentscope/plugin/gemini-cli/README.md")).exists());
+    assert!(Path::new(&tmp.path().join(".scopewarden/skill/codex/README.md")).exists());
+    assert!(Path::new(&tmp.path().join(".scopewarden/plugin/gemini-cli/README.md")).exists());
 }
 
 #[test]
 fn cli_config_set_supports_agent_auto_attach() {
     let tmp = tempfile::tempdir().unwrap();
-    std::fs::write(tmp.path().join("agentscope.yaml"), "version: 1\n").unwrap();
+    std::fs::write(tmp.path().join("scopewarden.yaml"), "version: 1\n").unwrap();
 
-    Command::cargo_bin("agentscope")
+    Command::cargo_bin("scopewarden")
         .unwrap()
         .args(["config", "set", "agents.auto_attach", "true"])
         .current_dir(tmp.path())
@@ -539,6 +539,6 @@ fn cli_config_set_supports_agent_auto_attach() {
         .success()
         .stdout(predicate::str::contains("agents.auto_attach = true"));
 
-    let config = std::fs::read_to_string(tmp.path().join("agentscope.yaml")).unwrap();
+    let config = std::fs::read_to_string(tmp.path().join("scopewarden.yaml")).unwrap();
     assert!(config.contains("auto_attach: true"));
 }

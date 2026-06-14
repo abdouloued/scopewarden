@@ -10,9 +10,9 @@ use ulid::Ulid;
 
 use crate::{cli::ChatAction, config};
 
-pub const CHATS_DIR: &str = ".agentscope/chats";
-pub const CHAT_INDEX: &str = ".agentscope/chats/index.json";
-pub const CHAT_ARCHIVE_DIR: &str = ".agentscope/chats/archive";
+pub const CHATS_DIR: &str = ".scopewarden/chats";
+pub const CHAT_INDEX: &str = ".scopewarden/chats/index.json";
+pub const CHAT_ARCHIVE_DIR: &str = ".scopewarden/chats/archive";
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ChatSessionMeta {
@@ -101,7 +101,7 @@ pub fn create_chat(title: Option<String>, config: &config::Config) -> Result<Cha
     let repo_root = std::env::current_dir()?;
     let title = title
         .filter(|value| !value.trim().is_empty())
-        .unwrap_or_else(|| "AgentScope chat".into());
+        .unwrap_or_else(|| "ScopeWarden chat".into());
     let meta = ChatSessionMeta {
         id: id.clone(),
         title,

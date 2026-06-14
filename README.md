@@ -1,46 +1,46 @@
-# AgentScope
+# ScopeWarden
 
-**[Website](https://abdouloued.github.io/agentscopev2)** · **[crates.io](https://crates.io/crates/agentscope)** · **[GitHub](https://github.com/abdouloued/agentscopev2)**
+**[Website](https://abdouloued.github.io/scopewarden)** · **[crates.io](https://crates.io/crates/scopewarden)** · **[GitHub](https://github.com/abdouloued/scopewarden)**
 
 > **⚠️ Early development — currently tested with [Ollama](https://ollama.com) and local models only.**
 > Multi-provider judge support (Claude, OpenAI, Gemini, OpenRouter) is implemented but undertested.
 > Expect rough edges; contributions and bug reports are welcome.
 
-**AgentScope is a Rust CLI cockpit for AI coding agents.** It records or detects a mission, watches Git changes live, applies deterministic policy, and optionally asks a judge model whether the diff still matches the mission — all inside a polished terminal UI.
+**ScopeWarden is a Rust CLI cockpit for AI coding agents.** It records or detects a mission, watches Git changes live, applies deterministic policy, and optionally asks a judge model whether the diff still matches the mission — all inside a polished terminal UI.
 
-AgentScope does not replace Codex, Claude Code, Cursor, Gemini CLI, OpenCode, or Copilot. It sits beside them as a repo safety layer and real-time audit cockpit.
+ScopeWarden does not replace Codex, Claude Code, Cursor, Gemini CLI, OpenCode, or Copilot. It sits beside them as a repo safety layer and real-time audit cockpit.
 
 ## Install
 
 **Option 1 — pre-built binary (no Rust required):**
 
-Download the latest binary for your platform from [GitHub Releases](https://github.com/abdouloued/agentscopev2/releases):
+Download the latest binary for your platform from [GitHub Releases](https://github.com/abdouloued/scopewarden/releases):
 
 ```bash
 # macOS Apple Silicon
-curl -L https://github.com/abdouloued/agentscopev2/releases/latest/download/agentscope-aarch64-apple-darwin.tar.gz | tar xz
-sudo mv agentscope-aarch64-apple-darwin /usr/local/bin/agentscope
+curl -L https://github.com/abdouloued/scopewarden/releases/latest/download/scopewarden-aarch64-apple-darwin.tar.gz | tar xz
+sudo mv scopewarden-aarch64-apple-darwin /usr/local/bin/scopewarden
 
 # macOS Intel
-curl -L https://github.com/abdouloued/agentscopev2/releases/latest/download/agentscope-x86_64-apple-darwin.tar.gz | tar xz
-sudo mv agentscope-x86_64-apple-darwin /usr/local/bin/agentscope
+curl -L https://github.com/abdouloued/scopewarden/releases/latest/download/scopewarden-x86_64-apple-darwin.tar.gz | tar xz
+sudo mv scopewarden-x86_64-apple-darwin /usr/local/bin/scopewarden
 
 # Linux x86_64
-curl -L https://github.com/abdouloued/agentscopev2/releases/latest/download/agentscope-x86_64-linux.tar.gz | tar xz
-sudo mv agentscope-x86_64-linux /usr/local/bin/agentscope
+curl -L https://github.com/abdouloued/scopewarden/releases/latest/download/scopewarden-x86_64-linux.tar.gz | tar xz
+sudo mv scopewarden-x86_64-linux /usr/local/bin/scopewarden
 ```
 
 **Option 2 — from crates.io (requires Rust):**
 
 ```bash
-cargo install agentscope
+cargo install scopewarden
 ```
 
 **Option 3 — build from source:**
 
 ```bash
-git clone https://github.com/abdouloued/agentscopev2.git
-cd agentscope
+git clone https://github.com/abdouloued/scopewarden.git
+cd scopewarden
 cargo install --path . --force
 ```
 
@@ -49,52 +49,52 @@ cargo install --path . --force
 **If installed via `cargo install`:**
 
 ```bash
-cargo uninstall agentscope
+cargo uninstall scopewarden
 ```
 
 **If installed via pre-built binary:**
 
 ```bash
-sudo rm /usr/local/bin/agentscope
+sudo rm /usr/local/bin/scopewarden
 ```
 
 **If installed via build from source into `~/.local/bin`:**
 
 ```bash
-rm ~/.local/bin/agentscope
+rm ~/.local/bin/scopewarden
 ```
 
-To also remove all AgentScope data (sessions, config):
+To also remove all ScopeWarden data (sessions, config):
 
 ```bash
-rm -rf ~/.config/agentscope ~/.local/share/agentscope
+rm -rf ~/.config/scopewarden ~/.local/share/scopewarden
 ```
 
 ## The 30-second version
 
 ```bash
-agentscope init
-agentscope start "Fix checkout button loading state" --agent codex
+scopewarden init
+scopewarden start "Fix checkout button loading state" --agent codex
 
 # Run your coding agent normally, then watch the cockpit:
-agentscope watch
+scopewarden watch
 ```
 
-If you are already inside a supported agent session, let AgentScope infer the mission:
+If you are already inside a supported agent session, let ScopeWarden infer the mission:
 
 ```bash
-agentscope agents detect
-agentscope attach --agent auto --apply
-agentscope monitor --agent auto
+scopewarden agents detect
+scopewarden attach --agent auto --apply
+scopewarden monitor --agent auto
 ```
 
-Safe default: `attach` is a dry run. It only writes `.agentscope/session.json` with `--apply`.
+Safe default: `attach` is a dry run. It only writes `.scopewarden/session.json` with `--apply`.
 
 ---
 
 ## The TUI cockpit
 
-`agentscope watch` opens a full-terminal cockpit with five modes:
+`scopewarden watch` opens a full-terminal cockpit with five modes:
 
 | Key | Mode | What you see |
 |-----|------|--------------|
@@ -136,7 +136,7 @@ Five built-in themes, switchable at any time:
 
 | Theme | Description |
 |-------|-------------|
-| `agentscope` | Default dark theme |
+| `scopewarden` | Default dark theme |
 | `codex` | Codex-inspired blue/gray |
 | `claude` | Warm amber/cream |
 | `openclaw` | OpenClaw-inspired green terminal |
@@ -179,8 +179,8 @@ Press `2` to enter Chat. Chat is full-screen and has its own compose mode:
 | `/diff [file]` | Open colored diff for selected or named file |
 | `/check` | Summarize policy status in the activity log |
 | `/problems` | Toggle blocked/suspicious filter |
-| `/allow [file\|glob]` | Persist an allow override in `agentscope.yaml` |
-| `/block [file\|glob]` | Persist a blocked pattern in `agentscope.yaml` |
+| `/allow [file\|glob]` | Persist an allow override in `scopewarden.yaml` |
+| `/block [file\|glob]` | Persist a blocked pattern in `scopewarden.yaml` |
 | `/theme [name]` | Switch the TUI theme |
 | `/agents` | Show active/stale detected agent missions |
 | `/mission` | Show full active mission context |
@@ -213,7 +213,7 @@ JUDGE  ollama / qwen3.5:2b
 DRIFT DETECTED — review suspicious files before commit
 ```
 
-AgentScope has three enforcement layers:
+ScopeWarden has three enforcement layers:
 
 | Layer | Purpose |
 |-------|---------|
@@ -230,20 +230,20 @@ Deterministic policy wins. A model can help explain drift, but it cannot make `.
 Build from source (Rust 1.75+):
 
 ```bash
-git clone https://github.com/abdouloued/agentscopev2.git
-cd agentscopev2
+git clone https://github.com/abdouloued/scopewarden.git
+cd scopewarden
 cargo build --release
-cp target/release/agentscope ~/.local/bin/
+cp target/release/scopewarden ~/.local/bin/
 ```
 
-To uninstall: `rm ~/.local/bin/agentscope`
+To uninstall: `rm ~/.local/bin/scopewarden`
 
 For local development:
 
 ```bash
 cargo build
 cargo test
-./target/debug/agentscope --help
+./target/debug/scopewarden --help
 ```
 
 ---
@@ -253,15 +253,15 @@ cargo test
 ### 1. Initialize once per repo
 
 ```bash
-agentscope init
+scopewarden init
 ```
 
-Creates `agentscope.yaml` and `.agentscope/` local session storage.
+Creates `scopewarden.yaml` and `.scopewarden/` local session storage.
 
 ### 2. Start a mission manually
 
 ```bash
-agentscope start "Fix the rate-limit bug in api/middleware.ts" --agent codex
+scopewarden start "Fix the rate-limit bug in api/middleware.ts" --agent codex
 ```
 
 Records the mission, agent label, git baseline commit, and timestamp.
@@ -269,11 +269,11 @@ Records the mission, agent label, git baseline commit, and timestamp.
 ### 3. Or attach to the current agent context
 
 ```bash
-agentscope agents detect           # show all detected missions
-agentscope agents doctor           # explain missing sources
-agentscope agents context --agent codex
-agentscope attach --agent auto     # dry-run: shows inferred mission
-agentscope attach --agent auto --apply   # write to session.json
+scopewarden agents detect           # show all detected missions
+scopewarden agents doctor           # explain missing sources
+scopewarden agents context --agent codex
+scopewarden attach --agent auto     # dry-run: shows inferred mission
+scopewarden attach --agent auto --apply   # write to session.json
 ```
 
 Low-confidence missions do not auto-attach. Use `agents doctor` when detection looks wrong.
@@ -281,16 +281,16 @@ Low-confidence missions do not auto-attach. Use `agents doctor` when detection l
 ### 4. Watch while the agent works
 
 ```bash
-agentscope watch            # open TUI cockpit (Review mode by default)
-agentscope monitor --agent auto   # detect + attach + watch in one step
+scopewarden watch            # open TUI cockpit (Review mode by default)
+scopewarden monitor --agent auto   # detect + attach + watch in one step
 ```
 
 ### 5. Check before commit
 
 ```bash
-agentscope diff --problems
-agentscope check
-agentscope check --json
+scopewarden diff --problems
+scopewarden check
+scopewarden check --json
 ```
 
 Exit code `0` = no blocked files. Exit code `1` = policy violation found.
@@ -314,15 +314,15 @@ Exit code `0` = no blocked files. Exit code `1` = policy violation found.
 
 ```bash
 ollama pull qwen3.5:2b
-agentscope judge -m qwen3.5:2b
+scopewarden judge -m qwen3.5:2b
 ```
 
 ### Switch provider
 
 ```bash
 # CLI
-agentscope config set judge.provider claude
-agentscope config set judge.model claude-3-5-haiku-20241022
+scopewarden config set judge.provider claude
+scopewarden config set judge.model claude-3-5-haiku-20241022
 
 # Or from Chat mode
 /judge-provider claude
@@ -346,7 +346,7 @@ judge:
 
 ## Policy
 
-Edit `agentscope.yaml`:
+Edit `scopewarden.yaml`:
 
 ```yaml
 policy:
@@ -391,9 +391,9 @@ Supported local context readers:
 | GitHub Copilot CLI | `~/.copilot/session-state/` |
 | VS Code Copilot Chat | `workspaceStorage/**/GitHub.copilot-chat/transcripts/` |
 
-Detection is **local-only**. AgentScope does not upload transcripts. It extracts the latest usable user task, filters out tool calls, patch hunks, and metadata, then returns a confidence score.
+Detection is **local-only**. ScopeWarden does not upload transcripts. It extracts the latest usable user task, filters out tool calls, patch hunks, and metadata, then returns a confidence score.
 
-Override paths in `agentscope.yaml`:
+Override paths in `scopewarden.yaml`:
 
 ```yaml
 agents:
@@ -433,37 +433,37 @@ agents:
 
 | Command | What it does |
 |---------|--------------|
-| `agentscope init` | Create `agentscope.yaml` and local session storage |
-| `agentscope start "mission" --agent codex` | Start a manual mission |
-| `agentscope watch` | Open the TUI cockpit |
-| `agentscope monitor --agent auto` | Detect context, attach, and watch in one step |
-| `agentscope agents detect` | Show supported agents and detected missions |
-| `agentscope agents doctor` | Explain missing sources and checked paths |
-| `agentscope agents context --agent auto` | Print one inferred context in detail |
-| `agentscope attach --agent auto` | Dry-run mission inference |
-| `agentscope attach --agent auto --apply` | Write inferred mission to `.agentscope/session.json` |
-| `agentscope diff --problems` | Show only suspicious and blocked changed files |
-| `agentscope check` | Enforce policy and scope checks |
-| `agentscope check --json` | Machine-readable policy check output |
-| `agentscope judge -m qwen3.5:2b` | Run optional LLM drift review |
-| `agentscope model list` | List judge models and providers |
-| `agentscope model set <model>` | Set default judge model |
-| `agentscope config show` | Print effective configuration |
-| `agentscope config set <key> <value>` | Set a configuration value |
-| `agentscope config edit` | Open config file in `$EDITOR` |
-| `agentscope config reset [solo\|team\|ci]` | Reset to a preset |
-| `agentscope hook install` | Install a pre-commit safety hook |
-| `agentscope hook uninstall` | Remove the pre-commit hook |
-| `agentscope report --markdown` | Generate a shareable report |
-| `agentscope mcp` | Expose JSON-RPC tools for compatible agents |
-| `agentscope skills install --agent all` | Generate project-local instruction files |
-| `agentscope plugins install --agent all` | Generate project-local plugin assets |
+| `scopewarden init` | Create `scopewarden.yaml` and local session storage |
+| `scopewarden start "mission" --agent codex` | Start a manual mission |
+| `scopewarden watch` | Open the TUI cockpit |
+| `scopewarden monitor --agent auto` | Detect context, attach, and watch in one step |
+| `scopewarden agents detect` | Show supported agents and detected missions |
+| `scopewarden agents doctor` | Explain missing sources and checked paths |
+| `scopewarden agents context --agent auto` | Print one inferred context in detail |
+| `scopewarden attach --agent auto` | Dry-run mission inference |
+| `scopewarden attach --agent auto --apply` | Write inferred mission to `.scopewarden/session.json` |
+| `scopewarden diff --problems` | Show only suspicious and blocked changed files |
+| `scopewarden check` | Enforce policy and scope checks |
+| `scopewarden check --json` | Machine-readable policy check output |
+| `scopewarden judge -m qwen3.5:2b` | Run optional LLM drift review |
+| `scopewarden model list` | List judge models and providers |
+| `scopewarden model set <model>` | Set default judge model |
+| `scopewarden config show` | Print effective configuration |
+| `scopewarden config set <key> <value>` | Set a configuration value |
+| `scopewarden config edit` | Open config file in `$EDITOR` |
+| `scopewarden config reset [solo\|team\|ci]` | Reset to a preset |
+| `scopewarden hook install` | Install a pre-commit safety hook |
+| `scopewarden hook uninstall` | Remove the pre-commit hook |
+| `scopewarden report --markdown` | Generate a shareable report |
+| `scopewarden mcp` | Expose JSON-RPC tools for compatible agents |
+| `scopewarden skills install --agent all` | Generate project-local instruction files |
+| `scopewarden plugins install --agent all` | Generate project-local plugin assets |
 
 ---
 
 ## MCP, skills, and plugins
 
-`agentscope mcp` exposes these JSON methods:
+`scopewarden mcp` exposes these JSON methods:
 
 | Method | Purpose |
 |--------|---------|
@@ -474,12 +474,12 @@ agents:
 | `agent_context` | Return one agent context |
 | `agent_attach` | Point compatible tools to safe attach behavior |
 
-Skills and plugins are generated local assets (not a marketplace integration). They give agents and editors clear instructions for when to run AgentScope:
+Skills and plugins are generated local assets (not a marketplace integration). They give agents and editors clear instructions for when to run ScopeWarden:
 
 ```bash
-agentscope skills list --agent all
-agentscope skills install --agent codex
-agentscope plugins install --agent all
+scopewarden skills list --agent all
+scopewarden skills install --agent codex
+scopewarden plugins install --agent all
 ```
 
 ---
@@ -487,9 +487,9 @@ agentscope plugins install --agent all
 ## Configuration presets
 
 ```bash
-agentscope config reset solo    # individual developer, max_files 20, judge enabled
-agentscope config reset team    # shared logs, max_files 10, judge enabled
-agentscope config reset ci      # max_files 5, judge disabled, JSON output
+scopewarden config reset solo    # individual developer, max_files 20, judge enabled
+scopewarden config reset team    # shared logs, max_files 10, judge enabled
+scopewarden config reset ci      # max_files 5, judge disabled, JSON output
 ```
 
 ---
@@ -497,8 +497,8 @@ agentscope config reset ci      # max_files 5, judge disabled, JSON output
 ## CI
 
 ```bash
-agentscope check --json > agentscope-report.json
-agentscope check
+scopewarden check --json > scopewarden-report.json
+scopewarden check
 ```
 
 GitHub Actions example:
@@ -506,8 +506,8 @@ GitHub Actions example:
 ```yaml
 - name: Audit agent changes
   run: |
-    agentscope check --json > agentscope-report.json
-    agentscope check
+    scopewarden check --json > scopewarden-report.json
+    scopewarden check
 ```
 
 ---
@@ -516,31 +516,31 @@ GitHub Actions example:
 
 ### `watch` shows the old mission
 
-`watch` reads `.agentscope/session.json`. Update it:
+`watch` reads `.scopewarden/session.json`. Update it:
 
 ```bash
-agentscope start "new mission" --agent codex
+scopewarden start "new mission" --agent codex
 # or
-agentscope attach --agent auto --apply
+scopewarden attach --agent auto --apply
 ```
 
 ### Agent detection says `not found`
 
 ```bash
-agentscope agents doctor
+scopewarden agents doctor
 ```
 
 | Situation | Fix |
 |-----------|-----|
 | Agent has no logs yet | Run the agent once, then detect again |
-| Agent stores logs elsewhere | Add `agents.sources.<agent>.paths` in `agentscope.yaml` |
-| Detection confidence is low | Use `agentscope start "mission"` |
+| Agent stores logs elsewhere | Add `agents.sources.<agent>.paths` in `scopewarden.yaml` |
+| Detection confidence is low | Use `scopewarden start "mission"` |
 | Multiple agents present | Reorder `agents.preferred` |
 
 ### The inferred mission is wrong
 
 ```bash
-agentscope start "exact mission here" --agent codex
+scopewarden start "exact mission here" --agent codex
 ```
 
 Then open an issue with a sanitized sample of the local log format.
@@ -559,7 +559,7 @@ Check the required env var for your provider:
 
 ### Terminal is too narrow
 
-AgentScope adapts to terminal width:
+ScopeWarden adapts to terminal width:
 
 - **≥ 120 cols**: Side-by-side file list + decision panel
 - **< 120 cols**: Stacked vertical layout
@@ -585,4 +585,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for contributor workflow and project stru
 ## License
 
 MIT + Commons Clause. Free to use and modify; commercial resale/hosting of
-AgentScope as a service is not permitted. See [LICENSE](LICENSE).
+ScopeWarden as a service is not permitted. See [LICENSE](LICENSE).

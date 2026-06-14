@@ -1,0 +1,2384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScopeWarden — Staff/Tech Lead Interview Prep</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DESIGN SYSTEM
+   ============================================================ */
+:root {
+  --bg-primary: #0a0e1a;
+  --bg-secondary: #111827;
+  --bg-card: #1a2235;
+  --bg-card-hover: #1e2a42;
+  --bg-code: #0d1117;
+
+  --accent-primary: #6366f1;
+  --accent-secondary: #818cf8;
+  --accent-glow: rgba(99, 102, 241, 0.15);
+  --accent-cyan: #22d3ee;
+  --accent-emerald: #34d399;
+  --accent-amber: #fbbf24;
+  --accent-rose: #fb7185;
+  --accent-purple: #a78bfa;
+
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  --border: rgba(99, 102, 241, 0.15);
+  --border-light: rgba(255, 255, 255, 0.06);
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 30px var(--accent-glow);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; font-size: 16px; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(10, 14, 26, 0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  transition: all 0.3s ease;
+}
+
+.nav-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.nav-brand .logo {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-cyan));
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
+.nav-links {
+  display: flex;
+  gap: 4px;
+  list-style: none;
+  flex-wrap: wrap;
+}
+
+.nav-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.nav-links a:hover, .nav-links a.active {
+  color: var(--accent-secondary);
+  background: var(--accent-glow);
+}
+
+.nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 2rem 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -200px;
+  right: -200px;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -100px;
+  left: -100px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-content {
+  max-width: 900px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: var(--accent-glow);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent-secondary);
+  margin-bottom: 2rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.hero-badge .dot {
+  width: 6px;
+  height: 6px;
+  background: var(--accent-emerald);
+  border-radius: 50%;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.hero h1 {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 900;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.03em;
+}
+
+.hero h1 .gradient-text {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-cyan), var(--accent-emerald));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero p {
+  font-size: 1.15rem;
+  color: var(--text-secondary);
+  max-width: 640px;
+  margin: 0 auto 2.5rem;
+  line-height: 1.8;
+}
+
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  flex-wrap: wrap;
+}
+
+.hero-stat {
+  text-align: center;
+}
+
+.hero-stat .number {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--accent-secondary);
+  font-family: var(--font-mono);
+}
+
+.hero-stat .label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 4px;
+}
+
+/* ============================================================
+   SECTIONS
+   ============================================================ */
+.section {
+  padding: 80px 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 0.75rem;
+}
+
+.section-title {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+}
+
+.section-subtitle {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   CARDS & GRID
+   ============================================================ */
+.card-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.card-grid-2 { grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); }
+.card-grid-3 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.card-grid-4 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+}
+
+.card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+}
+
+.card-icon.indigo { background: rgba(99, 102, 241, 0.15); }
+.card-icon.cyan { background: rgba(34, 211, 238, 0.15); }
+.card-icon.emerald { background: rgba(52, 211, 153, 0.15); }
+.card-icon.amber { background: rgba(251, 191, 36, 0.15); }
+.card-icon.rose { background: rgba(251, 113, 133, 0.15); }
+.card-icon.purple { background: rgba(167, 139, 250, 0.15); }
+
+.card h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.card p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* ============================================================
+   ARCHITECTURE DIAGRAM
+   ============================================================ */
+.arch-diagram {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: 2.5rem;
+  margin: 2rem 0;
+  overflow-x: auto;
+}
+
+.arch-layers {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.arch-layer {
+  border: 1px solid var(--border);
+  padding: 1.25rem 1.75rem;
+  text-align: center;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.arch-layer:first-child { border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+.arch-layer:last-child { border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+
+.arch-layer:hover {
+  background: var(--bg-card-hover);
+  z-index: 1;
+}
+
+.arch-layer .layer-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 0.35rem;
+}
+
+.arch-layer .layer-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.arch-layer .layer-desc {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.arch-layer .layer-tech {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.tech-badge {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  padding: 2px 10px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-light);
+}
+
+/* Arrow between layers */
+.arch-arrow {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 1rem;
+  padding: 4px 0;
+}
+
+/* ============================================================
+   CODE BLOCKS
+   ============================================================ */
+.code-block {
+  background: var(--bg-code);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1.5rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+  position: relative;
+}
+
+.code-block code {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.code-block .comment { color: var(--text-muted); }
+.code-block .keyword { color: var(--accent-rose); }
+.code-block .type { color: var(--accent-cyan); }
+.code-block .string { color: var(--accent-emerald); }
+.code-block .function { color: var(--accent-secondary); }
+.code-block .attr { color: var(--accent-amber); }
+
+.code-label {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ============================================================
+   TABLES
+   ============================================================ */
+.table-wrap {
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+thead th {
+  background: var(--bg-card);
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+}
+
+tbody td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-secondary);
+}
+
+tbody tr:hover { background: var(--bg-card); }
+
+tbody tr:last-child td { border-bottom: none; }
+
+/* ============================================================
+   STATUS BADGES
+   ============================================================ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 100px;
+  letter-spacing: 0.03em;
+}
+
+.badge-expected { background: rgba(52, 211, 153, 0.15); color: var(--accent-emerald); }
+.badge-suspicious { background: rgba(251, 191, 36, 0.15); color: var(--accent-amber); }
+.badge-blocked { background: rgba(251, 113, 133, 0.15); color: var(--accent-rose); }
+.badge-ignored { background: rgba(100, 116, 139, 0.15); color: var(--text-muted); }
+
+/* ============================================================
+   DEEP DIVE SECTIONS
+   ============================================================ */
+.deep-dive {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: 3rem;
+  margin: 3rem 0;
+}
+
+.deep-dive-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.deep-dive-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.deep-dive-header h2 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.deep-dive-header p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+.deep-dive h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 2rem 0 0.75rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.deep-dive h3::before {
+  content: '';
+  width: 3px;
+  height: 18px;
+  background: var(--accent-primary);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.deep-dive h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 1.5rem 0 0.5rem;
+  color: var(--accent-secondary);
+}
+
+.deep-dive ul {
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+
+.deep-dive li {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 0.35rem;
+  line-height: 1.6;
+}
+
+.deep-dive li strong {
+  color: var(--text-primary);
+}
+
+/* ============================================================
+   FLOW DIAGRAM
+   ============================================================ */
+.flow-diagram {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 1.5rem 0;
+  max-width: 700px;
+}
+
+.flow-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem 0;
+  position: relative;
+}
+
+.flow-step::before {
+  content: '';
+  position: absolute;
+  left: 17px;
+  top: 44px;
+  bottom: -4px;
+  width: 2px;
+  background: var(--border);
+}
+
+.flow-step:last-child::before { display: none; }
+
+.flow-number {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--accent-glow);
+  border: 2px solid var(--accent-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--accent-secondary);
+  flex-shrink: 0;
+}
+
+.flow-content {
+  flex: 1;
+  padding-top: 4px;
+}
+
+.flow-content .module {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--accent-cyan);
+  margin-bottom: 2px;
+}
+
+.flow-content .desc {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+/* ============================================================
+   INTERVIEW Q&A
+   ============================================================ */
+.qa-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  margin: 1rem 0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.qa-card:hover { border-color: var(--border); }
+
+.qa-question {
+  padding: 1.25rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+}
+
+.qa-question::after {
+  content: '▸';
+  color: var(--text-muted);
+  transition: transform 0.3s ease;
+  font-size: 0.8rem;
+}
+
+.qa-card.open .qa-question::after { transform: rotate(90deg); }
+
+.qa-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+
+.qa-card.open .qa-answer { max-height: 2000px; }
+
+.qa-answer-inner {
+  padding: 0 1.5rem 1.5rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  border-top: 1px solid var(--border-light);
+  padding-top: 1.25rem;
+}
+
+/* ============================================================
+   TALKING POINTS
+   ============================================================ */
+.talking-point {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(34, 211, 238, 0.03));
+  border-left: 3px solid var(--accent-primary);
+  padding: 1rem 1.5rem;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.talking-point strong { color: var(--accent-secondary); }
+
+/* ============================================================
+   PATTERN CARD
+   ============================================================ */
+.pattern-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.pattern-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  transition: all 0.3s ease;
+}
+
+.pattern-card:hover {
+  border-color: var(--border);
+  background: var(--bg-card-hover);
+}
+
+.pattern-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+}
+
+.pattern-where {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--accent-cyan);
+  margin-bottom: 0.5rem;
+}
+
+.pattern-desc {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ============================================================
+   TOC SIDEBAR (for larger screens)
+   ============================================================ */
+.toc {
+  position: fixed;
+  left: 0;
+  top: 64px;
+  bottom: 0;
+  width: 240px;
+  padding: 2rem 1rem 2rem 1.5rem;
+  overflow-y: auto;
+  display: none;
+}
+
+.toc-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.toc a {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 4px 0 4px 12px;
+  border-left: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.toc a:hover, .toc a.active {
+  color: var(--accent-secondary);
+  border-left-color: var(--accent-primary);
+}
+
+@media (min-width: 1600px) {
+  .toc { display: block; }
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.footer {
+  text-align: center;
+  padding: 3rem 2rem;
+  border-top: 1px solid var(--border-light);
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+/* ============================================================
+   DIVIDER
+   ============================================================ */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .nav-toggle { display: block; }
+  .nav.open .nav-links {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 64px;
+    left: 0;
+    right: 0;
+    background: rgba(10, 14, 26, 0.95);
+    backdrop-filter: blur(20px);
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero { padding-top: 80px; min-height: auto; }
+  .hero-stats { gap: 1.5rem; }
+  .card-grid-2, .card-grid-3 { grid-template-columns: 1fr; }
+  .deep-dive { padding: 1.5rem; }
+  .arch-diagram { padding: 1.25rem; }
+  .section { padding: 40px 1rem; }
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-in {
+  opacity: 0;
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+
+/* ============================================================
+   PRINT STYLES
+   ============================================================ */
+@media print {
+  .nav, .toc, .nav-toggle { display: none !important; }
+  .hero { min-height: auto; padding: 2rem; }
+  .section { padding: 1rem; }
+  .card:hover, .qa-card:hover { transform: none; box-shadow: none; }
+  body { background: white; color: #1a1a1a; }
+  .deep-dive { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     NAVIGATION
+     ============================================================ -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="#top" class="nav-brand">
+      <span class="logo">🛡</span>
+      ScopeWarden
+    </a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#policy-engine">Policy</a></li>
+      <li><a href="#diff-analysis">Diff</a></li>
+      <li><a href="#judge-system">Judge</a></li>
+      <li><a href="#tui">TUI</a></li>
+      <li><a href="#hooks">Hooks</a></li>
+      <li><a href="#chat-system">Chat</a></li>
+      <li><a href="#launcher-lab">Launchers</a></li>
+      <li><a href="#mcp">MCP/Agents</a></li>
+      <li><a href="#plugins">Plugins</a></li>
+      <li><a href="#patterns">Patterns</a></li>
+      <li><a href="#tradeoffs">Why This Architecture</a></li>
+      <li><a href="#qa">Q&A</a></li>
+    </ul>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">☰</button>
+  </div>
+</nav>
+
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<section class="hero" id="top">
+  <div class="hero-content animate-in">
+    <div class="hero-badge"><span class="dot"></span> Interview Preparation Guide</div>
+    <h1>
+      <span class="gradient-text">ScopeWarden</span><br>
+      System Design Deep-Dive
+    </h1>
+    <p>
+      A scope firewall and audit cockpit for AI coding agents.
+      This document covers the entire system architecture — from high-level design to implementation details — structured for staff and tech lead interviews.
+    </p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="number">17</div>
+        <div class="label">Rust Modules</div>
+      </div>
+      <div class="hero-stat">
+        <div class="number">13</div>
+        <div class="label">Agent Integrations</div>
+      </div>
+      <div class="hero-stat">
+        <div class="number">6</div>
+        <div class="label">LLM Providers</div>
+      </div>
+      <div class="hero-stat">
+        <div class="number">5</div>
+        <div class="label">TUI Modes</div>
+      </div>
+      <div class="hero-stat">
+        <div class="number">434K</div>
+        <div class="label">Lines of Rust</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================================
+     OVERVIEW
+     ============================================================ -->
+<section class="section" id="overview">
+  <div class="section-header animate-in">
+    <div class="section-label">The Problem & Solution</div>
+    <h2 class="section-title">What is ScopeWarden?</h2>
+    <p class="section-subtitle">A guardrail system that ensures AI coding agents stay within the bounds of their declared mission.</p>
+  </div>
+
+  <div class="card-grid card-grid-3 animate-in delay-1">
+    <div class="card">
+      <div class="card-icon indigo">🎯</div>
+      <h3>Mission Scoping</h3>
+      <p>Agents declare what they're working on. Every file change is evaluated against that mission to detect scope creep.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon rose">🛡</div>
+      <h3>Policy Enforcement</h3>
+      <p>Deterministic rules block changes to sensitive files (<code>.env</code>, secrets, keys). No LLM can override blocked patterns — hard stops.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon cyan">📊</div>
+      <h3>Live Audit Cockpit</h3>
+      <p>A 5-mode terminal UI for real-time monitoring: Review, Chat, Dashboard, Sessions, and Live file watching.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon emerald">🤖</div>
+      <h3>Agent Agnostic</h3>
+      <p>Works with Claude Code, Codex, Gemini, Cursor — any agent that can execute shell commands. Zero lock-in.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon amber">⚖️</div>
+      <h3>LLM Judge</h3>
+      <p>Optional AI-powered assessment of whether changes match the mission. Supports 5 providers including local Ollama.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon purple">📝</div>
+      <h3>Session Tracking</h3>
+      <p>Every agent session is recorded with timestamps, check results, and files changed — full audit trail.</p>
+    </div>
+  </div>
+
+  <div class="talking-point" style="margin-top: 2rem;">
+    <strong>🎤 Elevator Pitch:</strong> "ScopeWarden is a scope firewall I built in Rust that sits between AI coding agents and your codebase. It combines deterministic policy enforcement — like blocking <code>.env</code> files — with an optional LLM judge that evaluates whether changes match the declared mission. It's agent-agnostic by design: thin configuration adapters for each AI agent, but the core CLI is completely decoupled. Think of it as a security + governance layer for the emerging AI-assisted development workflow."
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================================
+     ARCHITECTURE
+     ============================================================ -->
+<section class="section" id="architecture">
+  <div class="section-header">
+    <div class="section-label">System Design</div>
+    <h2 class="section-title">Overall Architecture</h2>
+    <p class="section-subtitle">A layered, agent-agnostic architecture built on Rust, Git, and declarative policies.</p>
+  </div>
+
+  <div class="arch-diagram">
+    <div class="arch-layers">
+      <div class="arch-layer" style="background: rgba(99, 102, 241, 0.06);">
+        <div class="layer-label" style="color: var(--accent-secondary);">Layer 5 — Consumer Layer</div>
+        <div class="layer-title">AI Coding Agents</div>
+        <div class="layer-desc">Claude Code · OpenAI Codex · Google Gemini · Cursor</div>
+        <div class="layer-tech">
+          <span class="tech-badge">CLAUDE.md</span>
+          <span class="tech-badge">AGENTS.md</span>
+          <span class="tech-badge">.codex/</span>
+          <span class="tech-badge">.cursor/</span>
+        </div>
+      </div>
+
+      <div class="arch-layer" style="background: rgba(167, 139, 250, 0.06);">
+        <div class="layer-label" style="color: var(--accent-purple);">Layer 4 — Agent Config Adapters</div>
+        <div class="layer-title">Integration Layer</div>
+        <div class="layer-desc">Thin adapter files translating ScopeWarden commands into each agent's config format</div>
+        <div class="layer-tech">
+          <span class="tech-badge">slash commands</span>
+          <span class="tech-badge">instructions.md</span>
+          <span class="tech-badge">.mdc rules</span>
+          <span class="tech-badge">manifest.json</span>
+        </div>
+      </div>
+
+      <div class="arch-layer" style="background: rgba(34, 211, 238, 0.06);">
+        <div class="layer-label" style="color: var(--accent-cyan);">Layer 3 — CLI Interface</div>
+        <div class="layer-title">ScopeWarden CLI (Rust Binary)</div>
+        <div class="layer-desc">Agent-agnostic command-line tool — the core of the system</div>
+        <div class="layer-tech">
+          <span class="tech-badge">clap 4</span>
+          <span class="tech-badge">tokio</span>
+          <span class="tech-badge">ratatui</span>
+          <span class="tech-badge">reqwest</span>
+        </div>
+      </div>
+
+      <div class="arch-layer" style="background: rgba(52, 211, 153, 0.06);">
+        <div class="layer-label" style="color: var(--accent-emerald);">Layer 2 — Core Engines</div>
+        <div class="layer-title">Policy Engine · Diff Analyzer · LLM Judge · Session Manager</div>
+        <div class="layer-desc">Business logic: pattern matching, git analysis, LLM integration, persistence</div>
+        <div class="layer-tech">
+          <span class="tech-badge">glob patterns</span>
+          <span class="tech-badge">git2</span>
+          <span class="tech-badge">multi-provider LLM</span>
+          <span class="tech-badge">JSON persistence</span>
+        </div>
+      </div>
+
+      <div class="arch-layer" style="background: rgba(251, 191, 36, 0.06);">
+        <div class="layer-label" style="color: var(--accent-amber);">Layer 1 — Foundation</div>
+        <div class="layer-title">Git Repository · Configuration · File System</div>
+        <div class="layer-desc">Standard git operations, YAML config, JSON session storage</div>
+        <div class="layer-tech">
+          <span class="tech-badge">scopewarden.yaml</span>
+          <span class="tech-badge">.scopewarden/</span>
+          <span class="tech-badge">git diff</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Module Map -->
+  <h3 style="font-size: 1.3rem; font-weight: 700; margin: 3rem 0 1.5rem; text-align: center;">Module Map</h3>
+
+  <div class="card-grid card-grid-3">
+    <div class="card">
+      <h3 style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 0.95rem;">main.rs</h3>
+      <p>Entry point. Parses CLI args with <code>clap</code>, dispatches to module handlers via <code>Commands</code> enum match.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 0.95rem;">cli.rs</h3>
+      <p>CLI definitions using clap derive macros. <code>Commands</code> enum: Init, Start, Check, Watch, Judge, Diff, Status, Attach, Config.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 0.95rem;">config.rs</h3>
+      <p>Loads &amp; parses <code>scopewarden.yaml</code>. Types: <code>ScopeWardenConfig</code>, <code>PolicyConfig</code>, <code>SessionsConfig</code>. Walks up dirs to find repo root.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 0.95rem;">policy.rs</h3>
+      <p>Core policy engine. <code>PolicyEngine</code> compiles glob patterns, evaluates files → <code>PolicyVerdict</code> (Blocked/Warned/Allowed). Checks limits.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 0.95rem;">diff.rs</h3>
+      <p>Git diff analysis via <code>git2</code>. <code>ChangedFile</code> + <code>FileStatus</code> types. Classifies into <code>ScopeLabel</code>: Expected, Suspicious, Blocked, Ignored.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 0.95rem;">mission.rs</h3>
+      <p>Mission lifecycle: start → active → completed. Stores mission in <code>.scopewarden/mission.json</code>. Can infer mission from agent logs.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 0.95rem;">judge.rs</h3>
+      <p>LLM-based scope judge. <code>JudgeProvider</code> enum dispatches to Ollama/Claude/OpenAI/Gemini/OpenRouter. Returns <code>JudgeVerdict</code> with confidence + reasoning.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 0.95rem;">session.rs</h3>
+      <p>Session tracking with UUID-based persistence. Records checks, timestamps, files changed. Stores as JSON files in <code>.scopewarden/sessions/</code>.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 0.95rem;">tui.rs</h3>
+      <p>5-mode ratatui dashboard: Review, Chat, Dashboard, Sessions, Live. <code>App</code> state struct, 5 themes. MVC-like architecture.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 0.95rem;">watch.rs</h3>
+      <p>File system watcher using <code>notify</code> crate. Triggers re-classification on file changes. Event-driven, non-polling.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 0.95rem;">output.rs</h3>
+      <p>Colored terminal output with <code>colored</code> crate. Status labels, audit reports, JSON output for <code>--json</code> flag. ANSI formatting.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 0.95rem;">init.rs</h3>
+      <p>One-time repo setup: creates <code>.scopewarden/</code>, generates default <code>scopewarden.yaml</code>, updates <code>.gitignore</code>.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family: var(--font-mono); color: var(--accent-rose); font-size: 0.95rem;">agents.rs <span style="font-family: var(--font-sans); color: var(--text-muted); font-size: 0.72rem; font-weight: 400;">63KB · largest</span></h3>
+      <p>Agent detection engine + <strong>MCP JSON-RPC server</strong>. Scans 10 agent session sources, extracts missions with confidence scoring, skills/plugins install, and full MCP protocol.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family: var(--font-mono); color: var(--accent-rose); font-size: 0.95rem;">chat.rs</h3>
+      <p>Persistent chat system with ULID sessions, JSONL message store, index-based management, soft-delete → archive with restore and hard purge.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family: var(--font-mono); color: var(--accent-rose); font-size: 0.95rem;">hooks.rs</h3>
+      <p>Git pre-commit hook management. Generates shell scripts, backs up existing hooks. Install/uninstall/status lifecycle enforces scope compliance before every commit.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family: var(--font-mono); color: var(--accent-rose); font-size: 0.95rem;">launchers.rs <span style="font-family: var(--font-sans); color: var(--text-muted); font-size: 0.72rem; font-weight: 400;">24KB</span></h3>
+      <p>AI Launcher Lab. Detects 6 launcher apps via PATH + macOS .app resolution. Smoke-test execution with timeout, exit code capture, and formatted reports.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family: var(--font-mono); color: var(--accent-rose); font-size: 0.95rem;">audit.rs</h3>
+      <p>Historical audit trail with time-range filtering (today, this-week, last-5). Reads append-only JSONL activity log. Relative timestamp formatting.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family: var(--font-mono); color: var(--accent-rose); font-size: 0.95rem;">models.rs <span style="font-family: var(--font-sans); color: var(--text-muted); font-size: 0.72rem; font-weight: 400;">23KB</span></h3>
+      <p>LLM model management. List/set/test/pull Ollama models. Config show/edit/reset with preset system (solo, team, CI).</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family: var(--font-mono); color: var(--accent-rose); font-size: 0.95rem;">assistant_sessions.rs</h3>
+      <p>Indexes local assistant sessions from all detected agents. Browse, list, inspect sessions with agent-specific file parsing.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family: var(--font-mono); color: var(--accent-rose); font-size: 0.95rem;">theme.rs</h3>
+      <p>5 semantic TUI themes (scopewarden, codex, claude, openclaw, high-contrast). Semantic tokens: <code>expected</code>, <code>blocked</code>, <code>accent</code>. No raw RGB values.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family: var(--font-mono); color: var(--accent-rose); font-size: 0.95rem;">git.rs</h3>
+      <p>Git via <code>git2</code> with <code>default-features = false</code> (no SSH/HTTPS). Working tree diff, rename detection, content-level diff lines. Local only.</p>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================================
+     POLICY ENGINE DEEP DIVE
+     ============================================================ -->
+<section class="section" id="policy-engine">
+  <div class="deep-dive">
+    <div class="deep-dive-header">
+      <div class="deep-dive-icon" style="background: rgba(251, 113, 133, 0.15);">🛡</div>
+      <div>
+        <h2>Policy Engine</h2>
+        <p>Deterministic rule enforcement — the security core of ScopeWarden</p>
+      </div>
+    </div>
+
+    <h3>Core Concept</h3>
+    <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 1rem;">
+      The policy engine is <strong style="color: var(--text-primary);">deterministic and non-overridable</strong>. Unlike the LLM judge, policy verdicts cannot be influenced by prompt injection or model hallucination. This is a deliberate security architecture choice.
+    </p>
+
+    <h3>Key Types</h3>
+    <div class="code-block">
+      <span class="code-label">Rust</span>
+      <code><pre><span class="keyword">pub enum</span> <span class="type">PolicyVerdict</span> {
+    <span class="string">Blocked</span>,    <span class="comment">// Hard stop — file matches a blocked pattern</span>
+    <span class="string">Warned</span>,     <span class="comment">// Soft warning — matches a warn pattern</span>
+    <span class="string">Allowed</span>,    <span class="comment">// No policy match — proceed</span>
+}
+
+<span class="keyword">pub struct</span> <span class="type">PolicyEngine</span> {
+    blocked_patterns: <span class="type">Vec</span>&lt;<span class="type">glob::Pattern</span>&gt;,
+    warn_patterns:    <span class="type">Vec</span>&lt;<span class="type">glob::Pattern</span>&gt;,
+    max_files:        <span class="type">usize</span>,
+    max_lines:        <span class="type">usize</span>,
+}</pre></code>
+    </div>
+
+    <h3>How It Works</h3>
+    <div class="flow-diagram">
+      <div class="flow-step">
+        <div class="flow-number">1</div>
+        <div class="flow-content">
+          <div class="module">config.rs → PolicyEngine::new()</div>
+          <div class="desc">Load <code>scopewarden.yaml</code>, compile glob patterns for blocked &amp; warn lists into <code>glob::Pattern</code> instances</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-number">2</div>
+        <div class="flow-content">
+          <div class="module">policy.rs → evaluate_file()</div>
+          <div class="desc">For each changed file, test path against all blocked patterns first (short-circuit), then warn patterns → <code>PolicyVerdict</code></div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-number">3</div>
+        <div class="flow-content">
+          <div class="module">policy.rs → evaluate_changeset()</div>
+          <div class="desc">Evaluate all changed files, aggregate into <code>PolicyReport</code> with counts per verdict</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-number">4</div>
+        <div class="flow-content">
+          <div class="module">policy.rs → check_limits()</div>
+          <div class="desc">Compare total file count and line count against <code>max_files_changed</code> and <code>max_lines_changed</code> thresholds</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Configuration</h3>
+    <div class="code-block">
+      <span class="code-label">YAML</span>
+      <code><pre><span class="attr">policy</span>:
+  <span class="attr">blocked</span>:
+    - <span class="string">".env"</span>              <span class="comment"># exact match</span>
+    - <span class="string">"**/.env.*"</span>         <span class="comment"># glob — any .env.* in any dir</span>
+    - <span class="string">"**/secrets/**"</span>     <span class="comment"># entire secrets directory tree</span>
+    - <span class="string">"**/*.pem"</span>          <span class="comment"># all PEM certificates</span>
+    - <span class="string">"**/*.key"</span>          <span class="comment"># all private keys</span>
+  <span class="attr">warn</span>:
+    - <span class="string">"package-lock.json"</span>
+    - <span class="string">"yarn.lock"</span>
+    - <span class="string">"Cargo.lock"</span>
+  <span class="attr">max_files_changed</span>: <span class="type">20</span>
+  <span class="attr">max_lines_changed</span>: <span class="type">800</span></pre></code>
+    </div>
+
+    <h3>Scope Labels</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Badge</th><th>Label</th><th>Meaning</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="badge badge-expected">● EXPECTED</span></td><td>Expected</td><td>File matches the active mission scope</td><td>No action needed</td></tr>
+          <tr><td><span class="badge badge-suspicious">● SUSPICIOUS</span></td><td>Suspicious</td><td>Changed but no mission rule matches</td><td>Review recommended</td></tr>
+          <tr><td><span class="badge badge-blocked">● BLOCKED</span></td><td>Blocked</td><td>Matched a blocked policy path</td><td>Hard stop — cannot proceed</td></tr>
+          <tr><td><span class="badge badge-ignored">● IGNORED</span></td><td>Ignored</td><td>Clean, stale, or explicitly excluded</td><td>Skipped</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="talking-point">
+      <strong>🎤 Interview talking point:</strong> "The policy engine is intentionally non-Turing-complete. By using declarative YAML glob patterns instead of a scripting language, I ensure that policies are auditable, version-controllable, and cannot contain logic bombs. Blocked patterns are evaluated deterministically — there's no LLM in the loop for security-critical decisions."
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================================
+     DIFF ANALYSIS DEEP DIVE
+     ============================================================ -->
+<section class="section" id="diff-analysis">
+  <div class="deep-dive">
+    <div class="deep-dive-header">
+      <div class="deep-dive-icon" style="background: rgba(34, 211, 238, 0.15);">📊</div>
+      <div>
+        <h2>Git Diff Analysis</h2>
+        <p>Pipeline-based change detection and classification</p>
+      </div>
+    </div>
+
+    <h3>Data Flow Pipeline</h3>
+    <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 1rem;">
+      The diff module implements a clean pipeline: <strong style="color: var(--accent-cyan);">Git Diff → Parse → Classify → Report</strong>
+    </p>
+
+    <div class="code-block">
+      <span class="code-label">Rust</span>
+      <code><pre><span class="keyword">pub struct</span> <span class="type">ChangedFile</span> {
+    <span class="keyword">pub</span> path:          <span class="type">String</span>,
+    <span class="keyword">pub</span> status:        <span class="type">FileStatus</span>,      <span class="comment">// Added | Modified | Deleted | Renamed</span>
+    <span class="keyword">pub</span> lines_added:   <span class="type">usize</span>,
+    <span class="keyword">pub</span> lines_deleted: <span class="type">usize</span>,
+}
+
+<span class="keyword">pub enum</span> <span class="type">ScopeLabel</span> {
+    <span class="string">Expected</span>,    <span class="comment">// Mission match + policy allowed</span>
+    <span class="string">Suspicious</span>,  <span class="comment">// No mission match, policy allowed</span>
+    <span class="string">Blocked</span>,     <span class="comment">// Policy blocked (overrides everything)</span>
+    <span class="string">Ignored</span>,     <span class="comment">// Excluded from analysis</span>
+}</pre></code>
+    </div>
+
+    <h3>Classification Logic</h3>
+    <div class="flow-diagram">
+      <div class="flow-step">
+        <div class="flow-number">1</div>
+        <div class="flow-content">
+          <div class="module">git2 → get_changed_files()</div>
+          <div class="desc">Use libgit2 binding to compare HEAD vs. working tree — no shell subprocess spawning</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-number">2</div>
+        <div class="flow-content">
+          <div class="module">For each file → policy.evaluate_file()</div>
+          <div class="desc">Check against blocked patterns first (short-circuit on match), then warn patterns</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-number">3</div>
+        <div class="flow-content">
+          <div class="module">Match against mission.expected_paths</div>
+          <div class="desc">If policy allows, check whether the file path matches any glob in the mission's expected paths</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-number">4</div>
+        <div class="flow-content">
+          <div class="module">Combine → ScopeLabel</div>
+          <div class="desc">Blocked overrides all. Expected = policy OK + mission match. Suspicious = policy OK + no mission match.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="talking-point">
+      <strong>🎤 Interview talking point:</strong> "I chose <code>git2</code> (libgit2 Rust binding) over shelling out to <code>git</code> for three reasons: no process spawning overhead, structured data access instead of string parsing, and cross-platform reliability. The tradeoff is a larger binary and a C dependency, but for a tool that runs on every commit check, the performance gain matters."
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================================
+     LLM JUDGE DEEP DIVE
+     ============================================================ -->
+<section class="section" id="judge-system">
+  <div class="deep-dive">
+    <div class="deep-dive-header">
+      <div class="deep-dive-icon" style="background: rgba(251, 191, 36, 0.15);">⚖️</div>
+      <div>
+        <h2>LLM Judge System</h2>
+        <p>Multi-provider AI assessment with structured output</p>
+      </div>
+    </div>
+
+    <h3>Architecture: Strategy Pattern</h3>
+    <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 1rem;">
+      The judge uses the <strong style="color: var(--text-primary);">Strategy pattern</strong> — a <code>JudgeProvider</code> enum dispatches to provider-specific API implementations. This keeps the core logic clean while supporting 5 different LLM backends.
+    </p>
+
+    <div class="code-block">
+      <span class="code-label">Rust</span>
+      <code><pre><span class="keyword">pub enum</span> <span class="type">JudgeProvider</span> {
+    Ollama,     <span class="comment">// Local, private — no API key needed</span>
+    Claude,     <span class="comment">// requires ANTHROPIC_API_KEY</span>
+    OpenAi,     <span class="comment">// requires OPENAI_API_KEY</span>
+    Gemini,     <span class="comment">// requires GEMINI_API_KEY</span>
+    OpenRouter, <span class="comment">// requires OPENROUTER_API_KEY</span>
+}
+
+<span class="keyword">pub struct</span> <span class="type">JudgeVerdict</span> {
+    <span class="keyword">pub</span> file:       <span class="type">String</span>,
+    <span class="keyword">pub</span> relevant:   <span class="type">bool</span>,
+    <span class="keyword">pub</span> confidence: <span class="type">f64</span>,     <span class="comment">// 0.0 to 1.0</span>
+    <span class="keyword">pub</span> reasoning:  <span class="type">String</span>,
+}</pre></code>
+    </div>
+
+    <h3>Provider Architecture</h3>
+    <div class="card-grid card-grid-3" style="margin: 1rem 0;">
+      <div class="card">
+        <div class="card-icon emerald">🏠</div>
+        <h3>Ollama (Local)</h3>
+        <p>Default provider. Runs locally — zero data leaves the machine. Best for sensitive codebases. No API key required.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon purple">☁️</div>
+        <h3>Cloud Providers</h3>
+        <p>Claude, OpenAI, Gemini — higher quality judgments but requires API keys and sends code to external services.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon amber">🌐</div>
+        <h3>OpenRouter</h3>
+        <p>Meta-provider — access to hundreds of models through one API. Good for experimentation and comparison.</p>
+      </div>
+    </div>
+
+    <h3>Deterministic + LLM Hybrid Design</h3>
+    <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 1rem;">
+      Critical design decision: the judge is an <em>additional</em> layer, not a replacement for the policy engine.
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Aspect</th><th>Policy Engine</th><th>LLM Judge</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Nature</strong></td><td>Deterministic</td><td>Probabilistic</td></tr>
+          <tr><td><strong>Override-able</strong></td><td>No — hard enforcement</td><td>Advisory only</td></tr>
+          <tr><td><strong>Speed</strong></td><td>Microseconds (glob matching)</td><td>Seconds (API calls)</td></tr>
+          <tr><td><strong>Accuracy</strong></td><td>Perfect for known patterns</td><td>Best for semantic judgment</td></tr>
+          <tr><td><strong>Attack surface</strong></td><td>None (no LLM)</td><td>Prompt injection possible</td></tr>
+          <tr><td><strong>Offline capable</strong></td><td>Yes</td><td>Ollama only</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="talking-point">
+      <strong>🎤 Interview talking point:</strong> "This is a defense-in-depth design. The deterministic policy engine provides the security floor — it's fast, offline-capable, and immune to prompt injection. The LLM judge adds semantic intelligence on top: it can understand whether a change to <code>utils.rs</code> is related to a 'fix login bug' mission even if the file isn't in the expected paths list. But it can never override a BLOCKED verdict."
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================================
+     TUI DEEP DIVE
+     ============================================================ -->
+<section class="section" id="tui">
+  <div class="deep-dive">
+    <div class="deep-dive-header">
+      <div class="deep-dive-icon" style="background: rgba(99, 102, 241, 0.15);">🖥</div>
+      <div>
+        <h2>TUI Cockpit</h2>
+        <p>Real-time terminal dashboard with 5 modes and 5 themes</p>
+      </div>
+    </div>
+
+    <h3>MVC-like Architecture</h3>
+    <div class="code-block">
+      <span class="code-label">Rust</span>
+      <code><pre><span class="comment">// MODEL — Application state</span>
+<span class="keyword">pub struct</span> <span class="type">App</span> {
+    <span class="keyword">pub</span> mode:           <span class="type">TuiMode</span>,
+    <span class="keyword">pub</span> files:          <span class="type">Vec</span>&lt;<span class="type">ClassifiedFile</span>&gt;,
+    <span class="keyword">pub</span> selected:       <span class="type">usize</span>,
+    <span class="keyword">pub</span> mission:        <span class="type">Option</span>&lt;<span class="type">Mission</span>&gt;,
+    <span class="keyword">pub</span> sessions:       <span class="type">Vec</span>&lt;<span class="type">Session</span>&gt;,
+    <span class="keyword">pub</span> show_diff:      <span class="type">bool</span>,
+    <span class="keyword">pub</span> judge_results:  <span class="type">Vec</span>&lt;<span class="type">JudgeVerdict</span>&gt;,
+    <span class="keyword">pub</span> theme:          <span class="type">Theme</span>,
+}
+
+<span class="comment">// STATE MACHINE — drives rendering</span>
+<span class="keyword">pub enum</span> <span class="type">TuiMode</span> {
+    Review,     <span class="comment">// 1 — file-by-file review with diffs</span>
+    Chat,       <span class="comment">// 2 — chat interface for judge</span>
+    Dashboard,  <span class="comment">// 3 — overview statistics</span>
+    Sessions,   <span class="comment">// 4 — session history</span>
+    Live,       <span class="comment">// 5 — live file watching</span>
+}</pre></code>
+    </div>
+
+    <h3>TUI Modes</h3>
+    <div class="card-grid card-grid-3" style="margin: 1rem 0;">
+      <div class="card">
+        <h3 style="color: var(--accent-cyan);">1 · Review</h3>
+        <p>File-by-file review showing scope labels, diffs, and policy verdicts. Press Enter to expand diff overlay.</p>
+      </div>
+      <div class="card">
+        <h3 style="color: var(--accent-purple);">2 · Chat</h3>
+        <p>Interactive judge interface. Ask the LLM to evaluate specific files. Natural language scope assessment.</p>
+      </div>
+      <div class="card">
+        <h3 style="color: var(--accent-emerald);">3 · Dashboard</h3>
+        <p>Aggregate statistics: files changed, lines modified, verdict distribution, limit status.</p>
+      </div>
+      <div class="card">
+        <h3 style="color: var(--accent-amber);">4 · Sessions</h3>
+        <p>Historical session browser. See past missions, check results, and audit trails.</p>
+      </div>
+      <div class="card">
+        <h3 style="color: var(--accent-rose);">5 · Live</h3>
+        <p>Real-time file system monitoring. Uses <code>notify</code> crate for event-driven updates — no polling.</p>
+      </div>
+    </div>
+
+    <h3>Keyboard Shortcuts</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Key</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>1</code>–<code>5</code></td><td>Switch mode (Review/Chat/Dashboard/Sessions/Live)</td></tr>
+          <tr><td><code>Enter</code></td><td>Open diff overlay for selected file</td></tr>
+          <tr><td><code>j</code></td><td>Run judge on selected file</td></tr>
+          <tr><td><code>a</code> / <code>b</code></td><td>Allow / block selected file</td></tr>
+          <tr><td><code>t</code></td><td>Cycle themes (scopewarden / codex / claude / openclaw / high-contrast)</td></tr>
+          <tr><td><code>?</code></td><td>Help overlay</td></tr>
+          <tr><td><code>q</code></td><td>Quit</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="talking-point">
+      <strong>🎤 Interview talking point:</strong> "I built the TUI with <code>ratatui</code> (a Rust TUI framework) using an MVC-inspired architecture. The <code>App</code> struct is the model, <code>draw_*()</code> functions are views, and <code>handle_key()</code> is the controller. The <code>TuiMode</code> enum acts as a state machine that drives which view renders. I chose a TUI over a web UI because it has zero additional dependencies and fits naturally into the developer's terminal workflow."
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================================
+     GIT HOOKS DEEP DIVE
+     ============================================================ -->
+<section class="section" id="hooks">
+  <div class="deep-dive">
+    <div class="deep-dive-header">
+      <div class="deep-dive-icon" style="background: rgba(52, 211, 153, 0.15);">🪝</div>
+      <div>
+        <h2>Git Hooks Enforcement</h2>
+        <p>Automatic scope compliance — mandatory enforcement before every commit</p>
+      </div>
+    </div>
+
+    <h3>Why This Exists</h3>
+    <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 1rem;">
+      Without hooks, agents run <code>scopewarden check</code> <strong style="color: var(--text-primary);">voluntarily</strong>. An agent could simply skip the check and commit blocked files. The pre-commit hook makes enforcement <strong style="color: var(--accent-emerald);">mandatory</strong> — the commit physically cannot proceed if blocked files exist.
+    </p>
+
+    <h3>Architecture Decision: Shell Script over Binary Hook</h3>
+    <div class="card-grid card-grid-3" style="margin: 1rem 0;">
+      <div class="card">
+        <h3 style="color: var(--accent-emerald);">✅ Chose: Shell Script</h3>
+        <p>Works on any system with <code>/bin/sh</code>. Users can read and modify the hook. Self-referential — calls back to the same <code>scopewarden</code> binary.</p>
+      </div>
+      <div class="card">
+        <h3 style="color: var(--text-muted);">❌ Rejected: Binary Hook</h3>
+        <p>Would require compiling a separate binary, distributing it per-platform, and keeping it version-synced with the main CLI. Way too complex.</p>
+      </div>
+      <div class="card">
+        <h3 style="color: var(--text-muted);">❌ Rejected: husky/lint-staged</h3>
+        <p>Node.js dependency. ScopeWarden users may not have Node installed. A Rust tool shouldn't depend on the JavaScript ecosystem for enforcement.</p>
+      </div>
+    </div>
+
+    <h3>Key Design: Non-Destructive Install</h3>
+    <ul style="padding-left: 1.5rem; margin: 0.5rem 0;">
+      <li style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.35rem;"><strong style="color: var(--text-primary);">Backup</strong> — existing pre-commit hooks are copied to <code>.git/hooks/pre-commit.bak</code> before overwriting</li>
+      <li style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.35rem;"><strong style="color: var(--text-primary);">Marker detection</strong> — uses <code># ScopeWarden pre-commit hook</code> comment to identify its own hooks vs third-party</li>
+      <li style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.35rem;"><strong style="color: var(--text-primary);">Clean uninstall</strong> — removes only ScopeWarden's hook, restores backup if one exists</li>
+      <li style="color: var(--text-secondary); font-size: 0.9rem;"><strong style="color: var(--text-primary);">Escape hatch</strong> — <code>git commit --no-verify</code> always works for emergencies</li>
+    </ul>
+
+    <div class="talking-point">
+      <strong>🎤 Interview talking point:</strong> "The hook enforces policy at the git boundary — the last line of defense before code enters the repository. I deliberately chose a shell script over a compiled binary hook because transparency matters for a security tool. Users should be able to read <code>cat .git/hooks/pre-commit</code> and understand exactly what's being enforced. The non-destructive install pattern — backup, marker detection, clean uninstall — ensures we're a good citizen alongside other git hooks like prettier or eslint."
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================================
+     CHAT SYSTEM DEEP DIVE
+     ============================================================ -->
+<section class="section" id="chat-system">
+  <div class="deep-dive">
+    <div class="deep-dive-header">
+      <div class="deep-dive-icon" style="background: rgba(167, 139, 250, 0.15);">💬</div>
+      <div>
+        <h2>Chat System</h2>
+        <p>Persistent conversational scope review with LLM integration</p>
+      </div>
+    </div>
+
+    <h3>Why Not Just Binary Verdicts?</h3>
+    <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 1rem;">
+      The LLM judge returns <code>Matches | Drift | Unknown</code> — but developers need to <strong style="color: var(--text-primary);">understand why</strong>. The chat system lets users have a conversation: "Why did you flag <code>utils/crypto.rs</code>? The login bug fix needs password hashing changes." This turns the judge from a black box into an <strong style="color: var(--accent-purple);">interactive advisor</strong>.
+    </p>
+
+    <h3>Data Architecture</h3>
+    <div class="code-block">
+      <span class="code-label">Filesystem</span>
+      <code><pre><span class="comment">.scopewarden/chats/</span>
+├── <span class="attr">index.json</span>          <span class="comment"># Master index of all chat sessions</span>
+├── <span class="type">&lt;ULID&gt;</span>/
+│   ├── <span class="attr">context.json</span>    <span class="comment"># Provider, model, repo root</span>
+│   └── <span class="attr">messages.jsonl</span>  <span class="comment"># Append-only message log</span>
+└── <span class="keyword">archive/</span>
+    └── <span class="type">&lt;ULID&gt;</span>/          <span class="comment"># Soft-deleted chats (recoverable)</span></pre></code>
+    </div>
+
+    <h3>Why These Persistence Choices</h3>
+    <div class="card-grid card-grid-2" style="margin: 1rem 0;">
+      <div class="card">
+        <h3>📝 JSONL for Messages</h3>
+        <p><strong>Crash-safe:</strong> Each line is self-contained. A crash mid-write loses at most one entry. <strong>Stream-friendly:</strong> Can be tailed with <code>tail -f</code> and processed with <code>jq</code>.</p>
+      </div>
+      <div class="card">
+        <h3>🗂 Soft Delete → Archive</h3>
+        <p><strong>Recoverability:</strong> Prevents accidental data loss. <code>chat delete</code> moves to archive; <code>chat restore</code> brings it back; <code>chat purge --yes</code> permanently removes.</p>
+      </div>
+    </div>
+
+    <div class="talking-point">
+      <strong>🎤 Interview talking point:</strong> "I implemented a three-tier deletion model — active, archived, purged — because for a governance tool, audit history matters. The soft-delete pattern means accidental deletions are always recoverable. I chose JSONL over SQLite for messages because it's crash-safe (append-only), human-readable (<code>cat messages.jsonl | jq</code>), and has zero native library dependencies. This is the same format used by structured logging systems like Bunyan."
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================================
+     LAUNCHER LAB DEEP DIVE
+     ============================================================ -->
+<section class="section" id="launcher-lab">
+  <div class="deep-dive">
+    <div class="deep-dive-header">
+      <div class="deep-dive-icon" style="background: rgba(34, 211, 238, 0.15);">🚀</div>
+      <div>
+        <h2>AI Launcher Lab</h2>
+        <p>Ecosystem detection and safe smoke-testing for AI coding agents</p>
+      </div>
+    </div>
+
+    <h3>Why Ecosystem Awareness Matters</h3>
+    <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 1rem;">
+      ScopeWarden monitors <strong style="color: var(--text-primary);">multiple agents simultaneously</strong>. Users need to know which agents are installed, which are functioning, and which need attention. The Launcher Lab provides <strong style="color: var(--accent-cyan);">zero-configuration ecosystem discovery</strong>.
+    </p>
+
+    <h3>Supported Launchers</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Launcher</th><th>Detection Method</th><th>Smoke Test</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Claude Code</strong></td><td>PATH binary scan</td><td><code>claude --version</code></td></tr>
+          <tr><td><strong>Codex App</strong></td><td>macOS .app paths</td><td><code>open -Ra Codex</code></td></tr>
+          <tr><td><strong>OpenClaw</strong></td><td>PATH binary scan</td><td><code>openclaw --version</code></td></tr>
+          <tr><td><strong>Hermes Agent</strong></td><td>PATH binary scan</td><td><code>hermes --version</code></td></tr>
+          <tr><td><strong>Codex CLI</strong></td><td>PATH binary scan</td><td><code>codex --version</code></td></tr>
+          <tr><td><strong>OpenCode</strong></td><td>PATH binary scan</td><td><code>opencode --version</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Safe Smoke Testing Architecture</h3>
+    <ul style="padding-left: 1.5rem; margin: 0.5rem 0;">
+      <li style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.35rem;"><strong style="color: var(--text-primary);">Timeout management</strong> — per-launcher configurable timeout (default 8s) with clean process kill on expiry</li>
+      <li style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.35rem;"><strong style="color: var(--text-primary);">Signal isolation</strong> — sets <code>AGENTSCOPE_SMOKE_TEST=1</code> env var so agents know it's a test, not a real session</li>
+      <li style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.35rem;"><strong style="color: var(--text-primary);">Output capture</strong> — stdout/stderr captured (max 12KB) for diagnostics; exit code tracked</li>
+      <li style="color: var(--text-secondary); font-size: 0.9rem;"><strong style="color: var(--text-primary);">Status categories</strong> — PASS / FAIL / TIMEOUT / SKIP with formatted report output</li>
+    </ul>
+
+    <div class="talking-point">
+      <strong>🎤 Interview talking point:</strong> "The Launcher Lab solves the 'works on my machine' problem for AI agent toolchains. Instead of manually checking if Claude, Codex, and Hermes are installed, <code>scopewarden launchers test</code> does safe startup checks with timeout management. I implemented both PATH binary scanning and macOS <code>.app</code> bundle detection because agents ship as both CLI tools and GUI apps. The smoke tests use <code>--version</code> flags and environment signaling so they never trigger real agent sessions."
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================================
+     MCP / AGENT INTEGRATION DEEP DIVE
+     ============================================================ -->
+<section class="section" id="mcp">
+  <div class="deep-dive">
+    <div class="deep-dive-header">
+      <div class="deep-dive-icon" style="background: rgba(52, 211, 153, 0.15);">🔌</div>
+      <div>
+        <h2>Agent Integration &amp; MCP</h2>
+        <p>How ScopeWarden achieves agent-agnosticism across Claude, Codex, Gemini, and Cursor</p>
+      </div>
+    </div>
+
+    <h3>Design Philosophy</h3>
+    <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 1.5rem;">
+      ScopeWarden uses a <strong style="color: var(--text-primary);">thin adapter layer</strong> approach. The core CLI is completely agent-agnostic — it doesn't know or care which AI agent is running. Each agent gets a configuration file in its native format that teaches it <em>how</em> to use ScopeWarden.
+    </p>
+
+    <h3>Integration Architecture</h3>
+
+    <div class="card-grid card-grid-2" style="margin: 1.5rem 0;">
+      <div class="card" style="border-left: 3px solid var(--accent-purple);">
+        <h3 style="color: var(--accent-purple);">Claude Code</h3>
+        <h4 style="font-size: 0.82rem; font-family: var(--font-mono); color: var(--text-muted); margin-top: 0;">CLAUDE.md + .claude/commands/</h4>
+        <ul style="padding-left: 1.2rem; margin-top: 0.5rem;">
+          <li style="color: var(--text-secondary); font-size: 0.85rem;"><strong>CLAUDE.md</strong> — system prompt with mandatory rules</li>
+          <li style="color: var(--text-secondary); font-size: 0.85rem;"><strong>Slash commands</strong> — scope-init, scope-start, scope-check, scope-watch, scope-attach</li>
+          <li style="color: var(--text-secondary); font-size: 0.85rem;"><strong>.claude-plugin/manifest.json</strong> — distributable plugin package</li>
+        </ul>
+      </div>
+      <div class="card" style="border-left: 3px solid var(--accent-emerald);">
+        <h3 style="color: var(--accent-emerald);">OpenAI Codex</h3>
+        <h4 style="font-size: 0.82rem; font-family: var(--font-mono); color: var(--text-muted); margin-top: 0;">.codex/instructions.md</h4>
+        <ul style="padding-left: 1.2rem; margin-top: 0.5rem;">
+          <li style="color: var(--text-secondary); font-size: 0.85rem;">Single instructions file with workflow rules</li>
+          <li style="color: var(--text-secondary); font-size: 0.85rem;">Same mandatory checkpoints as Claude</li>
+          <li style="color: var(--text-secondary); font-size: 0.85rem;">Adapted to Codex's instruction format</li>
+        </ul>
+      </div>
+      <div class="card" style="border-left: 3px solid var(--accent-cyan);">
+        <h3 style="color: var(--accent-cyan);">Google Gemini</h3>
+        <h4 style="font-size: 0.82rem; font-family: var(--font-mono); color: var(--text-muted); margin-top: 0;">AGENTS.md</h4>
+        <ul style="padding-left: 1.2rem; margin-top: 0.5rem;">
+          <li style="color: var(--text-secondary); font-size: 0.85rem;">Uses Gemini's AGENTS.md convention</li>
+          <li style="color: var(--text-secondary); font-size: 0.85rem;">Quick reference tables for commands and shortcuts</li>
+          <li style="color: var(--text-secondary); font-size: 0.85rem;">Judge provider configuration docs</li>
+        </ul>
+      </div>
+      <div class="card" style="border-left: 3px solid var(--accent-amber);">
+        <h3 style="color: var(--accent-amber);">Cursor</h3>
+        <h4 style="font-size: 0.82rem; font-family: var(--font-mono); color: var(--text-muted); margin-top: 0;">.cursor/rules/scopewarden.mdc</h4>
+        <ul style="padding-left: 1.2rem; margin-top: 0.5rem;">
+          <li style="color: var(--text-secondary); font-size: 0.85rem;">Uses Cursor's MDC (Markdown Config) format</li>
+          <li style="color: var(--text-secondary); font-size: 0.85rem;"><code>alwaysApply: true</code> — rules always active</li>
+          <li style="color: var(--text-secondary); font-size: 0.85rem;">Same workflow integration rules</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Agent Workflow Integration</h3>
+    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">Every agent follows the same workflow, regardless of its configuration format:</p>
+
+    <div class="flow-diagram">
+      <div class="flow-step">
+        <div class="flow-number">1</div>
+        <div class="flow-content">
+          <div class="module">Before starting work</div>
+          <div class="desc"><code>scopewarden status</code> — Check if there's an active mission, verify the environment is ready</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-number">2</div>
+        <div class="flow-content">
+          <div class="module">Start mission</div>
+          <div class="desc"><code>scopewarden start "your mission"</code> — Declare what the agent is about to do</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-number">3</div>
+        <div class="flow-content">
+          <div class="module">During work (optional)</div>
+          <div class="desc"><code>scopewarden watch</code> — Live TUI cockpit for monitoring in real-time</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-number">4</div>
+        <div class="flow-content">
+          <div class="module">Before finishing</div>
+          <div class="desc"><code>scopewarden check</code> — Full policy check + scope audit. Must pass before commit.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-number">5</div>
+        <div class="flow-content">
+          <div class="module">Before committing</div>
+          <div class="desc"><code>scopewarden diff --problems</code> — Show only suspicious/blocked files for final review</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>MCP Relationship</h3>
+    <p style="color: var(--text-secondary); font-size: 0.92rem;">
+      ScopeWarden does <strong style="color: var(--text-primary);">not implement MCP (Model Context Protocol) directly</strong>. Instead, it's a CLI tool that MCP-enabled agents can invoke via their command execution capabilities. The relationship is:
+    </p>
+    <ul style="margin: 0.75rem 0 0 1.5rem;">
+      <li style="color: var(--text-secondary); font-size: 0.88rem;">AI agents use MCP to access tools (file read, command execution, etc.)</li>
+      <li style="color: var(--text-secondary); font-size: 0.88rem;">ScopeWarden is one such tool — invoked via shell commands</li>
+      <li style="color: var(--text-secondary); font-size: 0.88rem;">The config adapters teach agents <em>when</em> and <em>how</em> to invoke ScopeWarden</li>
+    </ul>
+
+    <div class="talking-point">
+      <strong>🎤 Interview talking point:</strong> "I designed the integration layer as thin adapters rather than building agent-specific code into the core. Adding support for a new AI agent is just creating a config file — zero Rust code changes. This is the <em>Open/Closed Principle</em> in practice: open for extension (new agents), closed for modification (core CLI). The CLI-first design means any tool that can run a shell command can use ScopeWarden, making it future-proof as new agents emerge."
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================================
+     PLUGINS DEEP DIVE
+     ============================================================ -->
+<section class="section" id="plugins">
+  <div class="deep-dive">
+    <div class="deep-dive-header">
+      <div class="deep-dive-icon" style="background: rgba(167, 139, 250, 0.15);">🧩</div>
+      <div>
+        <h2>Plugin System &amp; Distribution</h2>
+        <p>How ScopeWarden is packaged and distributed as a plugin for AI agents</p>
+      </div>
+    </div>
+
+    <h3>Claude Plugin Package</h3>
+    <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 1rem;">
+      ScopeWarden can be distributed as a <strong style="color: var(--text-primary);">reusable Claude plugin</strong> via the <code>.claude-plugin/</code> directory. This allows it to be installed across multiple projects without copying files.
+    </p>
+
+    <div class="code-block">
+      <span class="code-label">JSON</span>
+      <code><pre>{
+  <span class="attr">"name"</span>: <span class="string">"scopewarden"</span>,
+  <span class="attr">"version"</span>: <span class="string">"0.2.0"</span>,
+  <span class="attr">"description"</span>: <span class="string">"Scope firewall and audit cockpit for AI coding agents"</span>,
+  <span class="attr">"instructions"</span>: <span class="string">"AGENTS.md"</span>
+}</pre></code>
+    </div>
+
+    <h3>Internal Architecture as "Pluggable" Modules</h3>
+    <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 1rem;">
+      While the <code>plugins/</code> directory is reserved for future external plugins, the core system itself is designed with pluggable components:
+    </p>
+
+    <div class="card-grid card-grid-2" style="margin: 1rem 0;">
+      <div class="card">
+        <h3>🔌 Pluggable Judge Providers</h3>
+        <p>5 LLM backends via <code>JudgeProvider</code> enum. Adding a new provider = adding an enum variant + API call function. Strategy pattern.</p>
+      </div>
+      <div class="card">
+        <h3>🎨 Pluggable TUI Themes</h3>
+        <p>5 built-in themes (scopewarden, codex, claude, openclaw, high-contrast). <code>Theme</code> struct with color fields — easy to extend.</p>
+      </div>
+      <div class="card">
+        <h3>📋 Pluggable Agent Configs</h3>
+        <p>Each agent's config is an independent file in its own format. No coupling between agents. Adding a new agent = new config file.</p>
+      </div>
+      <div class="card">
+        <h3>📏 Pluggable Policy Rules</h3>
+        <p>Declarative YAML patterns. Users can customize blocked/warn lists and limits without touching code. Version-controlled alongside the project.</p>
+      </div>
+    </div>
+
+    <h3>Extensibility Points</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Extension Point</th><th>Mechanism</th><th>Effort to Add</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>New AI agent</td><td>Config file in agent's native format</td><td>~30 min (no Rust)</td></tr>
+          <tr><td>New LLM judge provider</td><td>Enum variant + API function</td><td>~2 hours (Rust)</td></tr>
+          <tr><td>New TUI theme</td><td>Theme struct instance</td><td>~15 min (Rust)</td></tr>
+          <tr><td>New policy pattern type</td><td>PolicyConfig field + evaluation logic</td><td>~1 hour (Rust)</td></tr>
+          <tr><td>New TUI mode</td><td>TuiMode variant + draw function</td><td>~4 hours (Rust)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="talking-point">
+      <strong>🎤 Interview talking point:</strong> "The plugin architecture follows the principle of <em>convention over configuration</em>. Each AI agent has its own convention for how instructions are provided — Claude uses <code>CLAUDE.md</code> and slash commands, Codex uses <code>instructions.md</code>, Gemini uses <code>AGENTS.md</code>, Cursor uses <code>.mdc</code> rules. Instead of forcing a single format, I adapt to each agent's native convention. This respects each platform's ecosystem while maintaining a single source of truth for the workflow rules."
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================================
+     DESIGN PATTERNS
+     ============================================================ -->
+<section class="section" id="patterns">
+  <div class="section-header">
+    <div class="section-label">Engineering Excellence</div>
+    <h2 class="section-title">Design Patterns &amp; Technical Decisions</h2>
+    <p class="section-subtitle">Patterns and principles applied throughout the codebase</p>
+  </div>
+
+  <div class="pattern-grid">
+    <div class="pattern-card">
+      <div class="pattern-name">Command Pattern</div>
+      <div class="pattern-where">cli.rs · main.rs</div>
+      <div class="pattern-desc">CLI subcommands as enum variants. <code>clap</code> derive macros build the parser; <code>match</code> dispatches to handlers.</div>
+    </div>
+    <div class="pattern-card">
+      <div class="pattern-name">Strategy Pattern</div>
+      <div class="pattern-where">judge.rs · policy.rs</div>
+      <div class="pattern-desc">Swappable LLM providers via <code>JudgeProvider</code> enum. Each variant dispatches to its own API implementation.</div>
+    </div>
+    <div class="pattern-card">
+      <div class="pattern-name">State Machine</div>
+      <div class="pattern-where">tui.rs · mission.rs</div>
+      <div class="pattern-desc"><code>TuiMode</code> enum drives rendering. Mission has lifecycle states: none → active → completed.</div>
+    </div>
+    <div class="pattern-card">
+      <div class="pattern-name">Pipeline</div>
+      <div class="pattern-where">diff.rs</div>
+      <div class="pattern-desc">Data flows through: Git Diff → Parse → Classify → Report. Each stage transforms the data type.</div>
+    </div>
+    <div class="pattern-card">
+      <div class="pattern-name">Repository Pattern</div>
+      <div class="pattern-where">config.rs · session.rs</div>
+      <div class="pattern-desc">Abstracting persistence. Config loads from YAML, sessions from JSON. Storage details hidden behind load/save functions.</div>
+    </div>
+    <div class="pattern-card">
+      <div class="pattern-name">Observer/Event-Driven</div>
+      <div class="pattern-where">watch.rs · tui.rs</div>
+      <div class="pattern-desc"><code>notify</code> crate watches file system events, triggers re-classification. Non-polling, event-driven updates.</div>
+    </div>
+    <div class="pattern-card">
+      <div class="pattern-name">MVC Architecture</div>
+      <div class="pattern-where">tui.rs</div>
+      <div class="pattern-desc"><code>App</code> (model), <code>draw_*()</code> (views), <code>handle_key()</code> (controller). Clean separation of concerns in TUI.</div>
+    </div>
+    <div class="pattern-card">
+      <div class="pattern-name">Enum Dispatch</div>
+      <div class="pattern-where">Throughout</div>
+      <div class="pattern-desc">Rust's powerful enums replace inheritance. <code>PolicyVerdict</code>, <code>ScopeLabel</code>, <code>FileStatus</code> — type-safe branching.</div>
+    </div>
+    <div class="pattern-card">
+      <div class="pattern-name">Defense in Depth</div>
+      <div class="pattern-where">policy.rs + judge.rs</div>
+      <div class="pattern-desc">Deterministic policy engine (security floor) + LLM judge (semantic intelligence). Two complementary layers.</div>
+    </div>
+  </div>
+
+  <h3 style="font-size: 1.3rem; font-weight: 700; margin: 3rem 0 1.5rem; text-align: center;">Error Handling Strategy</h3>
+
+  <div class="card" style="max-width: 700px; margin: 0 auto;">
+    <ul style="padding-left: 1.5rem;">
+      <li style="margin-bottom: 0.5rem;"><strong>Rust's <code>Result&lt;T&gt;</code></strong> with <code>anyhow</code> crate for ergonomic error propagation</li>
+      <li style="margin-bottom: 0.5rem;"><strong><code>?</code> operator</strong> for clean error bubbling — no manual unwrap calls</li>
+      <li style="margin-bottom: 0.5rem;"><strong><code>anyhow::bail!()</code></strong> for early returns with descriptive messages</li>
+      <li style="margin-bottom: 0.5rem;"><strong><code>anyhow::Context</code></strong> for adding context to errors ("failed to load config")</li>
+      <li style="margin-bottom: 0.5rem;"><strong>No panics</strong> in normal code paths — graceful degradation</li>
+      <li><strong>Exit codes:</strong> 0 = success, 1 = policy violations found, 2 = configuration error</li>
+    </ul>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================================
+     TRADEOFFS
+     ============================================================ -->
+<section class="section" id="tradeoffs">
+  <div class="section-header">
+    <div class="section-label">Engineering Judgment · Why This Architecture</div>
+    <h2 class="section-title">Architecture Decisions &amp; Tradeoffs</h2>
+    <p class="section-subtitle">Every choice has a WHY — here's how to defend each decision in an interview</p>
+  </div>
+
+  <div class="card-grid card-grid-2">
+    <div class="card">
+      <h3>🦀 Rust over Python/Go</h3>
+      <p><strong>Chose:</strong> Performance, memory safety, single-binary distribution.<br>
+      <strong>Over:</strong> Larger ecosystem (Python), faster compile times (Go), more contributors.<br>
+      <strong>Why:</strong> A scope firewall runs on every commit check — it must be fast and reliable. Single binary = zero runtime dependency. No virtualenvs, no node_modules.<br>
+      <strong style="color: var(--accent-amber);">Tradeoff:</strong> Slower development, steeper learning curve, smaller contributor pool.</p>
+    </div>
+    <div class="card">
+      <h3>📚 git2 over shell git</h3>
+      <p><strong>Chose:</strong> In-process library, typed Rust structs, no process spawning overhead.<br>
+      <strong>Over:</strong> Smaller binary, simpler integration, git CLI familiarity.<br>
+      <strong>Why:</strong> The TUI refreshes every 150ms — subprocess spawning would be too slow. Parsing <code>git diff</code> output is fragile and locale-dependent.<br>
+      <strong style="color: var(--accent-amber);">Tradeoff:</strong> Larger binary (libgit2 is a C library), C build dependency. Used <code>default-features = false</code> to disable SSH/HTTPS and minimize attack surface.</p>
+    </div>
+    <div class="card">
+      <h3>📝 YAML Policy over Code Policy</h3>
+      <p><strong>Chose:</strong> Declarative, auditable, version-controllable, non-Turing-complete.<br>
+      <strong>Over:</strong> Flexible scripting (Lua, Starlark), conditional logic, dynamic rules.<br>
+      <strong>Why:</strong> Security invariant — policies can't contain logic bombs. What you see is what you get. Auditors can review glob patterns without understanding a programming language.<br>
+      <strong style="color: var(--accent-amber);">Tradeoff:</strong> Can't express "block .env except in test environments" without code. Accepted limitation for security.</p>
+    </div>
+    <div class="card">
+      <h3>🖥 TUI over Web UI</h3>
+      <p><strong>Chose:</strong> Zero additional dependencies, terminal-native, fits developer workflow.<br>
+      <strong>Over:</strong> Richer visuals, better data visualization, mobile access, collaborative viewing.<br>
+      <strong>Why:</strong> Target users are developers working in terminals alongside AI agents. A web UI adds a server dependency and opens a port.<br>
+      <strong style="color: var(--accent-amber);">Tradeoff:</strong> Limited to terminal capabilities. No graphs, no images, no drag-and-drop.</p>
+    </div>
+    <div class="card">
+      <h3>📄 JSON Files over SQLite</h3>
+      <p><strong>Chose:</strong> Human-readable, git-friendly, no additional native library dependency.<br>
+      <strong>Over:</strong> Query capabilities, indexing, concurrent access, scalability.<br>
+      <strong>Why:</strong> Session data is small. JSON files are inspectable with <code>cat</code>. No SQLite = simpler cross-compilation (critical for musl static builds).<br>
+      <strong style="color: var(--accent-amber);">Tradeoff:</strong> No query capability. As sessions grow into thousands, would need indexing.</p>
+    </div>
+    <div class="card">
+      <h3>🤖 Enum Dispatch over Trait Objects</h3>
+      <p><strong>Chose:</strong> <code>JudgeProvider</code> enum with exhaustive <code>match</code> — compile-time guarantees.<br>
+      <strong>Over:</strong> <code>dyn JudgeProvider</code> trait objects — runtime polymorphism, open extension.<br>
+      <strong>Why:</strong> Closed set of 6 providers. Adding one = adding an enum variant. Exhaustive match catches every missing case at compile time. No vtable overhead.<br>
+      <strong style="color: var(--accent-amber);">Tradeoff:</strong> Can't add providers without code changes. If providers grew to 20+, would refactor to traits.</p>
+    </div>
+    <div class="card">
+      <h3>🆔 ULID over UUID</h3>
+      <p><strong>Chose:</strong> Monotonically sortable unique IDs — <code>ls .scopewarden/</code> shows sessions in chronological order.<br>
+      <strong>Over:</strong> UUID v4 — universally recognized, library support everywhere.<br>
+      <strong>Why:</strong> ULIDs embed a timestamp prefix. Sessions naturally sort by creation time without parsing metadata. Better for auditing and debugging.<br>
+      <strong style="color: var(--accent-amber);">Tradeoff:</strong> Less common than UUID; some tools don't understand the format.</p>
+    </div>
+    <div class="card">
+      <h3>📦 Pure Binary Crate (no lib.rs)</h3>
+      <p><strong>Chose:</strong> Flat module design, no public API contract to maintain.<br>
+      <strong>Over:</strong> lib+bin split for reusability, programmatic embedding, IDE plugins.<br>
+      <strong>Why:</strong> ScopeWarden is an end-user CLI tool. Integration tests via <code>assert_cmd</code> test the actual binary. No downstream consumers need a library API.<br>
+      <strong style="color: var(--accent-amber);">Tradeoff:</strong> Cannot be embedded as a library. Would need refactoring for IDE plugin scenarios.</p>
+    </div>
+    <div class="card">
+      <h3>🎯 GlobSet DFA over Individual Globs</h3>
+      <p><strong>Chose:</strong> <code>globset::GlobSet</code> — compiles all patterns into a single deterministic finite automaton.<br>
+      <strong>Over:</strong> Individual <code>glob::Pattern</code> matching — simpler but O(patterns × paths).<br>
+      <strong>Why:</strong> O(path_length) matching regardless of pattern count. Uses same syntax as <code>.gitignore</code> — zero cognitive load for developers.<br>
+      <strong style="color: var(--accent-amber);">Tradeoff:</strong> Upfront compilation cost, more complex error handling for malformed patterns.</p>
+    </div>
+    <div class="card">
+      <h3>🔒 rustls-tls over OpenSSL</h3>
+      <p><strong>Chose:</strong> Pure Rust TLS implementation — no native C library dependency.<br>
+      <strong>Over:</strong> OpenSSL — more widely tested, hardware acceleration support.<br>
+      <strong>Why:</strong> Eliminates entire class of native library vulnerabilities. Simpler cross-compilation. No OpenSSL version conflicts.<br>
+      <strong style="color: var(--accent-amber);">Tradeoff:</strong> Slightly slower TLS handshakes. No hardware HSM support.</p>
+    </div>
+  </div>
+
+  <div class="talking-point" style="margin-top: 2rem;">
+    <strong>🎤 Interview talking point:</strong> "I can justify every dependency in my <code>Cargo.toml</code>. Each one solves a specific problem that I evaluated alternatives for. For example, I chose <code>globset</code> over individual <code>glob::Pattern</code> matching because GlobSet compiles all patterns into a single DFA — that's O(path_length) matching regardless of how many patterns exist. I chose <code>rustls-tls</code> over OpenSSL because a security tool shouldn't carry native C library vulnerabilities. Every tradeoff was made with specific user scenarios and failure modes in mind."
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================================
+     TESTING & CI/CD
+     ============================================================ -->
+<section class="section" id="testing">
+  <div class="section-header">
+    <div class="section-label">Quality Assurance</div>
+    <h2 class="section-title">Testing &amp; CI/CD</h2>
+    <p class="section-subtitle">Multi-layered testing strategy with fixture-based integration tests</p>
+  </div>
+
+  <div class="card-grid card-grid-2">
+    <div class="card">
+      <div class="card-icon emerald">🧪</div>
+      <h3>Unit Tests</h3>
+      <p>Inline <code>#[cfg(test)] mod tests</code> in each module. Tests core logic: policy evaluation, glob matching, file classification, config parsing.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon cyan">🔗</div>
+      <h3>Integration Tests</h3>
+      <p><code>tests/integration/</code> — Full command execution tests. Test init, check, policy enforcement, session persistence with real git repos.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon amber">📦</div>
+      <h3>Test Fixtures</h3>
+      <p><code>tests/fixtures/</code> — Pre-built git repositories and config files. Reproducible test environments for deterministic results.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon purple">🤖</div>
+      <h3>CI/CD</h3>
+      <p><code>dependabot.yml</code> — Automated weekly dependency updates for Cargo packages. Keeps security patches flowing in.</p>
+    </div>
+  </div>
+
+  <h3 style="font-size: 1.1rem; font-weight: 700; margin: 2rem 0 1rem;">Key Test Scenarios</h3>
+  <div class="card" style="max-width: 700px;">
+    <ul style="padding-left: 1.5rem;">
+      <li>Blocked files are <strong>always</strong> blocked regardless of mission</li>
+      <li>Expected paths match correctly with glob patterns</li>
+      <li>Limit violations (max files/lines) are detected</li>
+      <li>Session persistence roundtrips correctly (save → load)</li>
+      <li>TUI mode transitions work correctly</li>
+      <li>Mission attach infers from agent logs</li>
+      <li>Config loading handles missing/malformed YAML gracefully</li>
+    </ul>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================================
+     DEPENDENCY MAP
+     ============================================================ -->
+<section class="section" id="dependencies">
+  <div class="section-header">
+    <div class="section-label">Technology Stack</div>
+    <h2 class="section-title">Dependency Map</h2>
+    <p class="section-subtitle">Every dependency serves a purpose — no bloat</p>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Crate</th><th>Version</th><th>Purpose</th><th>Used In</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>clap</strong></td><td>4.x</td><td>CLI argument parsing with derive macros</td><td>cli.rs, main.rs</td></tr>
+        <tr><td><strong>serde + serde_json + serde_yaml</strong></td><td>1.x / 0.9</td><td>Serialization/deserialization for config &amp; sessions</td><td>config.rs, session.rs, mission.rs</td></tr>
+        <tr><td><strong>tokio</strong></td><td>1.x (full)</td><td>Async runtime for HTTP calls and event loops</td><td>main.rs, judge.rs, tui.rs</td></tr>
+        <tr><td><strong>git2</strong></td><td>0.19</td><td>Rust bindings for libgit2 — programmatic git access</td><td>diff.rs</td></tr>
+        <tr><td><strong>glob</strong></td><td>0.3</td><td>Glob pattern matching for policies</td><td>policy.rs</td></tr>
+        <tr><td><strong>ratatui + crossterm</strong></td><td>0.29 / 0.28</td><td>Terminal UI framework + cross-platform terminal control</td><td>tui.rs</td></tr>
+        <tr><td><strong>reqwest</strong></td><td>0.12 (json)</td><td>HTTP client for LLM provider API calls</td><td>judge.rs</td></tr>
+        <tr><td><strong>chrono</strong></td><td>0.4</td><td>Date/time handling for sessions and missions</td><td>session.rs, mission.rs</td></tr>
+        <tr><td><strong>colored</strong></td><td>2.x</td><td>ANSI colored terminal output</td><td>output.rs</td></tr>
+        <tr><td><strong>uuid</strong></td><td>1.x (v4)</td><td>Session ID generation</td><td>session.rs</td></tr>
+        <tr><td><strong>notify</strong></td><td>7.x</td><td>Cross-platform file system event watching</td><td>watch.rs</td></tr>
+        <tr><td><strong>dirs</strong></td><td>5.x</td><td>Platform-specific directory paths</td><td>config.rs</td></tr>
+        <tr><td><strong>textwrap</strong></td><td>0.16</td><td>Text wrapping for terminal output</td><td>output.rs</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================================
+     INTERVIEW Q&A
+     ============================================================ -->
+<section class="section" id="qa">
+  <div class="section-header">
+    <div class="section-label">Practice Questions</div>
+    <h2 class="section-title">Interview Q&amp;A</h2>
+    <p class="section-subtitle">Common questions interviewers might ask about this project, with prepared answers</p>
+  </div>
+
+  <!-- System Design Questions -->
+  <h3 style="color: var(--accent-primary); font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem;">System Design</h3>
+
+  <div class="qa-card">
+    <div class="qa-question">Walk me through the overall architecture of ScopeWarden.</div>
+    <div class="qa-answer"><div class="qa-answer-inner">
+      ScopeWarden is a 5-layer architecture. At the bottom is the <strong>Foundation layer</strong> — git repositories, YAML config, and JSON file storage. Above that are the <strong>Core Engines</strong>: a deterministic policy engine for glob-based pattern matching, a git diff analyzer using libgit2, a multi-provider LLM judge, and a session manager. The <strong>CLI layer</strong> is a Rust binary using <code>clap</code> for command parsing — it's completely agent-agnostic. The <strong>Integration layer</strong> provides thin adapter files for each AI agent (Claude, Codex, Gemini, Cursor) in their native config format. Finally, the <strong>Consumer layer</strong> is the AI agents themselves, which invoke ScopeWarden via shell commands. Each layer only depends on layers below it — clean dependency direction.
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-question">Why Rust? What were the alternatives?</div>
+    <div class="qa-answer"><div class="qa-answer-inner">
+      Three main reasons: <strong>performance</strong> (this tool runs on every commit check, so latency matters), <strong>memory safety</strong> (no garbage collector pauses, no runtime crashes from null pointers), and <strong>single-binary distribution</strong> (users install one binary — no Python virtualenvs, no node_modules). I considered Go (simpler concurrency model, faster compile times) and Python (larger ecosystem, faster prototyping), but the performance requirements and distribution story made Rust the clear choice. The tradeoff is slower development and a steeper learning curve, but for a security tool that needs to be reliable, Rust's guarantees are worth it.
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-question">How does the deterministic policy engine work alongside the LLM judge?</div>
+    <div class="qa-answer"><div class="qa-answer-inner">
+      It's a <strong>defense-in-depth</strong> design. The policy engine runs first — it compiles glob patterns from <code>scopewarden.yaml</code> and evaluates every changed file. Blocked verdicts are <strong>final and non-overridable</strong> — no LLM can bypass them. This gives us a hard security floor. The LLM judge is an optional layer on top that adds <strong>semantic intelligence</strong>. For example, if the mission is "fix login bug" and the agent modifies <code>utils/string_helpers.rs</code>, the policy engine might flag it as SUSPICIOUS (not in expected paths), but the LLM judge could determine it's actually relevant because the login code depends on string helpers. The key principle: deterministic rules for security, probabilistic AI for intelligence.
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-question">How do you handle the agent-agnostic design? What if a new AI agent comes along?</div>
+    <div class="qa-answer"><div class="qa-answer-inner">
+      The core CLI is a <strong>pure command-line tool</strong> with no knowledge of specific agents. Agent integration is achieved through thin adapter files — each agent has a configuration file in its <strong>native format</strong>. Claude uses <code>CLAUDE.md</code> + slash commands, Codex uses <code>instructions.md</code>, Gemini uses <code>AGENTS.md</code>, Cursor uses <code>.mdc</code> rules. Adding a new agent literally means creating a new config file — zero Rust code changes. This is the <strong>Open/Closed Principle</strong>: open for extension, closed for modification. The workflow rules are the same across all agents; only the config format differs.
+    </div></div>
+  </div>
+
+  <!-- Technical Deep Dive Questions -->
+  <h3 style="color: var(--accent-cyan); font-size: 1.1rem; font-weight: 700; margin: 2rem 0 1rem;">Technical Deep Dive</h3>
+
+  <div class="qa-card">
+    <div class="qa-question">How does the data flow when running `scopewarden check`?</div>
+    <div class="qa-answer"><div class="qa-answer-inner">
+      10-step pipeline: (1) <code>main.rs</code> parses CLI args via clap. (2) <code>config.rs</code> loads and parses <code>scopewarden.yaml</code>. (3) <code>mission.rs</code> loads the active mission from <code>.scopewarden/mission.json</code>. (4) <code>diff.rs</code> uses <code>git2</code> to compare HEAD vs working tree — gets <code>Vec&lt;ChangedFile&gt;</code>. (5) <code>policy.rs</code> creates a <code>PolicyEngine</code>, compiling glob patterns. (6) <code>diff.rs</code> classifies each file: policy verdict + mission match → <code>ScopeLabel</code>. Blocked overrides everything. Expected = policy OK + mission match. Suspicious = policy OK + no match. (7) Check limits against max_files_changed, max_lines_changed. (8) Record check result in active session. (9) Output colored report or JSON. (10) Exit code 0 if clean, 1 if blocked files found.
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-question">Tell me about your error handling strategy.</div>
+    <div class="qa-answer"><div class="qa-answer-inner">
+      I use Rust's <code>Result&lt;T&gt;</code> type with the <code>anyhow</code> crate. Every function returns <code>Result&lt;()&gt;</code> or <code>Result&lt;T&gt;</code> — no panics in normal code paths. Errors propagate with the <code>?</code> operator for clean bubbling. <code>anyhow::bail!()</code> for early returns with descriptive messages, and <code>anyhow::Context</code> for adding context (e.g., "failed to load config at {path}"). I use distinct exit codes: 0 for success, 1 for policy violations (expected outcome, not an error), 2 for configuration errors (actual errors). This distinction is important — a non-zero exit from <code>scopewarden check</code> doesn't mean the tool failed; it means it found problems, which is its job.
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-question">Why did you choose `git2` over shelling out to `git`?</div>
+    <div class="qa-answer"><div class="qa-answer-inner">
+      Three reasons: (1) <strong>No process spawning overhead</strong> — git2 is an in-process library, not a subprocess call. For a tool that might check diffs frequently, this matters. (2) <strong>Structured data</strong> — git2 gives me typed Rust structs for diffs, file statuses, and tree entries. Parsing <code>git diff</code> output strings is fragile and locale-dependent. (3) <strong>Cross-platform reliability</strong> — I don't depend on <code>git</code> being on PATH or being a specific version. The tradeoff is a larger binary (libgit2 is a C library linked in) and a C dependency in the build, but for a developer tool that needs to be reliable, I'll take the larger binary.
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-question">How would you scale this if the policy engine needed to handle thousands of rules?</div>
+    <div class="qa-answer"><div class="qa-answer-inner">
+      Currently, policies are compiled into <code>glob::Pattern</code> instances and evaluated linearly per file. For thousands of rules, I'd consider: (1) <strong>Trie-based matching</strong> — build a prefix trie from the glob patterns for O(path_length) matching instead of O(num_patterns). (2) <strong>Pattern categorization</strong> — separate exact matches (hash lookup) from glob patterns (linear scan). Most policies are either exact paths or simple globs. (3) <strong>Caching</strong> — if the same files are checked repeatedly, cache policy verdicts by file path. (4) <strong>Parallel evaluation</strong> — use Rayon for data-parallel policy evaluation across files. But honestly, for the current use case (20-800 files, ~20 patterns), the linear approach is microseconds. I'd only optimize when profiling shows it's a bottleneck — premature optimization is the root of all evil.
+    </div></div>
+  </div>
+
+  <!-- Leadership & Process Questions -->
+  <h3 style="color: var(--accent-emerald); font-size: 1.1rem; font-weight: 700; margin: 2rem 0 1rem;">Leadership &amp; Process</h3>
+
+  <div class="qa-card">
+    <div class="qa-question">What was the hardest design decision you made?</div>
+    <div class="qa-answer"><div class="qa-answer-inner">
+      The <strong>deterministic vs. AI-powered</strong> split. Early on, I considered making the entire system LLM-powered — just send the mission and the diff to an LLM and ask "is this in scope?" It would have been simpler to build. But I realized that for a <strong>security tool</strong>, you can't have probabilistic enforcement. An LLM might be convinced through prompt injection that modifying <code>.env</code> is "necessary for the mission." So I split the architecture: deterministic glob-based rules for hard security boundaries, LLM judge for semantic scope assessment. This doubled the complexity but gave us a system where the security floor is guaranteed and the intelligence ceiling is high.
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-question">If you were to rewrite this, what would you change?</div>
+    <div class="qa-answer"><div class="qa-answer-inner">
+      Three things: (1) <strong>Git hooks integration</strong> — currently agents run <code>scopewarden check</code> voluntarily. I'd add a pre-commit git hook that automatically blocks commits with BLOCKED files, making enforcement mandatory. (2) <strong>Plugin system with dynamic loading</strong> — the <code>plugins/</code> directory exists but isn't populated. I'd implement a proper plugin system with WASM-based plugins for custom policy evaluators, so users can write custom rules without forking the project. (3) <strong>Structured logging</strong> — currently session data is simple JSON files. I'd add structured event logging (OpenTelemetry-compatible) for better observability in enterprise environments.
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-question">How would you explain this project to a non-technical stakeholder?</div>
+    <div class="qa-answer"><div class="qa-answer-inner">
+      "AI coding assistants are incredibly powerful, but they sometimes make changes they shouldn't — like modifying security credentials or editing files unrelated to their task. ScopeWarden is like a security guard for your codebase. You tell it what the AI is supposed to be working on, and it watches everything the AI does. If the AI tries to touch a sensitive file, ScopeWarden blocks it immediately. If the AI wanders outside its assigned scope, ScopeWarden flags it for human review. Think of it as guardrails for AI development — you get the productivity benefits of AI while maintaining security and governance."
+    </div></div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-question">What metrics would you use to measure ScopeWarden's effectiveness?</div>
+    <div class="qa-answer"><div class="qa-answer-inner">
+      Five key metrics: (1) <strong>Scope violation rate</strong> — percentage of agent sessions with SUSPICIOUS or BLOCKED files (should decrease as agents learn to use ScopeWarden). (2) <strong>False positive rate</strong> — SUSPICIOUS files that are actually legitimate changes (calibrates mission specificity). (3) <strong>Blocked incident rate</strong> — how often agents attempt to modify truly sensitive files (security metric). (4) <strong>Latency P99</strong> — time for <code>scopewarden check</code> (should stay under 200ms). (5) <strong>Adoption rate</strong> — percentage of teams/repos using ScopeWarden (platform metric). I'd also track <strong>judge accuracy</strong> — when the LLM judge says "relevant", how often do human reviewers agree?
+    </div></div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ============================================================
+     CHEAT SHEET
+     ============================================================ -->
+<section class="section" id="cheatsheet">
+  <div class="section-header">
+    <div class="section-label">Quick Reference</div>
+    <h2 class="section-title">Command Cheat Sheet</h2>
+  </div>
+
+  <div class="card-grid card-grid-2">
+    <div class="code-block" style="margin: 0;">
+      <span class="code-label">Setup</span>
+      <code><pre><span class="comment"># One-time repo setup</span>
+<span class="function">scopewarden</span> init
+
+<span class="comment"># Start a mission</span>
+<span class="function">scopewarden</span> start <span class="string">"fix authentication bug in login module"</span>
+
+<span class="comment"># Check current status</span>
+<span class="function">scopewarden</span> status</pre></code>
+    </div>
+    <div class="code-block" style="margin: 0;">
+      <span class="code-label">Audit</span>
+      <code><pre><span class="comment"># Run full policy check + scope audit</span>
+<span class="function">scopewarden</span> check
+
+<span class="comment"># JSON output for CI integration</span>
+<span class="function">scopewarden</span> check <span class="attr">--json</span>
+
+<span class="comment"># Show only problematic files</span>
+<span class="function">scopewarden</span> diff <span class="attr">--problems</span></pre></code>
+    </div>
+    <div class="code-block" style="margin: 0;">
+      <span class="code-label">Monitor</span>
+      <code><pre><span class="comment"># Live TUI cockpit</span>
+<span class="function">scopewarden</span> watch
+
+<span class="comment"># Ask LLM to judge changes</span>
+<span class="function">scopewarden</span> judge
+
+<span class="comment"># Auto-attach from agent logs</span>
+<span class="function">scopewarden</span> attach <span class="attr">--agent</span> auto <span class="attr">--apply</span></pre></code>
+    </div>
+    <div class="code-block" style="margin: 0;">
+      <span class="code-label">Config</span>
+      <code><pre><span class="comment"># Set LLM judge provider</span>
+<span class="function">scopewarden</span> config set <span class="attr">judge.provider</span> ollama
+
+<span class="comment"># Available providers</span>
+<span class="comment"># ollama, claude, openai, gemini, openrouter</span>
+
+<span class="comment"># Edit policy in scopewarden.yaml</span></pre></code>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer class="footer">
+  <p>ScopeWarden v0.2.0 · Interview Preparation Guide · Built with 🦀 Rust</p>
+  <p style="margin-top: 0.5rem; font-size: 0.75rem;">
+    Generated for Staff / Tech Lead interview preparation
+  </p>
+</footer>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+// Mobile nav toggle
+const navToggle = document.getElementById('navToggle');
+const nav = document.getElementById('nav');
+navToggle.addEventListener('click', () => nav.classList.toggle('open'));
+
+// Close mobile nav on link click
+document.querySelectorAll('.nav-links a').forEach(link => {
+  link.addEventListener('click', () => nav.classList.remove('open'));
+});
+
+// Q&A accordion
+document.querySelectorAll('.qa-card .qa-question').forEach(question => {
+  question.addEventListener('click', () => {
+    const card = question.closest('.qa-card');
+    card.classList.toggle('open');
+  });
+});
+
+// Active nav link on scroll
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+
+const observerOptions = {
+  rootMargin: '-20% 0px -80% 0px',
+  threshold: 0
+};
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id;
+      navLinks.forEach(link => {
+        link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+      });
+    }
+  });
+}, observerOptions);
+
+sections.forEach(section => observer.observe(section));
+
+// Animate elements on scroll
+const animateObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.card, .deep-dive, .qa-card, .code-block').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(15px)';
+  el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+  animateObserver.observe(el);
+});
+</script>
+</body>
+</html>

@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AgentScope — Accountability for AI Coding Agents</title>
-<meta name="description" content="AgentScope is a scope firewall for AI coding agents. Holds Claude, Codex, Cursor, Gemini CLI, and any shell-wrapped agent accountable — checks every file change against your declared goal, automatically, at the Git boundary.">
+<title>ScopeWarden — Accountability for AI Coding Agents</title>
+<meta name="description" content="ScopeWarden is a scope firewall for AI coding agents. Holds Claude, Codex, Cursor, Gemini CLI, and any shell-wrapped agent accountable — checks every file change against your declared goal, automatically, at the Git boundary.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
@@ -1128,7 +1128,7 @@
     <a href="#contributing">Contribute</a>
     <a href="#launch">Roadmap</a>
     <button class="nav-cmd-btn" id="navCmdBtn" type="button">/ commands <span class="cmd-k-badge">⌘K</span></button>
-    <a href="https://github.com/abdouloued/agentscopev2" class="nav-badge">GitHub</a>
+    <a href="https://github.com/abdouloued/scopewarden" class="nav-badge">GitHub</a>
   </div>
 </nav>
 
@@ -1138,10 +1138,10 @@
   <div class="container">
     <p class="hero-eyebrow">Open Source · Model-Agnostic · Rust CLI</p>
     <h1><em>Accountability</em> for<br>AI coding agents.</h1>
-    <p class="hero-sub">Engineering leads are nervous about giving agents write access. AgentScope holds Claude, Codex, OpenCode, and any shell-wrapped agent accountable — every file changed is checked against the goal you declared, automatically, on every turn.</p>
+    <p class="hero-sub">Engineering leads are nervous about giving agents write access. ScopeWarden holds Claude, Codex, OpenCode, and any shell-wrapped agent accountable — every file changed is checked against the goal you declared, automatically, on every turn.</p>
     <div class="hero-actions">
       <a href="#config" class="btn-primary">Install with one command</a>
-      <a href="https://github.com/abdouloued/agentscopev2" class="btn-ghost">Star on GitHub</a>
+      <a href="https://github.com/abdouloued/scopewarden" class="btn-ghost">Star on GitHub</a>
     </div>
 
     <!-- HERO TERMINAL -->
@@ -1150,10 +1150,10 @@
         <div class="dot dot-r"></div>
         <div class="dot dot-y"></div>
         <div class="dot dot-g"></div>
-        <span class="terminal-title">agentscope check</span>
+        <span class="terminal-title">scopewarden check</span>
       </div>
       <div class="terminal-body">
-        <span class="t-line t-muted">$ agentscope check</span>
+        <span class="t-line t-muted">$ scopewarden check</span>
         <span class="t-line">&nbsp;</span>
         <span class="t-line t-muted">── Scanning diff against goal: <span class="t-bright">"Fix checkout button loading state"</span></span>
         <span class="t-line t-muted">── Base commit: <span class="t-bright">a3f9c12</span>  →  Working tree</span>
@@ -1213,8 +1213,8 @@
         <span class="pain-tag">security · production</span>
       </div>
       <div class="pain-cell" style="background: var(--surface); display: flex; flex-direction: column; justify-content: center; align-items: flex-start;">
-        <p style="font-family: var(--mono); font-size: 13px; color: var(--lime); margin-bottom: 8px;">AgentScope adds accountability at the diff boundary.</p>
-        <p style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">No editor integration required. If your agent runs in a shell, AgentScope can hold it accountable.</p>
+        <p style="font-family: var(--mono); font-size: 13px; color: var(--lime); margin-bottom: 8px;">ScopeWarden adds accountability at the diff boundary.</p>
+        <p style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">No editor integration required. If your agent runs in a shell, ScopeWarden can hold it accountable.</p>
       </div>
     </div>
   </div>
@@ -1227,7 +1227,7 @@
   <div class="container">
     <p class="section-label">Integration</p>
     <h2 class="section-title">Already using Claude<br>or Codex? <em>Pick your style.</em></h2>
-    <p class="section-sub">Your agent doesn't change. AgentScope works at the Git boundary — checking every diff against your declared goal. Three ways to integrate.</p>
+    <p class="section-sub">Your agent doesn't change. ScopeWarden works at the Git boundary — checking every diff against your declared goal. Three ways to integrate.</p>
 
     <div class="integration-grid reveal">
 
@@ -1236,22 +1236,22 @@
         <div class="arch-accent accent-lime" style="border-radius:12px 12px 0 0;"></div>
         <span class="integration-card-badge badge-lime">Mode 1 · Recommended to start</span>
         <h3>Two terminals — your agent is completely untouched</h3>
-        <p>Keep running Claude or Codex exactly as you do today. Open a second terminal for AgentScope. Set your mission, run your agent, then check.</p>
+        <p>Keep running Claude or Codex exactly as you do today. Open a second terminal for ScopeWarden. Set your mission, run your agent, then check.</p>
         <div class="two-terminals">
           <div class="terminal" style="box-shadow:none;">
             <div class="terminal-bar">
               <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
-              <span class="terminal-title">Terminal 1 — agentscope</span>
+              <span class="terminal-title">Terminal 1 — scopewarden</span>
             </div>
             <div class="terminal-body">
 <span class="t-line t-muted"># 1. Record your mission + git baseline</span>
-<span class="t-line"><span class="t-cmd">agentscope start</span> <span class="t-warn">"Fix checkout bug"</span> <span class="t-info">--agent claude</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden start</span> <span class="t-warn">"Fix checkout bug"</span> <span class="t-info">--agent claude</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted"># 3. After agent finishes — check scope</span>
-<span class="t-line"><span class="t-cmd">agentscope check</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden check</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted"># Or watch the diff live as agent edits</span>
-<span class="t-line"><span class="t-cmd">agentscope watch</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden watch</span></span>
             </div>
           </div>
           <div class="terminal" style="box-shadow:none;">
@@ -1264,7 +1264,7 @@
 <span class="t-line"><span class="t-cmd">claude</span></span>
 <span class="t-line t-muted">   # or: codex, cursor, gemini, ...</span>
 <span class="t-line">&nbsp;</span>
-<span class="t-line t-muted"># AgentScope reads the git diff.</span>
+<span class="t-line t-muted"># ScopeWarden reads the git diff.</span>
 <span class="t-line t-muted"># It does NOT wrap or change your</span>
 <span class="t-line t-muted"># agent's launch or behavior.</span>
             </div>
@@ -1277,12 +1277,12 @@
         <div class="arch-accent accent-amber" style="border-radius:12px 12px 0 0;"></div>
         <span class="integration-card-badge badge-amber">Mode 2 · Zero friction after install</span>
         <h3>Git hook — auto-check on every commit</h3>
-        <p>Install once per repo. Every <code>git commit</code> automatically runs <code>agentscope check</code>. Your agent workflow is completely unchanged.</p>
+        <p>Install once per repo. Every <code>git commit</code> automatically runs <code>scopewarden check</code>. Your agent workflow is completely unchanged.</p>
         <div class="terminal" style="box-shadow:none;margin-top:4px;">
           <div class="terminal-body">
 <span class="t-line t-muted"># Install once in your repo</span>
-<span class="t-line"><span class="t-cmd">agentscope init</span></span>
-<span class="t-line"><span class="t-cmd">agentscope hook install</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden init</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden hook install</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted"># Then commit as normal:</span>
 <span class="t-line"><span class="t-cmd">git commit</span> <span class="t-info">-m "fix checkout"</span></span>
@@ -1297,12 +1297,12 @@
         <div class="arch-accent accent-blue" style="border-radius:12px 12px 0 0;"></div>
         <span class="integration-card-badge badge-blue-bg">Mode 3 · Agent reads your rules on every session</span>
         <h3>Plugin install — write guidance into the agent's native file</h3>
-        <p>Run once per project. AgentScope writes your policy rules and scope commands into the agent's native instructions file — <code>CLAUDE.md</code> for Claude, <code>AGENTS.md</code> for Codex. The agent reads these automatically, no flags needed.</p>
+        <p>Run once per project. ScopeWarden writes your policy rules and scope commands into the agent's native instructions file — <code>CLAUDE.md</code> for Claude, <code>AGENTS.md</code> for Codex. The agent reads these automatically, no flags needed.</p>
         <div class="terminal" style="box-shadow:none;margin-top:4px;">
           <div class="terminal-body">
-<span class="t-line t-muted"># Write AgentScope guidance into the agent's native file</span>
-<span class="t-line"><span class="t-cmd">agentscope plugins install</span> <span class="t-info">--agent claude</span>  <span class="t-muted"># → writes CLAUDE.md</span></span>
-<span class="t-line"><span class="t-cmd">agentscope plugins install</span> <span class="t-info">--agent all</span>     <span class="t-muted"># → writes for all agents</span></span>
+<span class="t-line t-muted"># Write ScopeWarden guidance into the agent's native file</span>
+<span class="t-line"><span class="t-cmd">scopewarden plugins install</span> <span class="t-info">--agent claude</span>  <span class="t-muted"># → writes CLAUDE.md</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden plugins install</span> <span class="t-info">--agent all</span>     <span class="t-muted"># → writes for all agents</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted"># Agent reads the file automatically — run it normally</span>
 <span class="t-line"><span class="t-cmd">claude</span></span>
@@ -1322,14 +1322,14 @@
   <div class="container">
     <p class="section-label">How it works</p>
     <h2 class="section-title">Four engines.<br><em>One config file.</em></h2>
-    <p class="section-sub">AgentScope is a layered Rust CLI that holds agents accountable. Deterministic rules run first — fast, always. The LLM judge is opt-in and can only make the result more cautious, never less safe.</p>
+    <p class="section-sub">ScopeWarden is a layered Rust CLI that holds agents accountable. Deterministic rules run first — fast, always. The LLM judge is opt-in and can only make the result more cautious, never less safe.</p>
 
     <div class="arch-grid">
       <div class="arch-card">
         <div class="arch-accent accent-lime"></div>
         <p class="arch-card-icon">01 / ALWAYS RUNS</p>
         <h3>Git Engine</h3>
-        <p>Captures the baseline commit on <code>agentscope start</code>. After the agent runs, it diffs the working tree against that baseline: changed files, line counts, deleted files, binary changes, and untracked files.</p>
+        <p>Captures the baseline commit on <code>scopewarden start</code>. After the agent runs, it diffs the working tree against that baseline: changed files, line counts, deleted files, binary changes, and untracked files.</p>
       </div>
       <div class="arch-card">
         <div class="arch-accent accent-red"></div>
@@ -1353,19 +1353,19 @@
         <div class="arch-accent accent-blue"></div>
         <p class="arch-card-icon">05 / ALWAYS RUNS</p>
         <h3>Reporter</h3>
-        <p>Three output formats: action-first terminal guidance for humans, JSON for automation, and Markdown for PR comments or session logs. Reports are saved under <code>.agentscope/</code>.</p>
+        <p>Three output formats: action-first terminal guidance for humans, JSON for automation, and Markdown for PR comments or session logs. Reports are saved under <code>.scopewarden/</code>.</p>
       </div>
       <div class="arch-card">
         <div class="arch-accent accent-lime"></div>
         <p class="arch-card-icon">06 / AGENT CONTEXT</p>
         <h3>Agent Detection</h3>
-        <p><code>agentscope agents detect</code> inspects your project for local agent context files and infers the active session. <code>agentscope attach --agent auto --apply</code> writes a session from the detected context. <code>agentscope monitor --agent auto</code> watches continuously.</p>
+        <p><code>scopewarden agents detect</code> inspects your project for local agent context files and infers the active session. <code>scopewarden attach --agent auto --apply</code> writes a session from the detected context. <code>scopewarden monitor --agent auto</code> watches continuously.</p>
       </div>
       <div class="arch-card">
         <div class="arch-accent accent-blue"></div>
         <p class="arch-card-icon">07 / TUI</p>
         <h3>Live Dashboard</h3>
-        <p><code>agentscope watch</code> opens a live terminal dashboard: changed files, policy meters, run history, and scope status updating in real time as your agent edits the codebase.</p>
+        <p><code>scopewarden watch</code> opens a live terminal dashboard: changed files, policy meters, run history, and scope status updating in real time as your agent edits the codebase.</p>
       </div>
     </div>
   </div>
@@ -1377,68 +1377,68 @@
 <section>
   <div class="container">
     <h2 class="section-title reveal">10 supported agents.<br><em>One command.</em></h2>
-    <p class="section-sub" style="margin-bottom:40px;">Declare your mission and pick your agent. AgentScope records the git baseline, then checks every changed file against your goal when you're done.</p>
+    <p class="section-sub" style="margin-bottom:40px;">Declare your mission and pick your agent. ScopeWarden records the git baseline, then checks every changed file against your goal when you're done.</p>
 
     <div class="agent-grid reveal">
 
       <div class="agent-card">
         <p class="agent-card-id">--agent claude</p>
         <p class="agent-card-name">Claude</p>
-        <div class="agent-card-cmd">agentscope start "Fix bug" --agent claude</div>
+        <div class="agent-card-cmd">scopewarden start "Fix bug" --agent claude</div>
       </div>
 
       <div class="agent-card">
         <p class="agent-card-id">--agent codex</p>
         <p class="agent-card-name">OpenAI Codex CLI</p>
-        <div class="agent-card-cmd">agentscope start "Add tests" --agent codex</div>
+        <div class="agent-card-cmd">scopewarden start "Add tests" --agent codex</div>
       </div>
 
       <div class="agent-card">
         <p class="agent-card-id">--agent codex-app</p>
         <p class="agent-card-name">Codex App (GUI)</p>
-        <div class="agent-card-cmd">agentscope start "Update deps" --agent codex-app</div>
+        <div class="agent-card-cmd">scopewarden start "Update deps" --agent codex-app</div>
       </div>
 
       <div class="agent-card">
         <p class="agent-card-id">--agent cursor</p>
         <p class="agent-card-name">Cursor AI</p>
-        <div class="agent-card-cmd">agentscope start "Refactor auth" --agent cursor</div>
+        <div class="agent-card-cmd">scopewarden start "Refactor auth" --agent cursor</div>
       </div>
 
       <div class="agent-card">
         <p class="agent-card-id">--agent gemini</p>
         <p class="agent-card-name">Google Gemini CLI</p>
-        <div class="agent-card-cmd">agentscope start "Fix handler" --agent gemini</div>
+        <div class="agent-card-cmd">scopewarden start "Fix handler" --agent gemini</div>
       </div>
 
       <div class="agent-card">
         <p class="agent-card-id">--agent opencode</p>
         <p class="agent-card-name">OpenCode</p>
-        <div class="agent-card-cmd">agentscope start "Clean imports" --agent opencode</div>
+        <div class="agent-card-cmd">scopewarden start "Clean imports" --agent opencode</div>
       </div>
 
       <div class="agent-card">
         <p class="agent-card-id">--agent openclaw</p>
         <p class="agent-card-name">OpenClaw</p>
-        <div class="agent-card-cmd">agentscope start "Fix middleware" --agent openclaw</div>
+        <div class="agent-card-cmd">scopewarden start "Fix middleware" --agent openclaw</div>
       </div>
 
       <div class="agent-card">
         <p class="agent-card-id">--agent hermes</p>
         <p class="agent-card-name">Hermes Agent</p>
-        <div class="agent-card-cmd">agentscope start "Add logging" --agent hermes</div>
+        <div class="agent-card-cmd">scopewarden start "Add logging" --agent hermes</div>
       </div>
 
       <div class="agent-card">
         <p class="agent-card-id">--agent copilot</p>
         <p class="agent-card-name">GitHub Copilot CLI</p>
-        <div class="agent-card-cmd">agentscope start "Fix bug" --agent copilot</div>
+        <div class="agent-card-cmd">scopewarden start "Fix bug" --agent copilot</div>
       </div>
 
       <div class="agent-card">
         <p class="agent-card-id">--agent antigravity</p>
         <p class="agent-card-name">Antigravity IDE</p>
-        <div class="agent-card-cmd">agentscope start "Fix bug" --agent antigravity</div>
+        <div class="agent-card-cmd">scopewarden start "Fix bug" --agent antigravity</div>
       </div>
 
     </div>
@@ -1500,18 +1500,18 @@
       </div>
       <div class="terminal-body">
 <span class="t-line t-muted"># 1. Initialize config in your repo (once)</span>
-<span class="t-line"><span class="t-cmd">agentscope init</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden init</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted"># 2. Declare your mission — records the git baseline</span>
-<span class="t-line"><span class="t-cmd">agentscope start</span> <span class="t-warn">"Fix the rate-limit bug in api/middleware.ts"</span> <span class="t-info">--agent codex</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden start</span> <span class="t-warn">"Fix the rate-limit bug in api/middleware.ts"</span> <span class="t-info">--agent codex</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted"># 3. Run your agent as normal in another terminal or window</span>
-<span class="t-line t-muted">#    agentscope does NOT wrap or launch it</span>
+<span class="t-line t-muted">#    scopewarden does NOT wrap or launch it</span>
 <span class="t-line">&nbsp;</span>
-<span class="t-line t-muted"># 4. Check scope when done (or use agentscope watch for live view)</span>
-<span class="t-line"><span class="t-cmd">agentscope check</span>                           <span class="t-muted"># deterministic rules</span></span>
-<span class="t-line"><span class="t-cmd">agentscope judge</span> <span class="t-info">-m qwen3.5:2b</span>             <span class="t-muted"># optional LLM judge</span></span>
-<span class="t-line"><span class="t-cmd">agentscope check</span> <span class="t-info">--json</span>                    <span class="t-muted"># machine-readable for CI</span></span>
+<span class="t-line t-muted"># 4. Check scope when done (or use scopewarden watch for live view)</span>
+<span class="t-line"><span class="t-cmd">scopewarden check</span>                           <span class="t-muted"># deterministic rules</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden judge</span> <span class="t-info">-m qwen3.5:2b</span>             <span class="t-muted"># optional LLM judge</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden check</span> <span class="t-info">--json</span>                    <span class="t-muted"># machine-readable for CI</span></span>
       </div>
     </div>
   </div>
@@ -1524,17 +1524,17 @@
   <div class="container">
     <p class="section-label">Live TUI Dashboard</p>
     <h2 class="section-title reveal">Watch your agent.<br><em>In real time.</em></h2>
-    <p class="section-sub reveal">Run <code style="color:var(--lime);background:var(--surface2);padding:1px 6px;border-radius:3px;font-size:0.9em;">agentscope watch</code> alongside your agent. The live dashboard shows scope status, file change activity, and an LLM judge verdict — all without wrapping or interrupting your agent.</p>
+    <p class="section-sub reveal">Run <code style="color:var(--lime);background:var(--surface2);padding:1px 6px;border-radius:3px;font-size:0.9em;">scopewarden watch</code> alongside your agent. The live dashboard shows scope status, file change activity, and an LLM judge verdict — all without wrapping or interrupting your agent.</p>
 
     <!-- TUI terminal mockup -->
     <div class="tui-mockup reveal">
       <div class="tui-bar">
         <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
-        <span class="tui-bar-title">agentscope watch — session a1b2c3 — "Fix rate-limit bug in api/middleware.ts"</span>
+        <span class="tui-bar-title">scopewarden watch — session a1b2c3 — "Fix rate-limit bug in api/middleware.ts"</span>
       </div>
       <div class="tui-body">
         <div class="tui-header-row">
-          <span class="tui-label">agentscope watch</span>
+          <span class="tui-label">scopewarden watch</span>
           <span class="tui-session-id">session: a1b2c3</span>
           <span class="tui-mission">"Fix rate-limit bug in api/middleware.ts"</span>
         </div>
@@ -1660,7 +1660,7 @@
       <div>
         <strong>The judge is LLM-powered.</strong> Press <code>j</code> in the watch TUI to send all changed files and your mission statement to Claude, OpenAI, Gemini, OpenRouter, or a local Ollama model. It responds with a semantic verdict, a confidence score, and a natural-language reasoning string — not just pattern matching.
         <br><br>
-        <code>judge.provider = "claude" | "openai" | "gemini" | "openrouter" | "ollama"</code> — configure once in <code>agentscope.yaml</code>.
+        <code>judge.provider = "claude" | "openai" | "gemini" | "openrouter" | "ollama"</code> — configure once in <code>scopewarden.yaml</code>.
       </div>
     </div>
 
@@ -1694,17 +1694,17 @@
       <div class="tui-key-card">
         <div class="tui-key-badge">/allow</div>
         <div class="tui-key-card-label">Allow</div>
-        <div class="tui-key-card-desc">Persist an allow override in agentscope.yaml and log the change to activity</div>
+        <div class="tui-key-card-desc">Persist an allow override in scopewarden.yaml and log the change to activity</div>
       </div>
       <div class="tui-key-card hl">
         <div class="tui-key-badge lime">/theme</div>
         <div class="tui-key-card-label">Theme</div>
-        <div class="tui-key-card-desc">Switch palette: <em>agentscope</em>, <em>codex</em>, <em>openclaw</em>, <em>mono</em></div>
+        <div class="tui-key-card-desc">Switch palette: <em>scopewarden</em>, <em>codex</em>, <em>openclaw</em>, <em>mono</em></div>
       </div>
       <div class="tui-key-card">
         <div class="tui-key-badge">/block</div>
         <div class="tui-key-card-label">Block</div>
-        <div class="tui-key-card-desc">Persist a new blocked glob in agentscope.yaml and refresh verdicts</div>
+        <div class="tui-key-card-desc">Persist a new blocked glob in scopewarden.yaml and refresh verdicts</div>
       </div>
       <div class="tui-key-card">
         <div class="tui-key-badge">/clear</div>
@@ -1727,7 +1727,7 @@
   <div class="container">
     <p class="section-label">Plugin Integration Workflow</p>
     <h2 class="section-title">No manual exit.<br><em>Agent holds itself accountable.</em></h2>
-    <p class="section-sub">Use AgentScope in two ways: local instruction files for any agent, or Claude Code's plugin marketplace flow. The pre-commit hook still enforces scope at every commit — no wrapper command, no manual review step.</p>
+    <p class="section-sub">Use ScopeWarden in two ways: local instruction files for any agent, or Claude Code's plugin marketplace flow. The pre-commit hook still enforces scope at every commit — no wrapper command, no manual review step.</p>
 
     <!-- Workflow Flow -->
     <div class="plugin-flow">
@@ -1738,11 +1738,11 @@
       <div class="plugin-flow-arrow">→</div>
       <div class="plugin-flow-step highlight">
         <p class="plugin-flow-step-label">pre-commit hook</p>
-        <p class="plugin-flow-step-name">agentscope check<br>runs automatically</p>
+        <p class="plugin-flow-step-name">scopewarden check<br>runs automatically</p>
       </div>
       <div class="plugin-flow-arrow">→</div>
       <div class="plugin-flow-step">
-        <p class="plugin-flow-step-label">agentscope</p>
+        <p class="plugin-flow-step-label">scopewarden</p>
         <p class="plugin-flow-step-name">check --json<br>runs in &lt; 100ms</p>
       </div>
       <div class="plugin-flow-arrow">→</div>
@@ -1769,14 +1769,14 @@
           </div>
           <div class="terminal-body">
 <span class="t-line t-muted"># Install plugin files + register with Claude Code (once per project)</span>
-<span class="t-line"><span class="t-cmd">agentscope plugins install</span> <span class="t-info">--agent claude</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden plugins install</span> <span class="t-info">--agent claude</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted"># Restart Claude Code, then verify in /plugins → Installed tab</span>
-<span class="t-line t-muted"># Plugin ID: agentscope@agentscopev2</span>
+<span class="t-line t-muted"># Plugin ID: scopewarden@scopewarden</span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted"># Or add marketplace manually from inside Claude Code:</span>
 <span class="t-line"><span class="t-cmd">/plugin marketplace add</span> <span class="t-info">abdouloued/abdouloued.github.io</span></span>
-<span class="t-line"><span class="t-cmd">/plugin install</span> <span class="t-info">agentscope@agentscope</span></span>
+<span class="t-line"><span class="t-cmd">/plugin install</span> <span class="t-info">scopewarden@scopewarden</span></span>
           </div>
         </div>
       </div>
@@ -1790,16 +1790,16 @@
             <span class="terminal-title">install + activate</span>
           </div>
           <div class="terminal-body">
-<span class="t-line t-muted"># Write AgentScope guidance into native files</span>
-<span class="t-line"><span class="t-cmd">agentscope plugins install</span> <span class="t-info">--agent claude</span>  <span class="t-muted"># CLAUDE.md</span></span>
-<span class="t-line"><span class="t-cmd">agentscope plugins install</span> <span class="t-info">--agent codex</span>   <span class="t-muted"># AGENTS.md</span></span>
+<span class="t-line t-muted"># Write ScopeWarden guidance into native files</span>
+<span class="t-line"><span class="t-cmd">scopewarden plugins install</span> <span class="t-info">--agent claude</span>  <span class="t-muted"># CLAUDE.md</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden plugins install</span> <span class="t-info">--agent codex</span>   <span class="t-muted"># AGENTS.md</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted"># Then run your agent normally</span>
-<span class="t-line"><span class="t-cmd">agentscope attach</span> <span class="t-info">--agent auto --apply</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden attach</span> <span class="t-info">--agent auto --apply</span></span>
 <span class="t-line"><span class="t-cmd">codex</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted"># Install for all agents at once:</span>
-<span class="t-line"><span class="t-cmd">agentscope plugins install</span> <span class="t-info">--agent all</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden plugins install</span> <span class="t-info">--agent all</span></span>
           </div>
         </div>
       </div>
@@ -1813,15 +1813,15 @@
             <span class="terminal-title">install + activate</span>
           </div>
           <div class="terminal-body">
-<span class="t-line t-muted"># Write AgentScope guidance into .agentscope/plugin/opencode/</span>
-<span class="t-line"><span class="t-cmd">agentscope plugins install</span> <span class="t-info">--agent opencode</span></span>
+<span class="t-line t-muted"># Write ScopeWarden guidance into .scopewarden/plugin/opencode/</span>
+<span class="t-line"><span class="t-cmd">scopewarden plugins install</span> <span class="t-info">--agent opencode</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted"># Attach mission from current agent context</span>
-<span class="t-line"><span class="t-cmd">agentscope attach</span> <span class="t-info">--agent auto --apply</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden attach</span> <span class="t-info">--agent auto --apply</span></span>
 <span class="t-line"><span class="t-cmd">opencode</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted"># Watch and check</span>
-<span class="t-line"><span class="t-cmd">agentscope watch</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden watch</span></span>
           </div>
         </div>
       </div>
@@ -1839,8 +1839,8 @@
           <tbody>
             <tr>
               <td>scope_check</td>
-              <td>Verify current scope — shows a hint to run <code>agentscope check</code></td>
-              <td><code>{ "hint": "run agentscope check for terminal policy output" }</code></td>
+              <td>Verify current scope — shows a hint to run <code>scopewarden check</code></td>
+              <td><code>{ "hint": "run scopewarden check for terminal policy output" }</code></td>
             </tr>
             <tr>
               <td>scope_status</td>
@@ -1850,12 +1850,12 @@
             <tr>
               <td>scope_start</td>
               <td>Register a goal if one wasn't set at launch</td>
-              <td><code>{ "hint": "run agentscope start \"mission\"" }</code></td>
+              <td><code>{ "hint": "run scopewarden start \"mission\"" }</code></td>
             </tr>
             <tr>
               <td>agent_attach</td>
               <td>Attach inferred session from agent context</td>
-              <td><code>{ "hint": "run agentscope attach --agent auto --apply" }</code></td>
+              <td><code>{ "hint": "run scopewarden attach --agent auto --apply" }</code></td>
             </tr>
           </tbody>
         </table>
@@ -1883,9 +1883,9 @@
             <p style="font-family:var(--mono);font-size:10px;color:var(--lime);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">What Claude sees in /plugins</p>
             <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px 14px;margin-bottom:16px;">
               <p style="font-family:var(--mono);font-size:11px;color:var(--text-muted);line-height:1.8;">
-                Installed › <span style="color:var(--lime);">agentscope</span> <span style="color:var(--text-dim);">@ agentscopev2  v1.0.0</span><br>
+                Installed › <span style="color:var(--lime);">scopewarden</span> <span style="color:var(--text-dim);">@ scopewarden  v1.0.0</span><br>
                 Skills: scope-guard · scope-check · scope-firewall<br>
-                MCP: <span style="color:var(--amber);">agentscope</span> (5 tools)
+                MCP: <span style="color:var(--amber);">scopewarden</span> (5 tools)
               </p>
             </div>
 
@@ -1897,15 +1897,15 @@
               </div>
               <div class="terminal-body" style="font-size:11px;">
 <span class="t-line t-muted"># At session start — Claude calls automatically:</span>
-<span class="t-line"><span class="t-info">mcp__agentscope__scope_status</span>({})</span>
+<span class="t-line"><span class="t-info">mcp__scopewarden__scope_status</span>({})</span>
 <span class="t-line t-muted">→ Session: 01KSGXT · Agent: claude-code · Mission: "Fix auth bug"</span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted"># Before each commit or risky edit:</span>
-<span class="t-line"><span class="t-info">mcp__agentscope__scope_check</span>({})</span>
+<span class="t-line"><span class="t-info">mcp__scopewarden__scope_check</span>({})</span>
 <span class="t-line t-muted">→ 3 expected · 1 suspicious · 0 blocked</span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted"># To register a new mission mid-session:</span>
-<span class="t-line"><span class="t-info">mcp__agentscope__scope_start</span>({mission: "Refactor login flow"})</span>
+<span class="t-line"><span class="t-info">mcp__scopewarden__scope_start</span>({mission: "Refactor login flow"})</span>
               </div>
             </div>
 
@@ -1930,14 +1930,14 @@
             </div>
           </div>
           <div style="padding:20px;">
-            <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;line-height:1.6;">Codex reads <code>AGENTS.md</code> at startup and loads MCP servers from <code>.mcp.json</code>. AgentScope tools appear in Codex's tool list with no extra configuration.</p>
+            <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;line-height:1.6;">Codex reads <code>AGENTS.md</code> at startup and loads MCP servers from <code>.mcp.json</code>. ScopeWarden tools appear in Codex's tool list with no extra configuration.</p>
 
             <p style="font-family:var(--mono);font-size:10px;color:var(--lime);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">What Codex reads from AGENTS.md</p>
             <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px 14px;margin-bottom:16px;font-family:var(--mono);font-size:11px;color:var(--text-muted);line-height:1.8;">
-              <span style="color:var(--lime);">## AgentScope</span><br>
-              You have an AgentScope scope firewall active.<br>
-              — Run <code>agentscope status</code> before starting any task.<br>
-              — Run <code>agentscope check</code> before every git commit.<br>
+              <span style="color:var(--lime);">## ScopeWarden</span><br>
+              You have an ScopeWarden scope firewall active.<br>
+              — Run <code>scopewarden status</code> before starting any task.<br>
+              — Run <code>scopewarden check</code> before every git commit.<br>
               — Do NOT edit files in <code>blocked:</code> paths.<br>
               — If suspicious files appear, explain before proceeding.
             </div>
@@ -1949,8 +1949,8 @@
                 <span class="terminal-title">Codex — tool calls</span>
               </div>
               <div class="terminal-body" style="font-size:11px;">
-<span class="t-line t-muted"># Codex loads .mcp.json → starts agentscope mcp</span>
-<span class="t-line"><span class="t-cmd">agentscope mcp</span>  <span class="t-muted"># persistent stdio JSON-RPC server</span></span>
+<span class="t-line t-muted"># Codex loads .mcp.json → starts scopewarden mcp</span>
+<span class="t-line"><span class="t-cmd">scopewarden mcp</span>  <span class="t-muted"># persistent stdio JSON-RPC server</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted"># Tools available to Codex via MCP:</span>
 <span class="t-line"><span class="t-info">scope_status</span>   <span class="t-muted">→ active session + mission</span></span>
@@ -1966,8 +1966,8 @@
               <p style="font-family:var(--mono);font-size:11px;color:var(--text-muted);line-height:1.8;">
                 {<br>
                 &nbsp;&nbsp;<span style="color:var(--amber);">"mcpServers"</span>: {<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--lime);">"agentscope"</span>: {<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--amber);">"command"</span>: <span style="color:var(--text);">"agentscope"</span>,<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--lime);">"scopewarden"</span>: {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--amber);">"command"</span>: <span style="color:var(--text);">"scopewarden"</span>,<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--amber);">"args"</span>: [<span style="color:var(--text);">"mcp"</span>]<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;}<br>
                 &nbsp;&nbsp;}<br>
@@ -1986,7 +1986,7 @@
           <p style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;">Pre-commit hook — the safety net that always runs</p>
           <p style="font-size:12px;color:var(--text-muted);line-height:1.6;margin-bottom:10px;">Both Claude Code and Codex commit via <code>git commit</code>. The hook intercepts every commit regardless of which agent issued it — no agent cooperation required.</p>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <span style="font-family:var(--mono);font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:3px 10px;color:var(--lime);">agentscope hook install</span>
+            <span style="font-family:var(--mono);font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:3px 10px;color:var(--lime);">scopewarden hook install</span>
             <span style="font-size:11px;color:var(--text-dim);padding:3px 0;">→ writes to</span>
             <span style="font-family:var(--mono);font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:3px 10px;color:var(--text-muted);">.git/hooks/pre-commit</span>
           </div>
@@ -2009,8 +2009,8 @@
         <p style="font-size:12px;color:var(--text-muted);line-height:1.5;">Copilot custom instructions file. Read by GitHub Copilot Chat.</p>
       </div>
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px;">
-        <p style="font-family:var(--mono);font-size:10px;color:var(--lime);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">.agentscope/plugin/</p>
-        <p style="font-size:12px;color:var(--text-muted);line-height:1.5;">Local record of installed plugins. Used by <code>agentscope plugins list</code>.</p>
+        <p style="font-family:var(--mono);font-size:10px;color:var(--lime);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">.scopewarden/plugin/</p>
+        <p style="font-size:12px;color:var(--text-muted);line-height:1.5;">Local record of installed plugins. Used by <code>scopewarden plugins list</code>.</p>
       </div>
     </div>
 
@@ -2144,10 +2144,10 @@
     <div class="config-wrap">
       <div class="config-header">
         <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
-        <span class="config-filename">agentscope.yaml</span>
+        <span class="config-filename">scopewarden.yaml</span>
       </div>
       <div class="config-body">
-<span class="yaml-comment"># agentscope.yaml — generated by `agentscope init`</span><br>
+<span class="yaml-comment"># scopewarden.yaml — generated by `scopewarden init`</span><br>
 <span class="yaml-key">version</span>: <span class="yaml-val">1</span><br>
 <br>
 <span class="yaml-section">policy:</span><br>
@@ -2187,22 +2187,22 @@
         <span class="terminal-title">edit your config</span>
       </div>
       <div class="terminal-body">
-<span class="t-line t-muted"># Create agentscope.yaml in your repo (picks up sensible defaults)</span>
-<span class="t-line"><span class="t-cmd">agentscope init</span>                               <span class="t-muted"># default preset</span></span>
-<span class="t-line"><span class="t-cmd">agentscope init</span> <span class="t-info">--preset team</span>                 <span class="t-muted"># team preset (stricter limits)</span></span>
-<span class="t-line"><span class="t-cmd">agentscope init</span> <span class="t-info">--preset ci</span>                   <span class="t-muted"># CI preset (json output, no judge)</span></span>
+<span class="t-line t-muted"># Create scopewarden.yaml in your repo (picks up sensible defaults)</span>
+<span class="t-line"><span class="t-cmd">scopewarden init</span>                               <span class="t-muted"># default preset</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden init</span> <span class="t-info">--preset team</span>                 <span class="t-muted"># team preset (stricter limits)</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden init</span> <span class="t-info">--preset ci</span>                   <span class="t-muted"># CI preset (json output, no judge)</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted"># Open the file in your $EDITOR directly</span>
-<span class="t-line"><span class="t-cmd">agentscope config edit</span>                        <span class="t-muted"># opens agentscope.yaml in $EDITOR</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden config edit</span>                        <span class="t-muted"># opens scopewarden.yaml in $EDITOR</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted"># Quick single-value changes without opening the editor</span>
-<span class="t-line"><span class="t-cmd">agentscope config set</span> <span class="t-info">model qwen3.5:2b</span>       <span class="t-muted"># change judge model</span></span>
-<span class="t-line"><span class="t-cmd">agentscope config set</span> <span class="t-info">judge.provider ollama</span>  <span class="t-muted"># switch provider</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden config set</span> <span class="t-info">model qwen3.5:2b</span>       <span class="t-muted"># change judge model</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden config set</span> <span class="t-info">judge.provider ollama</span>  <span class="t-muted"># switch provider</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted"># Inspect &amp; reset</span>
-<span class="t-line"><span class="t-cmd">agentscope config show</span>                        <span class="t-muted"># print resolved config</span></span>
-<span class="t-line"><span class="t-cmd">agentscope config path</span>                        <span class="t-muted"># print path to the config file</span></span>
-<span class="t-line"><span class="t-cmd">agentscope config reset</span>                       <span class="t-muted"># reset to defaults</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden config show</span>                        <span class="t-muted"># print resolved config</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden config path</span>                        <span class="t-muted"># print path to the config file</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden config reset</span>                       <span class="t-muted"># reset to defaults</span></span>
       </div>
     </div>
 
@@ -2212,18 +2212,18 @@
       <div class="terminal" style="box-shadow: none; margin-bottom: 28px;">
         <div class="terminal-bar">
           <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
-          <span class="terminal-title">install agentscope</span>
+          <span class="terminal-title">install scopewarden</span>
         </div>
         <div class="terminal-body">
 <span class="t-line t-muted"># Install from source via cargo</span>
-<span class="t-line"><span class="t-cmd">cargo install</span> <span class="t-info">--git https://github.com/abdouloued/agentscopev2 --force</span></span>
+<span class="t-line"><span class="t-cmd">cargo install</span> <span class="t-info">--git https://github.com/abdouloued/scopewarden --force</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted"># Or clone and build locally</span>
-<span class="t-line"><span class="t-cmd">git clone</span> <span class="t-info">https://github.com/abdouloued/agentscopev2.git</span> <span class="t-warn">&amp;&amp; cd agentscopev2</span></span>
+<span class="t-line"><span class="t-cmd">git clone</span> <span class="t-info">https://github.com/abdouloued/scopewarden.git</span> <span class="t-warn">&amp;&amp; cd scopewarden</span></span>
 <span class="t-line"><span class="t-cmd">cargo build</span> <span class="t-info">--release</span> <span class="t-warn">&amp;&amp; cargo install --path .</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted"># Verify install</span>
-<span class="t-line"><span class="t-cmd">agentscope</span> <span class="t-warn">--version</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden</span> <span class="t-warn">--version</span></span>
         </div>
       </div>
 
@@ -2235,73 +2235,73 @@
         </div>
         <div class="terminal-body">
 <span class="t-line t-muted">## Quick Start</span>
-<span class="t-line"><span class="t-cmd">agentscope init</span>                                    <span class="t-muted"># create agentscope.yaml in your repo</span></span>
-<span class="t-line"><span class="t-cmd">agentscope start</span> <span class="t-warn">"Fix login bug"</span> <span class="t-info">--agent claude</span>    <span class="t-muted"># record mission + git baseline</span></span>
-<span class="t-line"><span class="t-cmd">agentscope check</span>                                   <span class="t-muted"># check diff against goal + policy</span></span>
-<span class="t-line"><span class="t-cmd">agentscope check</span> <span class="t-info">--json</span>                            <span class="t-muted"># machine-readable output (CI)</span></span>
-<span class="t-line"><span class="t-cmd">agentscope check</span> <span class="t-info">--share</span>                           <span class="t-muted"># copy markdown summary to clipboard</span></span>
-<span class="t-line"><span class="t-cmd">agentscope status</span>                                  <span class="t-muted"># show active session one-liner</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden init</span>                                    <span class="t-muted"># create scopewarden.yaml in your repo</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden start</span> <span class="t-warn">"Fix login bug"</span> <span class="t-info">--agent claude</span>    <span class="t-muted"># record mission + git baseline</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden check</span>                                   <span class="t-muted"># check diff against goal + policy</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden check</span> <span class="t-info">--json</span>                            <span class="t-muted"># machine-readable output (CI)</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden check</span> <span class="t-info">--share</span>                           <span class="t-muted"># copy markdown summary to clipboard</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden status</span>                                  <span class="t-muted"># show active session one-liner</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted">## Agent Workflow</span>
-<span class="t-line"><span class="t-cmd">agentscope agents detect</span>                          <span class="t-muted"># detect local agent context files</span></span>
-<span class="t-line"><span class="t-cmd">agentscope agents doctor</span>                          <span class="t-muted"># explain found/missing sources + repair</span></span>
-<span class="t-line"><span class="t-cmd">agentscope attach</span> <span class="t-info">--agent auto</span>                    <span class="t-muted"># infer mission from agent context (dry run)</span></span>
-<span class="t-line"><span class="t-cmd">agentscope attach</span> <span class="t-info">--agent auto --apply</span>            <span class="t-muted"># write inferred session to disk</span></span>
-<span class="t-line"><span class="t-cmd">agentscope monitor</span> <span class="t-info">--agent auto</span>                   <span class="t-muted"># watch live + auto-attach on high confidence</span></span>
-<span class="t-line"><span class="t-cmd">agentscope watch</span>                                   <span class="t-muted"># live TUI dashboard (scope + diff + history)</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden agents detect</span>                          <span class="t-muted"># detect local agent context files</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden agents doctor</span>                          <span class="t-muted"># explain found/missing sources + repair</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden attach</span> <span class="t-info">--agent auto</span>                    <span class="t-muted"># infer mission from agent context (dry run)</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden attach</span> <span class="t-info">--agent auto --apply</span>            <span class="t-muted"># write inferred session to disk</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden monitor</span> <span class="t-info">--agent auto</span>                   <span class="t-muted"># watch live + auto-attach on high confidence</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden watch</span>                                   <span class="t-muted"># live TUI dashboard (scope + diff + history)</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted">## Launcher Lab</span>
-<span class="t-line"><span class="t-cmd">agentscope launchers list</span>                          <span class="t-muted"># list supported launcher apps</span></span>
-<span class="t-line"><span class="t-cmd">agentscope launchers test</span>                          <span class="t-muted"># safe startup test for all launchers</span></span>
-<span class="t-line"><span class="t-cmd">agentscope launchers test</span> <span class="t-info">codex</span>                    <span class="t-muted"># safe startup test for one launcher</span></span>
-<span class="t-line"><span class="t-cmd">agentscope launchers summary</span>                       <span class="t-muted"># compact launcher status summary</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden launchers list</span>                          <span class="t-muted"># list supported launcher apps</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden launchers test</span>                          <span class="t-muted"># safe startup test for all launchers</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden launchers test</span> <span class="t-info">codex</span>                    <span class="t-muted"># safe startup test for one launcher</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden launchers summary</span>                       <span class="t-muted"># compact launcher status summary</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted">## LLM Judge</span>
-<span class="t-line"><span class="t-cmd">agentscope judge</span>                                   <span class="t-muted"># judge with default provider + model</span></span>
-<span class="t-line"><span class="t-cmd">agentscope judge</span> <span class="t-info">-m qwen3.5:2b</span>                    <span class="t-muted"># specify model (ollama)</span></span>
-<span class="t-line"><span class="t-cmd">agentscope judge</span> <span class="t-info">-p claude</span>                        <span class="t-muted"># anthropic claude</span></span>
-<span class="t-line"><span class="t-cmd">agentscope judge</span> <span class="t-info">-p openai -m gpt-4o</span>             <span class="t-muted"># openai</span></span>
-<span class="t-line"><span class="t-cmd">agentscope judge</span> <span class="t-info">-p gemini</span>                        <span class="t-muted"># google gemini</span></span>
-<span class="t-line"><span class="t-cmd">agentscope model list</span>                              <span class="t-muted"># list available ollama models + cloud providers</span></span>
-<span class="t-line"><span class="t-cmd">agentscope model set</span> <span class="t-info">qwen3.5:2b</span>                   <span class="t-muted"># set default judge model</span></span>
-<span class="t-line"><span class="t-cmd">agentscope model test</span>                              <span class="t-muted"># test current model with a simple prompt</span></span>
-<span class="t-line"><span class="t-cmd">agentscope model pull</span> <span class="t-info">llama3</span>                      <span class="t-muted"># pull model from ollama</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden judge</span>                                   <span class="t-muted"># judge with default provider + model</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden judge</span> <span class="t-info">-m qwen3.5:2b</span>                    <span class="t-muted"># specify model (ollama)</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden judge</span> <span class="t-info">-p claude</span>                        <span class="t-muted"># anthropic claude</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden judge</span> <span class="t-info">-p openai -m gpt-4o</span>             <span class="t-muted"># openai</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden judge</span> <span class="t-info">-p gemini</span>                        <span class="t-muted"># google gemini</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden model list</span>                              <span class="t-muted"># list available ollama models + cloud providers</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden model set</span> <span class="t-info">qwen3.5:2b</span>                   <span class="t-muted"># set default judge model</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden model test</span>                              <span class="t-muted"># test current model with a simple prompt</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden model pull</span> <span class="t-info">llama3</span>                      <span class="t-muted"># pull model from ollama</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted">## Reports &amp; Audit</span>
-<span class="t-line"><span class="t-cmd">agentscope report</span>                                  <span class="t-muted"># print last run in terminal</span></span>
-<span class="t-line"><span class="t-cmd">agentscope report</span> <span class="t-info">--markdown</span>                      <span class="t-muted"># output as markdown (for PR comments)</span></span>
-<span class="t-line"><span class="t-cmd">agentscope diff</span>                                    <span class="t-muted"># git diff with scope annotations</span></span>
-<span class="t-line"><span class="t-cmd">agentscope diff</span> <span class="t-info">--problems</span>                        <span class="t-muted"># show only blocked/unasked files</span></span>
-<span class="t-line"><span class="t-cmd">agentscope audit</span> <span class="t-info">last-5</span>                           <span class="t-muted"># last 5 sessions</span></span>
-<span class="t-line"><span class="t-cmd">agentscope audit</span> <span class="t-info">today</span>                            <span class="t-muted"># sessions from today</span></span>
-<span class="t-line"><span class="t-cmd">agentscope audit</span> <span class="t-info">HEAD~5..HEAD</span>                     <span class="t-muted"># audit a git range</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden report</span>                                  <span class="t-muted"># print last run in terminal</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden report</span> <span class="t-info">--markdown</span>                      <span class="t-muted"># output as markdown (for PR comments)</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden diff</span>                                    <span class="t-muted"># git diff with scope annotations</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden diff</span> <span class="t-info">--problems</span>                        <span class="t-muted"># show only blocked/unasked files</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden audit</span> <span class="t-info">last-5</span>                           <span class="t-muted"># last 5 sessions</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden audit</span> <span class="t-info">today</span>                            <span class="t-muted"># sessions from today</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden audit</span> <span class="t-info">HEAD~5..HEAD</span>                     <span class="t-muted"># audit a git range</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted">## Integrations</span>
-<span class="t-line"><span class="t-cmd">agentscope hook install</span>                            <span class="t-muted"># install pre-commit hook</span></span>
-<span class="t-line"><span class="t-cmd">agentscope hook uninstall</span>                          <span class="t-muted"># remove hook</span></span>
-<span class="t-line"><span class="t-cmd">agentscope hook status</span>                             <span class="t-muted"># show current hook status</span></span>
-<span class="t-line"><span class="t-cmd">agentscope plugins install</span> <span class="t-info">--agent all</span>           <span class="t-muted"># write guidance files for all agents</span></span>
-<span class="t-line"><span class="t-cmd">agentscope plugins install</span> <span class="t-info">--agent claude</span>        <span class="t-muted"># writes to CLAUDE.md only</span></span>
-<span class="t-line"><span class="t-cmd">agentscope skills install</span> <span class="t-info">--agent all</span>            <span class="t-muted"># write skill instructions for all agents</span></span>
-<span class="t-line"><span class="t-cmd">agentscope use</span> <span class="t-info">codex-app</span>                         <span class="t-muted"># write helper integration files for one agent</span></span>
-<span class="t-line"><span class="t-cmd">agentscope mcp</span>                                    <span class="t-muted"># start persistent JSON-RPC MCP server</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden hook install</span>                            <span class="t-muted"># install pre-commit hook</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden hook uninstall</span>                          <span class="t-muted"># remove hook</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden hook status</span>                             <span class="t-muted"># show current hook status</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden plugins install</span> <span class="t-info">--agent all</span>           <span class="t-muted"># write guidance files for all agents</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden plugins install</span> <span class="t-info">--agent claude</span>        <span class="t-muted"># writes to CLAUDE.md only</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden skills install</span> <span class="t-info">--agent all</span>            <span class="t-muted"># write skill instructions for all agents</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden use</span> <span class="t-info">codex-app</span>                         <span class="t-muted"># write helper integration files for one agent</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden mcp</span>                                    <span class="t-muted"># start persistent JSON-RPC MCP server</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted">## Chats &amp; Sessions</span>
-<span class="t-line"><span class="t-cmd">agentscope chat new</span> <span class="t-warn">"Fix checkout"</span>              <span class="t-muted"># create an AgentScope-owned chat</span></span>
-<span class="t-line"><span class="t-cmd">agentscope chat list</span>                              <span class="t-muted"># list AgentScope chats</span></span>
-<span class="t-line"><span class="t-cmd">agentscope chat show</span> <span class="t-info">&lt;id&gt;</span>                       <span class="t-muted"># show chat metadata + transcript</span></span>
-<span class="t-line"><span class="t-cmd">agentscope chat delete</span> <span class="t-info">&lt;id&gt;</span>                     <span class="t-muted"># soft-delete a chat</span></span>
-<span class="t-line"><span class="t-cmd">agentscope chat restore</span> <span class="t-info">&lt;id&gt;</span>                    <span class="t-muted"># restore an archived chat</span></span>
-<span class="t-line"><span class="t-cmd">agentscope chat purge</span> <span class="t-info">&lt;id&gt;</span>                      <span class="t-muted"># permanently delete archived chat</span></span>
-<span class="t-line"><span class="t-cmd">agentscope sessions list</span>                          <span class="t-muted"># list indexed local assistant sessions</span></span>
-<span class="t-line"><span class="t-cmd">agentscope sessions latest</span>                        <span class="t-muted"># show newest local assistant session</span></span>
-<span class="t-line"><span class="t-cmd">agentscope sessions show</span> <span class="t-info">&lt;id&gt;</span>                   <span class="t-muted"># show one indexed session</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden chat new</span> <span class="t-warn">"Fix checkout"</span>              <span class="t-muted"># create an ScopeWarden-owned chat</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden chat list</span>                              <span class="t-muted"># list ScopeWarden chats</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden chat show</span> <span class="t-info">&lt;id&gt;</span>                       <span class="t-muted"># show chat metadata + transcript</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden chat delete</span> <span class="t-info">&lt;id&gt;</span>                     <span class="t-muted"># soft-delete a chat</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden chat restore</span> <span class="t-info">&lt;id&gt;</span>                    <span class="t-muted"># restore an archived chat</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden chat purge</span> <span class="t-info">&lt;id&gt;</span>                      <span class="t-muted"># permanently delete archived chat</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden sessions list</span>                          <span class="t-muted"># list indexed local assistant sessions</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden sessions latest</span>                        <span class="t-muted"># show newest local assistant session</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden sessions show</span> <span class="t-info">&lt;id&gt;</span>                   <span class="t-muted"># show one indexed session</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted">## Config</span>
-<span class="t-line"><span class="t-cmd">agentscope config show</span>                            <span class="t-muted"># print current config</span></span>
-<span class="t-line"><span class="t-cmd">agentscope config set</span> <span class="t-info">model qwen3.5:2b</span>           <span class="t-muted"># set a config value</span></span>
-<span class="t-line"><span class="t-cmd">agentscope config edit</span>                            <span class="t-muted"># open agentscope.yaml in $EDITOR</span></span>
-<span class="t-line"><span class="t-cmd">agentscope config reset</span> <span class="t-info">team</span>                 <span class="t-muted"># reset to a preset (solo|team|ci)</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden config show</span>                            <span class="t-muted"># print current config</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden config set</span> <span class="t-info">model qwen3.5:2b</span>           <span class="t-muted"># set a config value</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden config edit</span>                            <span class="t-muted"># open scopewarden.yaml in $EDITOR</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden config reset</span> <span class="t-info">team</span>                 <span class="t-muted"># reset to a preset (solo|team|ci)</span></span>
         </div>
       </div>
     </div>
@@ -2315,25 +2315,25 @@
   <div class="container">
     <p class="section-label">Local Development</p>
     <h2 class="section-title reveal">Clone and run<br><em>in your own repo.</em></h2>
-    <p class="section-sub">Want to contribute, inspect the source, or use a local build? AgentScope is a single Rust binary — clone, build, point at your repo.</p>
+    <p class="section-sub">Want to contribute, inspect the source, or use a local build? ScopeWarden is a single Rust binary — clone, build, point at your repo.</p>
 
     <div class="local-dev-grid reveal">
       <div class="terminal" style="box-shadow:none;">
         <div class="terminal-bar">
           <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
-          <span class="terminal-title">1. Clone &amp; build agentscope</span>
+          <span class="terminal-title">1. Clone &amp; build scopewarden</span>
         </div>
         <div class="terminal-body">
 <span class="t-line t-muted"># Clone the repo</span>
-<span class="t-line"><span class="t-cmd">git clone</span> <span class="t-info">https://github.com/abdouloued/agentscopev2.git</span></span>
-<span class="t-line"><span class="t-cmd">cd</span> <span class="t-warn">agentscopev2</span></span>
+<span class="t-line"><span class="t-cmd">git clone</span> <span class="t-info">https://github.com/abdouloued/scopewarden.git</span></span>
+<span class="t-line"><span class="t-cmd">cd</span> <span class="t-warn">scopewarden</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted"># Build and install the binary to ~/.cargo/bin</span>
 <span class="t-line"><span class="t-cmd">cargo install</span> <span class="t-info">--path . --force</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted"># Or just build without installing</span>
 <span class="t-line"><span class="t-cmd">cargo build</span> <span class="t-info">--release</span></span>
-<span class="t-line"><span class="t-cmd">./target/release/agentscope</span> <span class="t-warn">--version</span></span>
+<span class="t-line"><span class="t-cmd">./target/release/scopewarden</span> <span class="t-warn">--version</span></span>
         </div>
       </div>
 
@@ -2343,16 +2343,16 @@
           <span class="terminal-title">2. Use in your project repo</span>
         </div>
         <div class="terminal-body">
-<span class="t-line t-muted"># Navigate to YOUR project (not agentscope's dir)</span>
+<span class="t-line t-muted"># Navigate to YOUR project (not scopewarden's dir)</span>
 <span class="t-line"><span class="t-cmd">cd</span> <span class="t-warn">~/my-project</span></span>
 <span class="t-line">&nbsp;</span>
-<span class="t-line t-muted"># Initialize agentscope config here</span>
-<span class="t-line"><span class="t-cmd">agentscope init</span></span>
+<span class="t-line t-muted"># Initialize scopewarden config here</span>
+<span class="t-line"><span class="t-cmd">scopewarden init</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted"># Start a session and run your agent</span>
-<span class="t-line"><span class="t-cmd">agentscope start</span> <span class="t-warn">"Fix the login bug"</span> <span class="t-info">--agent claude</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden start</span> <span class="t-warn">"Fix the login bug"</span> <span class="t-info">--agent claude</span></span>
 <span class="t-line"><span class="t-muted">  # ... run claude, codex, or your agent ...</span></span>
-<span class="t-line"><span class="t-cmd">agentscope check</span></span>
+<span class="t-line"><span class="t-cmd">scopewarden check</span></span>
         </div>
       </div>
     </div>
@@ -2371,7 +2371,7 @@
   <div class="container">
     <p class="section-label">Open Source</p>
     <h2 class="section-title reveal">Early dev · Ollama-tested.<br><em>Contributions welcome.</em></h2>
-    <p class="section-sub">AgentScope is actively developed and currently tested with <strong style="color:var(--lime)">Ollama and local models</strong>. Multi-provider cloud support (Claude, OpenAI, Gemini) is implemented but undertested. Rough edges exist — bug reports and PRs are genuinely appreciated.</p>
+    <p class="section-sub">ScopeWarden is actively developed and currently tested with <strong style="color:var(--lime)">Ollama and local models</strong>. Multi-provider cloud support (Claude, OpenAI, Gemini) is implemented but undertested. Rough edges exist — bug reports and PRs are genuinely appreciated.</p>
 
     <div class="local-dev-grid reveal" style="margin-top:40px;">
       <div>
@@ -2403,8 +2403,8 @@
         </div>
         <div class="terminal-body">
 <span class="t-line t-muted"># Fork on GitHub, then:</span>
-<span class="t-line"><span class="t-cmd">git clone</span> <span class="t-info">https://github.com/YOUR_USERNAME/agentscopev2.git</span></span>
-<span class="t-line"><span class="t-cmd">cd</span> <span class="t-warn">agentscopev2</span></span>
+<span class="t-line"><span class="t-cmd">git clone</span> <span class="t-info">https://github.com/YOUR_USERNAME/scopewarden.git</span></span>
+<span class="t-line"><span class="t-cmd">cd</span> <span class="t-warn">scopewarden</span></span>
 <span class="t-line">&nbsp;</span>
 <span class="t-line t-muted"># Build and test</span>
 <span class="t-line"><span class="t-cmd">cargo build</span></span>
@@ -2421,9 +2421,9 @@
     </div>
 
     <div style="display:flex;gap:12px;margin-top:28px;flex-wrap:wrap;">
-      <a href="https://github.com/abdouloued/agentscopev2/blob/main/CONTRIBUTING.md" class="btn-primary" style="font-size:13px;padding:10px 20px;">Read CONTRIBUTING.md</a>
-      <a href="https://github.com/abdouloued/agentscopev2/issues/new" class="btn-ghost" style="font-size:13px;padding:10px 20px;">Open an issue</a>
-      <a href="https://github.com/abdouloued/agentscopev2" class="btn-ghost" style="font-size:13px;padding:10px 20px;">Star on GitHub ⭐</a>
+      <a href="https://github.com/abdouloued/scopewarden/blob/main/CONTRIBUTING.md" class="btn-primary" style="font-size:13px;padding:10px 20px;">Read CONTRIBUTING.md</a>
+      <a href="https://github.com/abdouloued/scopewarden/issues/new" class="btn-ghost" style="font-size:13px;padding:10px 20px;">Open an issue</a>
+      <a href="https://github.com/abdouloued/scopewarden" class="btn-ghost" style="font-size:13px;padding:10px 20px;">Star on GitHub ⭐</a>
     </div>
   </div>
 </section>
@@ -2435,7 +2435,7 @@
   <div class="container">
     <p class="section-label">Developer workflow</p>
     <h2 class="section-title">Designed for the way<br>agents are used <em>today.</em></h2>
-    <p class="section-sub">AgentScope does not require editor hooks, cloud dashboards, or a new agent runtime. It works at the shell and Git boundary.</p>
+    <p class="section-sub">ScopeWarden does not require editor hooks, cloud dashboards, or a new agent runtime. It works at the shell and Git boundary.</p>
 
     <div class="viral-grid">
       <div class="viral-card">
@@ -2444,30 +2444,30 @@
       </div>
       <div class="viral-card">
         <h3>JSON for automation</h3>
-        <p><code>.agentscope/last-run.json</code> gives CI, scripts, and dashboards a stable machine-readable contract.</p>
+        <p><code>.scopewarden/last-run.json</code> gives CI, scripts, and dashboards a stable machine-readable contract.</p>
       </div>
       <div class="viral-card">
         <h3>Markdown for reviews</h3>
-        <p><code>.agentscope/last-run.md</code> is ready for PR comments, session logs, and handoffs between developers.</p>
+        <p><code>.scopewarden/last-run.md</code> is ready for PR comments, session logs, and handoffs between developers.</p>
       </div>
       <div class="viral-card">
         <h3>Shell wrapper</h3>
-        <p>Works alongside Claude, Codex, Cursor, Gemini CLI, OpenCode, and any custom agent. Your agent runs untouched; agentscope tracks the boundary.</p>
+        <p>Works alongside Claude, Codex, Cursor, Gemini CLI, OpenCode, and any custom agent. Your agent runs untouched; scopewarden tracks the boundary.</p>
       </div>
       <div class="viral-card">
         <h3>Activity log</h3>
-        <p>Every check appends a record to <code>.agentscope/runs.jsonl</code> (personal) and <code>agentscope-activity.jsonl</code> (team audit trail). <code>agentscope audit last-5</code> shows a table of all past checks.</p>
+        <p>Every check appends a record to <code>.scopewarden/runs.jsonl</code> (personal) and <code>scopewarden-activity.jsonl</code> (team audit trail). <code>scopewarden audit last-5</code> shows a table of all past checks.</p>
       </div>
       <div class="viral-card">
         <h3>Drift forensics</h3>
-        <p><code>agentscope audit main..HEAD</code> walks every commit in a range and marks the first one that violated scope — so you know exactly which commit to revert.</p>
+        <p><code>scopewarden audit main..HEAD</code> walks every commit in a range and marks the first one that violated scope — so you know exactly which commit to revert.</p>
       </div>
     </div>
 
     <!-- Sharecard mockup -->
     <div class="sharecard">
       <div class="sharecard-header">
-        <span class="sharecard-logo">agentscope</span>
+        <span class="sharecard-logo">scopewarden</span>
         <span style="font-family: var(--mono); font-size: 11px; color: var(--text-dim);">drift report · shareable</span>
       </div>
       <div class="sharecard-body">
@@ -2487,7 +2487,7 @@
           <span class="t-line t-muted">The agent drifted into authentication code while fixing a UI bug.</span>
         </div>
         <span class="t-line">&nbsp;</span>
-        <span class="t-line t-muted" style="font-size: 11px;">github.com/abdouloued/agentscopev2 · open source · model-agnostic</span>
+        <span class="t-line t-muted" style="font-size: 11px;">github.com/abdouloued/scopewarden · open source · model-agnostic</span>
       </div>
     </div>
   </div>
@@ -2507,14 +2507,14 @@
           <p class="phase-label">v0.1 · ready</p>
           <p class="phase-name">Core engine</p>
           <ul class="phase-items">
-            <li><code>agentscope.yaml</code></li>
+            <li><code>scopewarden.yaml</code></li>
             <li>Git diff engine with line numbers</li>
             <li>Policy engine (all rules)</li>
             <li>EXPECTED / SUSPICIOUS / BLOCKED / IGNORED labels</li>
             <li>Ollama, Claude, OpenAI, Gemini, OpenRouter judge</li>
             <li>5-mode TUI cockpit (Review/Chat/Dashboard/Sessions/Live)</li>
             <li>JSON + Markdown reports</li>
-            <li>Pre-commit hook (<code>agentscope hook install</code>)</li>
+            <li>Pre-commit hook (<code>scopewarden hook install</code>)</li>
             <li>Plugin install → CLAUDE.md / AGENTS.md / .cursor/rules/</li>
             <li>Agent auto-detection (Claude, Codex, Cursor, Gemini, Copilot…)</li>
             <li>MCP stdio server</li>
@@ -2575,7 +2575,7 @@
       <div>
         <p style="font-family: var(--mono); font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Launch gate</p>
         <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; font-size: 13px; color: var(--text-muted); line-height: 1.8;">
-          <div>OK <code>agentscope.yaml</code> with <code>init</code></div>
+          <div>OK <code>scopewarden.yaml</code> with <code>init</code></div>
           <div>OK <code>start</code>, <code>check</code>, <code>run</code>, <code>report</code></div>
           <div>OK blocked paths and env files hard-block</div>
           <div>OK product-level CLI tests (31 pass)</div>
@@ -2598,9 +2598,9 @@
   <div class="container">
     <p class="hero-eyebrow" style="justify-content: center;">open source · mit license</p>
     <h2 style="font-size: clamp(32px, 5vw, 56px); font-weight: 300; letter-spacing: 0; color: var(--text); margin-bottom: 16px; line-height: 1.1;">Give agents write access.<br>Hold them <em style="color: var(--lime);">accountable.</em></h2>
-    <p style="font-size: 15px; color: var(--text-muted); max-width: 460px; margin: 0 auto 36px; line-height: 1.7;">AgentScope records the goal, checks every changed file against it, and stops drift automatically — as a pre-commit hook, MCP tool, or standalone CLI. Before review, merge, or handoff.</p>
+    <p style="font-size: 15px; color: var(--text-muted); max-width: 460px; margin: 0 auto 36px; line-height: 1.7;">ScopeWarden records the goal, checks every changed file against it, and stops drift automatically — as a pre-commit hook, MCP tool, or standalone CLI. Before review, merge, or handoff.</p>
     <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-      <a href="https://github.com/abdouloued/agentscopev2" class="btn-primary">Star on GitHub</a>
+      <a href="https://github.com/abdouloued/scopewarden" class="btn-primary">Star on GitHub</a>
       <a href="#plugins" class="btn-ghost">See native plugins</a>
     </div>
   </div>
@@ -2609,9 +2609,9 @@
 <footer>
   <div class="container">
     <div class="footer-inner">
-      <span style="font-family: var(--mono); color: var(--lime);">agentscope</span>
+      <span style="font-family: var(--mono); color: var(--lime);">scopewarden</span>
       <span>Open Source · MIT · Rust CLI</span>
-      <a href="https://github.com/abdouloued/agentscopev2" style="color: var(--text-dim); text-decoration: none;">github.com/abdouloued/agentscopev2</a>
+      <a href="https://github.com/abdouloued/scopewarden" style="color: var(--text-dim); text-decoration: none;">github.com/abdouloued/scopewarden</a>
     </div>
   </div>
 </footer>
@@ -2701,12 +2701,12 @@
       } else {
         document.documentElement.setAttribute('data-theme', id);
       }
-      localStorage.setItem('agentscope-theme', id);
+      localStorage.setItem('scopewarden-theme', id);
       renderSwatches();
     }
 
     // Restore saved theme
-    const saved = localStorage.getItem('agentscope-theme');
+    const saved = localStorage.getItem('scopewarden-theme');
     if (saved && saved !== 'midnight-lime') {
       document.documentElement.setAttribute('data-theme', saved);
     }
@@ -2716,7 +2716,7 @@
     const swatchContainer = document.getElementById('themeSwatches');
 
     function renderSwatches() {
-      const current = localStorage.getItem('agentscope-theme') || 'midnight-lime';
+      const current = localStorage.getItem('scopewarden-theme') || 'midnight-lime';
       swatchContainer.innerHTML = themes.map(t => `
         <div class="theme-swatch ${t.id === current ? 'active' : ''}" data-theme-id="${t.id}">
           <div class="theme-swatch-dot" style="background:${t.accent}"></div>
@@ -2749,37 +2749,37 @@
   // ══════════════════════════════════════════════════
   (function() {
     const commands = [
-      { group: 'Quick Start', name: '/init', desc: 'Initialize config in your repo', cli: 'agentscope init' },
-      { group: 'Quick Start', name: '/start', desc: 'Begin a new session', cli: 'agentscope start "MISSION" --agent claude' },
-      { group: 'Quick Start', name: '/check', desc: 'Check diff against goal', cli: 'agentscope check' },
-      { group: 'Quick Start', name: '/status', desc: 'Show active session', cli: 'agentscope status' },
-      { group: 'Agent Workflow', name: '/detect', desc: 'Detect agent context files', cli: 'agentscope agents detect' },
-      { group: 'Agent Workflow', name: '/doctor', desc: 'Diagnose agent sources', cli: 'agentscope agents doctor' },
-      { group: 'Agent Workflow', name: '/attach', desc: 'Infer and write session', cli: 'agentscope attach --agent auto --apply' },
-      { group: 'Agent Workflow', name: '/monitor', desc: 'Watch + auto-attach', cli: 'agentscope monitor --agent auto' },
-      { group: 'Agent Workflow', name: '/watch', desc: 'Live TUI dashboard', cli: 'agentscope watch' },
-      { group: 'Launcher Lab', name: '/launchers', desc: 'List launcher apps', cli: 'agentscope launchers list' },
-      { group: 'Launcher Lab', name: '/launcher-test', desc: 'Safe startup test', cli: 'agentscope launchers test codex' },
+      { group: 'Quick Start', name: '/init', desc: 'Initialize config in your repo', cli: 'scopewarden init' },
+      { group: 'Quick Start', name: '/start', desc: 'Begin a new session', cli: 'scopewarden start "MISSION" --agent claude' },
+      { group: 'Quick Start', name: '/check', desc: 'Check diff against goal', cli: 'scopewarden check' },
+      { group: 'Quick Start', name: '/status', desc: 'Show active session', cli: 'scopewarden status' },
+      { group: 'Agent Workflow', name: '/detect', desc: 'Detect agent context files', cli: 'scopewarden agents detect' },
+      { group: 'Agent Workflow', name: '/doctor', desc: 'Diagnose agent sources', cli: 'scopewarden agents doctor' },
+      { group: 'Agent Workflow', name: '/attach', desc: 'Infer and write session', cli: 'scopewarden attach --agent auto --apply' },
+      { group: 'Agent Workflow', name: '/monitor', desc: 'Watch + auto-attach', cli: 'scopewarden monitor --agent auto' },
+      { group: 'Agent Workflow', name: '/watch', desc: 'Live TUI dashboard', cli: 'scopewarden watch' },
+      { group: 'Launcher Lab', name: '/launchers', desc: 'List launcher apps', cli: 'scopewarden launchers list' },
+      { group: 'Launcher Lab', name: '/launcher-test', desc: 'Safe startup test', cli: 'scopewarden launchers test codex' },
       { group: 'Launcher Lab', name: '/ollama-claude', desc: 'Launch Claude Code with Ollama', cli: 'ollama launch claude --model qwen3.5' },
       { group: 'Launcher Lab', name: '/native-codex-app', desc: 'Launch Codex App natively', cli: 'open -a Codex' },
       { group: 'Launcher Lab', name: '/ollama-openclaw', desc: 'Launch OpenClaw with Ollama', cli: 'ollama launch openclaw --model qwen3.5' },
       { group: 'Launcher Lab', name: '/ollama-hermes', desc: 'Launch Hermes with Ollama', cli: 'ollama launch hermes --model qwen3.5' },
       { group: 'Launcher Lab', name: '/ollama-codex', desc: 'Launch Codex with Ollama', cli: 'ollama launch codex --model qwen3.5' },
       { group: 'Launcher Lab', name: '/ollama-opencode', desc: 'Launch OpenCode with Ollama', cli: 'ollama launch opencode --model qwen3.5' },
-      { group: 'LLM Judge', name: '/judge', desc: 'Run LLM judge', cli: 'agentscope judge' },
-      { group: 'LLM Judge', name: '/judge-local', desc: 'Judge with local model', cli: 'agentscope judge -m qwen3.5:2b' },
-      { group: 'LLM Judge', name: '/models', desc: 'List available models', cli: 'agentscope model list' },
-      { group: 'Reports & Audit', name: '/report', desc: 'Generate markdown report', cli: 'agentscope report --markdown' },
-      { group: 'Reports & Audit', name: '/diff', desc: 'Show problem files', cli: 'agentscope diff --problems' },
-      { group: 'Reports & Audit', name: '/audit', desc: 'Audit recent sessions', cli: 'agentscope audit last-5' },
-      { group: 'Integrations', name: '/hook', desc: 'Install git hook', cli: 'agentscope hook install' },
-      { group: 'Integrations', name: '/plugins', desc: 'Install plugins', cli: 'agentscope plugins install --agent all' },
-      { group: 'Integrations', name: '/use', desc: 'Write helper files', cli: 'agentscope use codex-app' },
-      { group: 'Integrations', name: '/mcp', desc: 'Start MCP server', cli: 'agentscope mcp' },
-      { group: 'Chats & Sessions', name: '/chat-new', desc: 'Create AgentScope chat', cli: 'agentscope chat new "Fix checkout"' },
-      { group: 'Chats & Sessions', name: '/chat-list', desc: 'List AgentScope chats', cli: 'agentscope chat list' },
-      { group: 'Chats & Sessions', name: '/sessions', desc: 'List local sessions', cli: 'agentscope sessions list' },
-      { group: 'Chats & Sessions', name: '/latest', desc: 'Show newest session', cli: 'agentscope sessions latest' },
+      { group: 'LLM Judge', name: '/judge', desc: 'Run LLM judge', cli: 'scopewarden judge' },
+      { group: 'LLM Judge', name: '/judge-local', desc: 'Judge with local model', cli: 'scopewarden judge -m qwen3.5:2b' },
+      { group: 'LLM Judge', name: '/models', desc: 'List available models', cli: 'scopewarden model list' },
+      { group: 'Reports & Audit', name: '/report', desc: 'Generate markdown report', cli: 'scopewarden report --markdown' },
+      { group: 'Reports & Audit', name: '/diff', desc: 'Show problem files', cli: 'scopewarden diff --problems' },
+      { group: 'Reports & Audit', name: '/audit', desc: 'Audit recent sessions', cli: 'scopewarden audit last-5' },
+      { group: 'Integrations', name: '/hook', desc: 'Install git hook', cli: 'scopewarden hook install' },
+      { group: 'Integrations', name: '/plugins', desc: 'Install plugins', cli: 'scopewarden plugins install --agent all' },
+      { group: 'Integrations', name: '/use', desc: 'Write helper files', cli: 'scopewarden use codex-app' },
+      { group: 'Integrations', name: '/mcp', desc: 'Start MCP server', cli: 'scopewarden mcp' },
+      { group: 'Chats & Sessions', name: '/chat-new', desc: 'Create ScopeWarden chat', cli: 'scopewarden chat new "Fix checkout"' },
+      { group: 'Chats & Sessions', name: '/chat-list', desc: 'List ScopeWarden chats', cli: 'scopewarden chat list' },
+      { group: 'Chats & Sessions', name: '/sessions', desc: 'List local sessions', cli: 'scopewarden sessions list' },
+      { group: 'Chats & Sessions', name: '/latest', desc: 'Show newest session', cli: 'scopewarden sessions latest' },
     ];
 
     const overlay = document.getElementById('cmdPaletteOverlay');

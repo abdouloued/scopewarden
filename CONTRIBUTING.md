@@ -1,4 +1,4 @@
-# Contributing to AgentScope
+# Contributing to ScopeWarden
 
 > **Status:** Early development — currently tested with [Ollama](https://ollama.com) and local models.
 > Multi-provider support (Claude, OpenAI, Gemini, OpenRouter) is implemented but undertested.
@@ -10,8 +10,8 @@
 
 ```bash
 # 1. Fork on GitHub, then clone your fork
-git clone https://github.com/YOUR_USERNAME/agentscopev2.git
-cd agentscopev2
+git clone https://github.com/YOUR_USERNAME/scopewarden.git
+cd scopewarden
 
 # 2. Build
 cargo build
@@ -24,9 +24,9 @@ cargo install --path . --force
 
 # 5. Try it in any git repo
 cd ~/my-project
-agentscope init
-agentscope start "test mission" --agent claude
-agentscope check
+scopewarden init
+scopewarden start "test mission" --agent claude
+scopewarden check
 ```
 
 **Requirements:** Rust 1.75+ (`rustup update stable`), Git.
@@ -55,7 +55,7 @@ src/
 ├── chat.rs             TUI chat panel (provider-agnostic)
 └── theme.rs            TUI theme definitions
 
-plugins/agentscope/     Claude Code plugin and MCP tools
+plugins/scopewarden/     Claude Code plugin and MCP tools
 docs/                   Additional documentation
 tests/                  Integration tests
 ```
@@ -66,10 +66,10 @@ tests/                  Integration tests
 
 ### Reporting bugs
 
-Open a [GitHub issue](https://github.com/abdouloued/agentscopev2/issues) with:
+Open a [GitHub issue](https://github.com/abdouloued/scopewarden/issues) with:
 - What you expected vs. what happened
 - Steps to reproduce
-- `agentscope --version` output
+- `scopewarden --version` output
 - OS and Rust version (`rustc --version`)
 
 ### Suggesting features
@@ -107,7 +107,7 @@ Open an issue tagged `enhancement` with:
 
 ## Testing agent-aware monitoring
 
-Agent readers must fail gracefully. A missing or unreadable local source should never cause `agentscope check` to fail.
+Agent readers must fail gracefully. A missing or unreadable local source should never cause `scopewarden check` to fail.
 
 For mission extraction changes, add regression tests using the fake log paths:
 
@@ -131,17 +131,17 @@ The default judge uses Ollama. To test locally:
 ollama pull qwen3.5:2b
 
 # Test the judge
-agentscope judge
+scopewarden judge
 
 # Or with a different model
-agentscope judge -m llama3.2:3b
+scopewarden judge -m llama3.2:3b
 ```
 
 For cloud providers (Claude, OpenAI, etc.), set the relevant env var before testing:
 
 ```bash
-ANTHROPIC_API_KEY=... agentscope judge -p claude
-OPENAI_API_KEY=...    agentscope judge -p openai -m gpt-4o-mini
+ANTHROPIC_API_KEY=... scopewarden judge -p claude
+OPENAI_API_KEY=...    scopewarden judge -p openai -m gpt-4o-mini
 ```
 
 ---

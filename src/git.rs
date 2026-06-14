@@ -63,7 +63,7 @@ impl WorkingTreeDiff {
 /// Open the git repo at or above cwd
 pub fn open_repo() -> Result<Repository> {
     let cwd = std::env::current_dir()?;
-    Repository::discover(&cwd).context("Not inside a git repository. AgentScope requires git.")
+    Repository::discover(&cwd).context("Not inside a git repository. ScopeWarden requires git.")
 }
 
 /// Capture the current HEAD commit SHA as a baseline

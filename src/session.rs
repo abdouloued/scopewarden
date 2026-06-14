@@ -11,7 +11,7 @@ use crate::judge;
 use crate::output::{CheckReport, Printer};
 use crate::policy::PolicyEngine;
 
-pub const ACTIVE_SESSION_FILE: &str = ".agentscope/session.json";
+pub const ACTIVE_SESSION_FILE: &str = ".scopewarden/session.json";
 
 // ── Session data ──────────────────────────────────────────────────────────────
 
@@ -344,7 +344,7 @@ pub async fn status() -> Result<()> {
 
     match load_active_session() {
         Ok(session) => p.session_one_liner(&session),
-        Err(_) => p.hint("No active session. Run: agentscope start \"your mission\""),
+        Err(_) => p.hint("No active session. Run: scopewarden start \"your mission\""),
     }
 
     Ok(())
@@ -366,7 +366,7 @@ pub fn append_session_activity(event: &str, session: &Session) -> Result<()> {
 pub fn load_active_session() -> Result<Session> {
     let path = std::path::Path::new(ACTIVE_SESSION_FILE);
     if !path.exists() {
-        anyhow::bail!("No active session. Run: agentscope start \"your mission\"");
+        anyhow::bail!("No active session. Run: scopewarden start \"your mission\"");
     }
     let json = std::fs::read_to_string(path)?;
     let session: Session = serde_json::from_str(&json)?;

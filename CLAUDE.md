@@ -4,13 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-AgentScope is a Rust CLI that acts as a scope firewall and audit layer for AI coding agents. It records or detects your mission, watches Git changes, applies deterministic policy, and optionally asks a judge model whether the diff still matches the mission.
+ScopeWarden is a Rust CLI that acts as a scope firewall and audit layer for AI coding agents. It records or detects your mission, watches Git changes, applies deterministic policy, and optionally asks a judge model whether the diff still matches the mission.
 
 ## Architecture
 
 ```mermaid
 graph TB
-    subgraph AgentScope Core
+    subgraph ScopeWarden Core
         A1[src/main.rs]
         A2[src/cli.rs]
         A3[src/config.rs]
@@ -55,101 +55,101 @@ graph TB
 ### Init / Start a Session
 
 ```bash
-# Create a new agentscope.yaml config
-agentscope init
+# Create a new scopewarden.yaml config
+scopewarden init
 
 # Start a manual mission
-agentscope start "Fix checkout button loading state" --agent codex
+scopewarden start "Fix checkout button loading state" --agent codex
 
 # Start with watching for changes
-agentscope start "Fix checkout button loading state" --agent codex --watch
+scopewarden start "Fix checkout button loading state" --agent codex --watch
 ```
 
 ### Agent Context & Monitoring
 
 ```bash
 # Detect local agent context
-agentscope agents detect
+scopewarden agents detect
 
 # Doctor configuration issues
-agentscope agents doctor
+scopewarden agents doctor
 
 # Print inferred context
-agentscope agents context --agent auto
+scopewarden agents context --agent auto
 
 # Attach to inferred session
-agentscope attach --agent auto
-agentscope attach --agent auto --apply
+scopewarden attach --agent auto
+scopewarden attach --agent auto --apply
 
 # Watch with auto-detect
-agentscope watch
+scopewarden watch
 
 # Monitor and auto-attach high-confidence sessions
-agentscope monitor --agent auto
+scopewarden monitor --agent auto
 ```
 
 ### Check Before Commit
 
 ```bash
 # Full check with JSON output
-agentscope check --json
+scopewarden check --json
 
 # Diff with problem-focused output
-agentscope diff --problems
+scopewarden diff --problems
 ```
 
 ### Judge Models
 
 ```bash
 # List available judge models
-agentscope model list
+scopewarden model list
 
 # Set default model
-agentscope model set qwen3.5:2b
+scopewarden model set qwen3.5:2b
 
 # Test a model
-agentscope model test
+scopewarden model test
 
 # Pull a model from Ollama
-agentscope model pull llama3
+scopewarden model pull llama3
 
 # One-off judge with any model
-agentscope judge -m gemma4:e2b
+scopewarden judge -m gemma4:e2b
 ```
 
 ### Config Management
 
 ```bash
 # Show current configuration
-agentscope config show
+scopewarden config show
 
 # Set a config value
-agentscope config set model qwen3.5:2b
-agentscope config set judge.enabled true
-agentscope config set max_files 50
-agentscope config set team.enabled true
+scopewarden config set model qwen3.5:2b
+scopewarden config set judge.enabled true
+scopewarden config set max_files 50
+scopewarden config set team.enabled true
 
 # Open config file in editor
-agentscope config edit
+scopewarden config edit
 
 # Reset to preset
-agentscope config reset solo
+scopewarden config reset solo
 ```
 
 ### Hooks (Pre-commit)
 
 ```bash
 # Install hook
-agentscope hook install
+scopewarden hook install
 
 # Uninstall hook
-agentscope hook uninstall
+scopewarden hook uninstall
 
 # Check hook status
-agentscope hook status
+scopewarden hook status
 ```
 
-## Configuration (`agentscope.yaml`)
+## Configuration (`scopewarden.yaml`)
 
 ```yaml
 policy:
@@ -203,35 +203,35 @@ agents:
 ### Solo Developer
 
 ```bash
-agentscope init
+scopewarden init
 
 # Watch session
-agentscope watch
+scopewarden watch
 
 # Auto-attach and watch
-agentscope monitor --agent auto
+scopewarden monitor --agent auto
 
 # Check before commit
-agentscope check --problems
-agentscope check --json
+scopewarden check --problems
+scopewarden check --json
 ```
 
 ### Team with Shared Logs
 
 ```bash
-agentscope init
+scopewarden init
 
 # Team preset configures max_files 10, shared logs enabled
-# Open .cursor/rules/agentscope.md for editor guidelines
+# Open .cursor/rules/scopewarden.md for editor guidelines
 ```
 
 ### CI Pipeline
 
 ```bash
-agentscope init
+scopewarden init
 
 # CI preset configures max_files 5, judge disabled
-agentscope config reset ci
+scopewarden config reset ci
 ```
 
 ## Key Files
@@ -268,31 +268,31 @@ MIT + Commons Clause. See [LICENSE](LICENSE).
 
 ---
 
-# AgentScope plugin · claude-code
+# ScopeWarden plugin · claude-code
 
-AgentScope is a scope firewall and audit cockpit for AI coding agents.
+ScopeWarden is a scope firewall and audit cockpit for AI coding agents.
 It checks whether your Git changes match the active mission.
 
-## When to run AgentScope
+## When to run ScopeWarden
 
 | Trigger | Command |
 |---------|--------|
-| Before starting work | `agentscope status` |
-| While working | `agentscope watch` (live TUI cockpit) |
-| Before finishing | `agentscope check` |
-| Before committing | `agentscope diff --problems` |
+| Before starting work | `scopewarden status` |
+| While working | `scopewarden watch` (live TUI cockpit) |
+| Before finishing | `scopewarden check` |
+| Before committing | `scopewarden diff --problems` |
 
 ## Quick reference
 
 ```
-agentscope init                          # one-time repo setup
-agentscope start "your mission"          # record what you're doing
-agentscope watch                         # live cockpit (1=review 2=chat 3=dash 4=sessions 5=live)
-agentscope check                         # policy check + scope audit
-agentscope check --json                  # machine-readable output
-agentscope judge                         # ask the LLM judge
-agentscope diff --problems               # show suspicious/blocked files only
-agentscope attach --agent auto --apply   # infer mission from this agent's logs
+scopewarden init                          # one-time repo setup
+scopewarden start "your mission"          # record what you're doing
+scopewarden watch                         # live cockpit (1=review 2=chat 3=dash 4=sessions 5=live)
+scopewarden check                         # policy check + scope audit
+scopewarden check --json                  # machine-readable output
+scopewarden judge                         # ask the LLM judge
+scopewarden diff --problems               # show suspicious/blocked files only
+scopewarden attach --agent auto --apply   # infer mission from this agent's logs
 ```
 
 ## Status labels
@@ -312,23 +312,23 @@ agentscope attach --agent auto --apply   # infer mission from this agent's logs
 | `Enter` | Open diff overlay for selected file |
 | `j` | Run judge on selected file |
 | `a` / `b` | Allow / block selected file |
-| `t` | Cycle themes (agentscope/codex/claude/openclaw/high-contrast) |
+| `t` | Cycle themes (scopewarden/codex/claude/openclaw/high-contrast) |
 | `?` | Help overlay |
 | `q` | Quit |
 
 ## Judge providers
 
-AgentScope supports Ollama (local/private), Claude, OpenAI, Gemini, and OpenRouter.
+ScopeWarden supports Ollama (local/private), Claude, OpenAI, Gemini, and OpenRouter.
 
 ```
-agentscope config set judge.provider ollama      # local, private
-agentscope config set judge.provider claude      # requires ANTHROPIC_API_KEY
-agentscope config set judge.provider openai      # requires OPENAI_API_KEY
-agentscope config set judge.provider gemini      # requires GEMINI_API_KEY
-agentscope config set judge.provider openrouter  # requires OPENROUTER_API_KEY
+scopewarden config set judge.provider ollama      # local, private
+scopewarden config set judge.provider claude      # requires ANTHROPIC_API_KEY
+scopewarden config set judge.provider openai      # requires OPENAI_API_KEY
+scopewarden config set judge.provider gemini      # requires GEMINI_API_KEY
+scopewarden config set judge.provider openrouter  # requires OPENROUTER_API_KEY
 ```
 
-## Policy config (`agentscope.yaml`)
+## Policy config (`scopewarden.yaml`)
 
 ```yaml
 policy:
@@ -350,5 +350,92 @@ Blocked patterns are enforced deterministically — no model can override them.
 
 ## More info
 
-Run `agentscope --help` or visit https://github.com/abdouloued/agentscopev2
+Run `scopewarden --help` or visit https://github.com/abdouloued/scopewarden
+
+
+---
+
+# ScopeWarden plugin · claude-code
+
+ScopeWarden is a scope firewall and audit cockpit for AI coding agents.
+It checks whether your Git changes match the active mission.
+
+## When to run ScopeWarden
+
+| Trigger | Command |
+|---------|--------|
+| Before starting work | `scopewarden status` |
+| While working | `scopewarden watch` (live TUI cockpit) |
+| Before finishing | `scopewarden check` |
+| Before committing | `scopewarden diff --problems` |
+
+## Quick reference
+
+```
+scopewarden init                          # one-time repo setup
+scopewarden start "your mission"          # record what you're doing
+scopewarden watch                         # live cockpit (1=review 2=chat 3=dash 4=sessions 5=live)
+scopewarden check                         # policy check + scope audit
+scopewarden check --json                  # machine-readable output
+scopewarden judge                         # ask the LLM judge
+scopewarden diff --problems               # show suspicious/blocked files only
+scopewarden attach --agent auto --apply   # infer mission from this agent's logs
+```
+
+## Status labels
+
+| Badge | Meaning |
+|-------|---------|
+| `EXPECTED` | File matches the active mission scope |
+| `SUSPICIOUS` | Changed but no mission rule matches |
+| `BLOCKED` | Matched a blocked policy path — hard stop |
+| `IGNORED` | Clean, stale, or explicitly excluded |
+
+## TUI keyboard shortcuts
+
+| Key | Action |
+|-----|--------|
+| `1`–`5` | Switch mode (Review/Chat/Dashboard/Sessions/Live) |
+| `Enter` | Open diff overlay for selected file |
+| `j` | Run judge on selected file |
+| `a` / `b` | Allow / block selected file |
+| `t` | Cycle themes (scopewarden/codex/claude/openclaw/high-contrast) |
+| `?` | Help overlay |
+| `q` | Quit |
+
+## Judge providers
+
+ScopeWarden supports Ollama (local/private), Claude, OpenAI, Gemini, and OpenRouter.
+
+```
+scopewarden config set judge.provider ollama      # local, private
+scopewarden config set judge.provider claude      # requires ANTHROPIC_API_KEY
+scopewarden config set judge.provider openai      # requires OPENAI_API_KEY
+scopewarden config set judge.provider gemini      # requires GEMINI_API_KEY
+scopewarden config set judge.provider openrouter  # requires OPENROUTER_API_KEY
+```
+
+## Policy config (`scopewarden.yaml`)
+
+```yaml
+policy:
+blocked:
+- ".env"
+- "**/.env.*"
+- "**/secrets/**"
+- "**/*.pem"
+- "**/*.key"
+warn:
+- "package-lock.json"
+- "yarn.lock"
+- "Cargo.lock"
+max_files_changed: 20
+max_lines_changed: 800
+```
+
+Blocked patterns are enforced deterministically — no model can override them.
+
+## More info
+
+Run `scopewarden --help` or visit https://github.com/abdouloued/scopewarden
 

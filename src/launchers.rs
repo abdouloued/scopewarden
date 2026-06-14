@@ -159,7 +159,7 @@ pub async fn test_command(app: Option<String>, timeout_secs: u64, summary: bool)
     if selected.is_empty() {
         println!(
             "{}",
-            style("No launchers matched. Run `agentscope launchers list`.").yellow()
+            style("No launchers matched. Run `scopewarden launchers list`.").yellow()
         );
         return Ok(());
     }
@@ -287,7 +287,7 @@ pub fn smoke_test_launcher(launcher: &DetectedLauncher, timeout: Duration) -> Re
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .env("OLLAMA_MODEL", "qwen3.5:2b")
-        .env("AGENTSCOPE_SMOKE_TEST", "1");
+        .env("SCOPEWARDEN_SMOKE_TEST", "1");
 
     let mut child = match command.spawn() {
         Ok(child) => child,
@@ -400,8 +400,8 @@ pub fn format_launcher_table(launchers: &[DetectedLauncher], color: bool) -> Str
         ));
     }
     out.push_str("\n  Next:\n");
-    out.push_str("    agentscope launchers test\n");
-    out.push_str("    agentscope launchers test codex\n");
+    out.push_str("    scopewarden launchers test\n");
+    out.push_str("    scopewarden launchers test codex\n");
     out
 }
 

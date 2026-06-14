@@ -1,0 +1,16 @@
+{
+  "name": "scopewarden",
+  "version": "1.0.0",
+  "description": "ScopeWarden scope firewall for AI coding agents. Monitors Git changes against your active mission, enforces policy (EXPECTED/SUSPICIOUS/BLOCKED), and can call an LLM judge.",
+  "author": {
+    "name": "ScopeWarden",
+    "url": "https://github.com/abdouloued/scopewarden"
+  },
+  "repository": "https://github.com/abdouloued/scopewarden",
+  "license": "MIT",
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "keywords": [
+    "scope", "policy", "git", "ai-agent", "firewall", "audit", "mission", "scopewarden"
+  ]
+}

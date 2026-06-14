@@ -167,8 +167,8 @@ pub async fn doctor_command() -> Result<()> {
     println!();
     println!("  Repair options:");
     println!("  - Start the agent once so it creates local session history.");
-    println!("  - Override paths in agentscope.yaml under agents.sources.<agent>.paths.");
-    println!("  - Fall back to manual scope with: agentscope start \"your mission\"");
+    println!("  - Override paths in scopewarden.yaml under agents.sources.<agent>.paths.");
+    println!("  - Fall back to manual scope with: scopewarden start \"your mission\"");
     Ok(())
 }
 
@@ -203,7 +203,7 @@ pub async fn attach_command(agent: String, apply: bool) -> Result<()> {
             println!("  source      {}", path.display());
         }
         println!();
-        println!("  dry run only - rerun with --apply to write .agentscope/session.json");
+        println!("  dry run only - rerun with --apply to write .scopewarden/session.json");
         return Ok(());
     }
 
@@ -238,7 +238,7 @@ pub async fn monitor_command(agent: String, auto_attach: bool) -> Result<()> {
                 let session = session_from_context(context, mission)?;
                 session::save_session(&session)?;
                 session::append_session_activity("agent_auto_attach", &session)?;
-                println!("  attached       .agentscope/session.json");
+                println!("  attached       .scopewarden/session.json");
             }
         } else {
             println!("  agent context  {} not found", context.agent);
@@ -346,7 +346,7 @@ pub async fn mcp_command() -> Result<()> {
                 "result": {
                     "protocolVersion": "2024-11-05",
                     "capabilities": { "tools": {} },
-                    "serverInfo": { "name": "agentscope", "version": "0.1.0" }
+                    "serverInfo": { "name": "scopewarden", "version": "0.1.0" }
                 }
             }),
 
@@ -357,7 +357,7 @@ pub async fn mcp_command() -> Result<()> {
                     "tools": [
                         {
                             "name": "scope_status",
-                            "description": "Get the active AgentScope session — mission, agent name, session ID, and start time.",
+                            "description": "Get the active ScopeWarden session — mission, agent name, session ID, and start time.",
                             "inputSchema": { "type": "object", "properties": {} }
                         },
                         {
@@ -367,7 +367,7 @@ pub async fn mcp_command() -> Result<()> {
                         },
                         {
                             "name": "scope_start",
-                            "description": "Start a new AgentScope monitoring session with a mission description.",
+                            "description": "Start a new ScopeWarden monitoring session with a mission description.",
                             "inputSchema": {
                                 "type": "object",
                                 "properties": {
@@ -415,7 +415,7 @@ pub async fn mcp_command() -> Result<()> {
                             s.mission,
                             s.started_at
                         ),
-                        Err(_) => "No active session.\nRun: agentscope start \"<your mission>\""
+                        Err(_) => "No active session.\nRun: scopewarden start \"<your mission>\""
                             .to_string(),
                     },
 
@@ -456,7 +456,7 @@ pub async fn mcp_command() -> Result<()> {
                             }
                         }
                         Err(_) => {
-                            "No active session. Run: agentscope start \"<mission>\"".to_string()
+                            "No active session. Run: scopewarden start \"<mission>\"".to_string()
                         }
                     },
 
@@ -472,7 +472,7 @@ pub async fn mcp_command() -> Result<()> {
                             "Error: 'mission' is required.".to_string()
                         } else {
                             format!(
-                                "Run in your terminal:\n  agentscope start \"{}\" --agent {}",
+                                "Run in your terminal:\n  scopewarden start \"{}\" --agent {}",
                                 mission, agent
                             )
                         }
@@ -1046,8 +1046,8 @@ fn install_integration(kind: &str, agent: &str) -> Result<()> {
         install_plugin_native(agent)?;
     }
 
-    // Always write the .agentscope/{kind}/{agent}/README.md record
-    let dir = format!(".agentscope/{}/{}", kind, agent);
+    // Always write the .scopewarden/{kind}/{agent}/README.md record
+    let dir = format!(".scopewarden/{}/{}", kind, agent);
     std::fs::create_dir_all(&dir)?;
     let file = Path::new(&dir).join("README.md");
     std::fs::write(file, integration_content(kind, agent))?;
@@ -1057,35 +1057,35 @@ fn install_integration(kind: &str, agent: &str) -> Result<()> {
 fn integration_content(kind: &str, agent: &str) -> String {
     let header = match kind {
         "skill" => format!(
-            "# AgentScope skill · {agent}\n\n\
-             This file instructs `{agent}` to use AgentScope as a scope firewall \
+            "# ScopeWarden skill · {agent}\n\n\
+             This file instructs `{agent}` to use ScopeWarden as a scope firewall \
              before and after making changes.\n"
         ),
         _ => format!(
-            "# AgentScope plugin · {agent}\n\n\
-             AgentScope is a scope firewall and audit cockpit for AI coding agents.\n\
+            "# ScopeWarden plugin · {agent}\n\n\
+             ScopeWarden is a scope firewall and audit cockpit for AI coding agents.\n\
              It checks whether your Git changes match the active mission.\n"
         ),
     };
     format!(
         "{header}\n\
-         ## When to run AgentScope\n\n\
+         ## When to run ScopeWarden\n\n\
          | Trigger | Command |\n\
          |---------|--------|\n\
-         | Before starting work | `agentscope status` |\n\
-         | While working | `agentscope watch` (live TUI cockpit) |\n\
-         | Before finishing | `agentscope check` |\n\
-         | Before committing | `agentscope diff --problems` |\n\n\
+         | Before starting work | `scopewarden status` |\n\
+         | While working | `scopewarden watch` (live TUI cockpit) |\n\
+         | Before finishing | `scopewarden check` |\n\
+         | Before committing | `scopewarden diff --problems` |\n\n\
          ## Quick reference\n\n\
          ```\n\
-         agentscope init                          # one-time repo setup\n\
-         agentscope start \"your mission\"          # record what you're doing\n\
-         agentscope watch                         # live cockpit (1=review 2=chat 3=dash 4=sessions 5=live)\n\
-         agentscope check                         # policy check + scope audit\n\
-         agentscope check --json                  # machine-readable output\n\
-         agentscope judge                         # ask the LLM judge\n\
-         agentscope diff --problems               # show suspicious/blocked files only\n\
-         agentscope attach --agent auto --apply   # infer mission from this agent's logs\n\
+         scopewarden init                          # one-time repo setup\n\
+         scopewarden start \"your mission\"          # record what you're doing\n\
+         scopewarden watch                         # live cockpit (1=review 2=chat 3=dash 4=sessions 5=live)\n\
+         scopewarden check                         # policy check + scope audit\n\
+         scopewarden check --json                  # machine-readable output\n\
+         scopewarden judge                         # ask the LLM judge\n\
+         scopewarden diff --problems               # show suspicious/blocked files only\n\
+         scopewarden attach --agent auto --apply   # infer mission from this agent's logs\n\
          ```\n\n\
          ## Status labels\n\n\
          | Badge | Meaning |\n\
@@ -1101,19 +1101,19 @@ fn integration_content(kind: &str, agent: &str) -> String {
          | `Enter` | Open diff overlay for selected file |\n\
          | `j` | Run judge on selected file |\n\
          | `a` / `b` | Allow / block selected file |\n\
-         | `t` | Cycle themes (agentscope/codex/claude/openclaw/high-contrast) |\n\
+         | `t` | Cycle themes (scopewarden/codex/claude/openclaw/high-contrast) |\n\
          | `?` | Help overlay |\n\
          | `q` | Quit |\n\n\
          ## Judge providers\n\n\
-         AgentScope supports Ollama (local/private), Claude, OpenAI, Gemini, and OpenRouter.\n\n\
+         ScopeWarden supports Ollama (local/private), Claude, OpenAI, Gemini, and OpenRouter.\n\n\
          ```\n\
-         agentscope config set judge.provider ollama      # local, private\n\
-         agentscope config set judge.provider claude      # requires ANTHROPIC_API_KEY\n\
-         agentscope config set judge.provider openai      # requires OPENAI_API_KEY\n\
-         agentscope config set judge.provider gemini      # requires GEMINI_API_KEY\n\
-         agentscope config set judge.provider openrouter  # requires OPENROUTER_API_KEY\n\
+         scopewarden config set judge.provider ollama      # local, private\n\
+         scopewarden config set judge.provider claude      # requires ANTHROPIC_API_KEY\n\
+         scopewarden config set judge.provider openai      # requires OPENAI_API_KEY\n\
+         scopewarden config set judge.provider gemini      # requires GEMINI_API_KEY\n\
+         scopewarden config set judge.provider openrouter  # requires OPENROUTER_API_KEY\n\
          ```\n\n\
-         ## Policy config (`agentscope.yaml`)\n\n\
+         ## Policy config (`scopewarden.yaml`)\n\n\
          ```yaml\n\
          policy:\n\
            blocked:\n\
@@ -1131,7 +1131,7 @@ fn integration_content(kind: &str, agent: &str) -> String {
          ```\n\n\
          Blocked patterns are enforced deterministically — no model can override them.\n\n\
          ## More info\n\n\
-         Run `agentscope --help` or visit https://github.com/abdouloued/agentscopev2\n"
+         Run `scopewarden --help` or visit https://github.com/abdouloued/scopewarden\n"
     )
 }
 
@@ -1142,21 +1142,21 @@ fn install_skill_native(agent: &str) -> Result<()> {
         "claude-code" => {
             // Claude Code reads CLAUDE.md at repo root
             let path = Path::new("CLAUDE.md");
-            merge_or_write(path, "## AgentScope", &content)?;
+            merge_or_write(path, "## ScopeWarden", &content)?;
         }
         "codex" => {
             // Codex CLI reads AGENTS.md at repo root
             std::fs::create_dir_all(".codex")?;
             let path = Path::new("AGENTS.md");
-            merge_or_write(path, "## AgentScope", &content)?;
+            merge_or_write(path, "## ScopeWarden", &content)?;
         }
         "cursor" => {
             std::fs::create_dir_all(".cursor/rules")?;
-            std::fs::write(".cursor/rules/agentscope.md", &content)?;
+            std::fs::write(".cursor/rules/scopewarden.md", &content)?;
         }
         "openclaw" | "hermes" | "codex-app" | "opencode" | "gemini-cli" | "antigravity"
         | "copilot-cli" => {
-            // Write into .agentscope/skill/{agent}/instructions.md — agents can pick it up
+            // Write into .scopewarden/skill/{agent}/instructions.md — agents can pick it up
         }
         _ => {}
     }
@@ -1170,34 +1170,34 @@ fn install_plugin_native(agent: &str) -> Result<()> {
         "claude-code" => {
             // Claude Code — CLAUDE.md (project context)
             let path = Path::new("CLAUDE.md");
-            merge_or_write(path, "## AgentScope", &content)?;
+            merge_or_write(path, "## ScopeWarden", &content)?;
             // Also register with Claude Code's plugin system
             if let Err(e) = register_claude_code_plugin() {
                 eprintln!("  note: could not register Claude Code plugin: {e}");
-                eprintln!("  tip:  manually add agentscopev2 marketplace in Claude Code /plugins settings");
+                eprintln!("  tip:  manually add scopewarden marketplace in Claude Code /plugins settings");
             }
         }
         "codex" => {
             // Codex — AGENTS.md
             let path = Path::new("AGENTS.md");
-            merge_or_write(path, "## AgentScope", &content)?;
+            merge_or_write(path, "## ScopeWarden", &content)?;
         }
         "cursor" => {
             std::fs::create_dir_all(".cursor/rules")?;
-            std::fs::write(".cursor/rules/agentscope.md", &content)?;
+            std::fs::write(".cursor/rules/scopewarden.md", &content)?;
         }
         "copilot-cli" => {
             std::fs::create_dir_all(".github")?;
             std::fs::write(".github/copilot-instructions.md", &content)?;
         }
         _ => {
-            // Generic: write into the .agentscope record dir only
+            // Generic: write into the .scopewarden record dir only
         }
     }
     Ok(())
 }
 
-/// Register AgentScope with Claude Code's plugin system.
+/// Register ScopeWarden with Claude Code's plugin system.
 /// Writes plugin files to the Claude cache, registers the marketplace,
 /// updates installed_plugins.json, and enables the plugin in settings.json.
 fn register_claude_code_plugin() -> Result<()> {
@@ -1207,19 +1207,19 @@ fn register_claude_code_plugin() -> Result<()> {
     let claude_dir = expand_path(&claude_base);
     let plugins_dir = claude_dir.join("plugins");
 
-    let mkt_dir = plugins_dir.join("marketplaces").join("agentscopev2");
+    let mkt_dir = plugins_dir.join("marketplaces").join("scopewarden");
     let cache_dir = plugins_dir
         .join("cache")
-        .join("agentscopev2")
-        .join("agentscope")
+        .join("scopewarden")
+        .join("scopewarden")
         .join("1.0.0");
 
-    const PLUGIN_JSON: &str = r#"{"name":"agentscope","version":"1.0.0","description":"AgentScope scope firewall for AI coding agents.","repository":"https://github.com/abdouloued/agentscopev2","license":"MIT+Commons-Clause","skills":"./skills/","mcpServers":"./.mcp.json","keywords":["scope","policy","git","ai-agent","firewall","audit","mission","agentscope"]}"#;
+    const PLUGIN_JSON: &str = r#"{"name":"scopewarden","version":"1.0.0","description":"ScopeWarden scope firewall for AI coding agents.","repository":"https://github.com/abdouloued/scopewarden","license":"MIT+Commons-Clause","skills":"./skills/","mcpServers":"./.mcp.json","keywords":["scope","policy","git","ai-agent","firewall","audit","mission","scopewarden"]}"#;
     const MCP_JSON: &str =
-        r#"{"mcpServers":{"agentscope":{"command":"agentscope","args":["mcp"],"env":{}}}}"#;
-    const CLAUDE_MD: &str = include_str!("../plugins/agentscope/CLAUDE.md");
-    const SCOPE_GUARD: &str = include_str!("../plugins/agentscope/skills/scope-guard/SKILL.md");
-    const SCOPE_CHECK: &str = include_str!("../plugins/agentscope/skills/scope-check/SKILL.md");
+        r#"{"mcpServers":{"scopewarden":{"command":"scopewarden","args":["mcp"],"env":{}}}}"#;
+    const CLAUDE_MD: &str = include_str!("../plugins/scopewarden/CLAUDE.md");
+    const SCOPE_GUARD: &str = include_str!("../plugins/scopewarden/skills/scope-guard/SKILL.md");
+    const SCOPE_CHECK: &str = include_str!("../plugins/scopewarden/skills/scope-check/SKILL.md");
 
     // ── 1. Write plugin files to cache ──────────────────────────────────────
     for dir in [
@@ -1252,7 +1252,7 @@ fn register_claude_code_plugin() -> Result<()> {
 
     // ── 2. Write marketplace directory (mirrors openai-codex structure) ─────
     {
-        let mkt_plugin_dir = mkt_dir.join("plugins").join("agentscope");
+        let mkt_plugin_dir = mkt_dir.join("plugins").join("scopewarden");
         for dir in [
             mkt_dir.join(".claude-plugin"),
             mkt_plugin_dir.join(".claude-plugin"),
@@ -1265,18 +1265,18 @@ fn register_claude_code_plugin() -> Result<()> {
         std::fs::write(
             mkt_dir.join(".claude-plugin").join("marketplace.json"),
             serde_json::to_string_pretty(&serde_json::json!({
-                "name": "agentscopev2",
-                "owner": { "name": "AgentScope" },
+                "name": "scopewarden",
+                "owner": { "name": "ScopeWarden" },
                 "metadata": {
-                    "description": "AgentScope scope firewall plugin — monitors Git changes against your mission.",
+                    "description": "ScopeWarden scope firewall plugin — monitors Git changes against your mission.",
                     "version": "1.0.0"
                 },
                 "plugins": [{
-                    "name": "agentscope",
+                    "name": "scopewarden",
                     "description": "Scope firewall for AI coding agents: EXPECTED/SUSPICIOUS/BLOCKED verdicts, LLM judge, live TUI.",
                     "version": "1.0.0",
-                    "author": { "name": "AgentScope" },
-                    "source": "./plugins/agentscope"
+                    "author": { "name": "ScopeWarden" },
+                    "source": "./plugins/scopewarden"
                 }]
             }))?,
         )?;
@@ -1310,7 +1310,7 @@ fn register_claude_code_plugin() -> Result<()> {
         serde_json::json!({})
     };
     // Always overwrite — use local source so Claude Code doesn't try to fetch from GitHub
-    km["agentscopev2"] = serde_json::json!({
+    km["scopewarden"] = serde_json::json!({
         "source": { "source": "local", "path": mkt_dir.display().to_string() },
         "installLocation": mkt_dir.display().to_string(),
         "lastUpdated": Utc::now().to_rfc3339()
@@ -1326,7 +1326,7 @@ fn register_claude_code_plugin() -> Result<()> {
         serde_json::json!({"version":2,"plugins":{}})
     };
     let now = Utc::now().to_rfc3339();
-    ip["plugins"]["agentscope@agentscopev2"] = serde_json::json!([{
+    ip["plugins"]["scopewarden@scopewarden"] = serde_json::json!([{
         "scope": "user",
         "installPath": cache_dir.display().to_string(),
         "version": "1.0.0",
@@ -1342,7 +1342,7 @@ fn register_claude_code_plugin() -> Result<()> {
         if let Ok(mut settings) = serde_json::from_str::<Value>(&raw) {
             if let Some(obj) = settings.as_object_mut() {
                 let enabled = obj.entry("enabledPlugins").or_insert(serde_json::json!({}));
-                enabled["agentscope@agentscopev2"] = serde_json::json!(true);
+                enabled["scopewarden@scopewarden"] = serde_json::json!(true);
             }
             std::fs::write(&settings_path, serde_json::to_string_pretty(&settings)?)?;
         }
@@ -1351,7 +1351,7 @@ fn register_claude_code_plugin() -> Result<()> {
     Ok(())
 }
 
-/// Append an AgentScope section to an existing file, or create it if it doesn't exist.
+/// Append an ScopeWarden section to an existing file, or create it if it doesn't exist.
 /// Idempotent: if the section marker already exists, overwrites only that section.
 fn merge_or_write(path: &Path, section_marker: &str, content: &str) -> Result<()> {
     if path.exists() {

@@ -1,19 +1,19 @@
-# AgentScope Plugin
+# ScopeWarden Plugin
 
-AgentScope is a scope firewall and audit cockpit for AI coding agents.
+ScopeWarden is a scope firewall and audit cockpit for AI coding agents.
 It enforces mission policy, monitors Git changes, and stops scope drift before it happens.
 
 ## Quick reference
 
 ```bash
-agentscope init                         # one-time repo setup
-agentscope start "your mission"         # record what you're doing
-agentscope watch                        # live TUI cockpit
-agentscope check                        # policy check + scope audit
-agentscope check --json                 # machine-readable output
-agentscope diff --problems              # show suspicious/blocked files only
-agentscope judge                        # ask the LLM judge
-agentscope attach --agent auto --apply  # infer mission from this session's logs
+scopewarden init                         # one-time repo setup
+scopewarden start "your mission"         # record what you're doing
+scopewarden watch                        # live TUI cockpit
+scopewarden check                        # policy check + scope audit
+scopewarden check --json                 # machine-readable output
+scopewarden diff --problems              # show suspicious/blocked files only
+scopewarden judge                        # ask the LLM judge
+scopewarden attach --agent auto --apply  # infer mission from this session's logs
 ```
 
 ## Status labels
@@ -32,11 +32,11 @@ agentscope attach --agent auto --apply  # infer mission from this session's logs
 | Tool | What it does |
 |------|-------------|
 | `scope_status` | Returns the current session JSON |
-| `scope_check` | Hint to run `agentscope check` for full policy output |
+| `scope_check` | Hint to run `scopewarden check` for full policy output |
 | `scope_start` | Hint to start a new mission |
 | `agent_attach` | Hint to attach an inferred session |
 
-## Policy config (`agentscope.yaml`)
+## Policy config (`scopewarden.yaml`)
 
 ```yaml
 policy:
@@ -57,11 +57,11 @@ policy:
 ## Judge providers
 
 ```bash
-agentscope config set judge.provider ollama      # local, private
-agentscope config set judge.provider claude      # requires ANTHROPIC_API_KEY
-agentscope config set judge.provider openai      # requires OPENAI_API_KEY
-agentscope config set judge.provider gemini      # requires GEMINI_API_KEY
-agentscope config set judge.provider openrouter  # requires OPENROUTER_API_KEY
+scopewarden config set judge.provider ollama      # local, private
+scopewarden config set judge.provider claude      # requires ANTHROPIC_API_KEY
+scopewarden config set judge.provider openai      # requires OPENAI_API_KEY
+scopewarden config set judge.provider gemini      # requires GEMINI_API_KEY
+scopewarden config set judge.provider openrouter  # requires OPENROUTER_API_KEY
 ```
 
 ## TUI keyboard shortcuts
@@ -76,4 +76,4 @@ agentscope config set judge.provider openrouter  # requires OPENROUTER_API_KEY
 | `?` | Help overlay |
 | `q` | Quit |
 
-Run `agentscope --help` or visit https://github.com/abdouloued/agentscopev2
+Run `scopewarden --help` or visit https://github.com/abdouloued/scopewarden

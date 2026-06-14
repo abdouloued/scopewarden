@@ -9,7 +9,7 @@ use ulid::Ulid;
 
 use crate::{agents, chat, cli::SessionsAction, config};
 
-pub const AGENT_SESSION_CACHE: &str = ".agentscope/cache/agent-sessions.json";
+pub const AGENT_SESSION_CACHE: &str = ".scopewarden/cache/agent-sessions.json";
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct AssistantSession {

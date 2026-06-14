@@ -4,9 +4,9 @@ use std::path::{Path, PathBuf};
 
 use crate::cli::{AgentKind, Preset};
 
-pub const CONFIG_FILE: &str = "agentscope.yaml";
-pub const SESSION_DIR: &str = ".agentscope";
-pub const ACTIVITY_LOG: &str = ".agentscope/activity.jsonl";
+pub const CONFIG_FILE: &str = "scopewarden.yaml";
+pub const SESSION_DIR: &str = ".scopewarden";
+pub const ACTIVITY_LOG: &str = ".scopewarden/activity.jsonl";
 
 // ── Top-level config struct ───────────────────────────────────────────────────
 
@@ -102,11 +102,11 @@ impl Default for TuiConfig {
 }
 
 fn default_tui_theme() -> String {
-    "agentscope".into()
+    "scopewarden".into()
 }
 
 pub fn tui_theme_names() -> &'static [&'static str] {
-    &["agentscope", "codex", "claude", "openclaw", "high-contrast"]
+    &["scopewarden", "codex", "claude", "openclaw", "high-contrast"]
 }
 
 pub fn add_policy_allow(config: &mut Config, pattern: &str) -> bool {
@@ -301,7 +301,7 @@ fn find_config_file() -> Result<PathBuf> {
         }
         if !dir.pop() {
             anyhow::bail!(
-                "No {} found. Run `agentscope init` to create one.",
+                "No {} found. Run `scopewarden init` to create one.",
                 CONFIG_FILE
             );
         }
@@ -323,7 +323,7 @@ pub async fn init(preset: Preset) -> Result<()> {
     let config = preset_config(&preset);
     let yaml = serde_yaml::to_string(&config)?;
     let header = format!(
-        "# AgentScope configuration — preset: {:?}\n# Docs: https://agentscope.dev/config\n\n",
+        "# ScopeWarden configuration — preset: {:?}\n# Docs: https://scopewarden.dev/config\n\n",
         preset
     );
     std::fs::write(path, header + &yaml)?;
@@ -340,7 +340,7 @@ pub async fn init(preset: Preset) -> Result<()> {
     }
 
     p.success(&format!("Created {}", CONFIG_FILE));
-    p.hint("Next: agentscope start \"your mission here\"");
+    p.hint("Next: scopewarden start \"your mission here\"");
     Ok(())
 }
 
@@ -351,12 +351,12 @@ pub async fn integrate_agent(agent: AgentKind) -> Result<()> {
     match agent {
         AgentKind::Claude => {
             std::fs::write("CLAUDE.md", agent_rules_content("Claude Code"))?;
-            p.success("Wrote CLAUDE.md — Claude Code will now respect AgentScope sessions");
+            p.success("Wrote CLAUDE.md — Claude Code will now respect ScopeWarden sessions");
         }
         AgentKind::Cursor => {
             std::fs::create_dir_all(".cursor/rules")?;
-            std::fs::write(".cursor/rules/agentscope.md", agent_rules_content("Cursor"))?;
-            p.success("Wrote .cursor/rules/agentscope.md");
+            std::fs::write(".cursor/rules/scopewarden.md", agent_rules_content("Cursor"))?;
+            p.success("Wrote .cursor/rules/scopewarden.md");
         }
         AgentKind::Gemini => {
             std::fs::write("GEMINI.md", agent_rules_content("Gemini CLI"))?;
@@ -364,39 +364,39 @@ pub async fn integrate_agent(agent: AgentKind) -> Result<()> {
         }
         AgentKind::Antigravity => {
             std::fs::write("AGENTS.md", agent_rules_content("Antigravity"))?;
-            p.success("Wrote AGENTS.md — Antigravity will now respect AgentScope sessions");
+            p.success("Wrote AGENTS.md — Antigravity will now respect ScopeWarden sessions");
         }
         AgentKind::Codex | AgentKind::CodexApp => {
             std::fs::write("AGENTS.md", agent_rules_content("Codex"))?;
-            p.success("Wrote AGENTS.md — Codex will now respect AgentScope sessions");
+            p.success("Wrote AGENTS.md — Codex will now respect ScopeWarden sessions");
         }
         AgentKind::Opencode => {
             std::fs::write("AGENTS.md", agent_rules_content("OpenCode"))?;
-            p.success("Wrote AGENTS.md — OpenCode will now respect AgentScope sessions");
+            p.success("Wrote AGENTS.md — OpenCode will now respect ScopeWarden sessions");
         }
         AgentKind::Openclaw => {
             std::fs::write("AGENTS.md", agent_rules_content("OpenClaw"))?;
-            p.success("Wrote AGENTS.md — OpenClaw will now respect AgentScope sessions");
+            p.success("Wrote AGENTS.md — OpenClaw will now respect ScopeWarden sessions");
         }
         AgentKind::Hermes => {
             std::fs::write("AGENTS.md", agent_rules_content("Hermes Agent"))?;
-            p.success("Wrote AGENTS.md — Hermes will now respect AgentScope sessions");
+            p.success("Wrote AGENTS.md — Hermes will now respect ScopeWarden sessions");
         }
         AgentKind::Copilot => {
             std::fs::write("AGENTS.md", agent_rules_content("Copilot CLI"))?;
-            p.success("Wrote AGENTS.md — Copilot will now respect AgentScope sessions");
+            p.success("Wrote AGENTS.md — Copilot will now respect ScopeWarden sessions");
         }
         AgentKind::Droid => {
             std::fs::write("AGENTS.md", agent_rules_content("Droid"))?;
-            p.success("Wrote AGENTS.md — Droid will now respect AgentScope sessions");
+            p.success("Wrote AGENTS.md — Droid will now respect ScopeWarden sessions");
         }
         AgentKind::Pi => {
             std::fs::write("AGENTS.md", agent_rules_content("Pi"))?;
-            p.success("Wrote AGENTS.md — Pi will now respect AgentScope sessions");
+            p.success("Wrote AGENTS.md — Pi will now respect ScopeWarden sessions");
         }
         AgentKind::Custom => {
-            p.hint("Custom agent — add agentscope check to your agent's post-run hook manually.");
-            p.hint("See: agentscope use claude for an example integration file.");
+            p.hint("Custom agent — add scopewarden check to your agent's post-run hook manually.");
+            p.hint("See: scopewarden use claude for an example integration file.");
         }
     }
     Ok(())
@@ -428,10 +428,10 @@ mod tui_policy_tests {
     use super::*;
 
     #[test]
-    fn default_config_uses_agentscope_theme_and_empty_allowlist() {
+    fn default_config_uses_scopewarden_theme_and_empty_allowlist() {
         let config = Config::default();
 
-        assert_eq!(config.tui.theme, "agentscope");
+        assert_eq!(config.tui.theme, "scopewarden");
         assert!(config.policy.allow.is_empty());
     }
 
@@ -463,24 +463,24 @@ mod tui_policy_tests {
 
 fn agent_rules_content(agent_name: &str) -> String {
     format!(
-        r#"# AgentScope Integration
+        r#"# ScopeWarden Integration
 
-This repo uses [AgentScope](https://github.com/abdouloued/agentscopev2) to track and audit AI agent sessions.
+This repo uses [ScopeWarden](https://github.com/abdouloued/scopewarden) to track and audit AI agent sessions.
 
 ## Rules for {agent_name}
 
-1. Before starting work, read the active session: `cat .agentscope/session.json`
+1. Before starting work, read the active session: `cat .scopewarden/session.json`
 2. Only modify files that are relevant to the stated mission
 3. Never modify files matching these blocked patterns:
    - `.env*` — environment secrets
    - `src/auth/**` — authentication logic
    - `**/migrations/**` — database migrations
    - `*.pem`, `*.key` — cryptographic keys
-4. After completing work, verify with: `agentscope check`
+4. After completing work, verify with: `scopewarden check`
 
 ## Why these rules exist
 
-AgentScope records every file you touch and compares it to the stated mission.
+ScopeWarden records every file you touch and compares it to the stated mission.
 Edits outside scope are flagged as **UNASKED**. Blocked-path edits **halt the session**.
 This is a safety and audit layer — not a limitation on your capability.
 
@@ -488,13 +488,13 @@ This is a safety and audit layer — not a limitation on your capability.
 
 ```bash
 # Check what the session expects
-cat .agentscope/session.json | jq '.mission'
+cat .scopewarden/session.json | jq '.mission'
 
 # Verify your changes when done
-agentscope check
+scopewarden check
 
 # See detailed status
-agentscope status
+scopewarden status
 ```
 "#,
         agent_name = agent_name,

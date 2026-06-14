@@ -50,14 +50,14 @@ pub struct Theme {
 }
 
 impl Theme {
-    /// Look up a theme by name. Falls back to `agentscope` on unknown names.
+    /// Look up a theme by name. Falls back to `scopewarden` on unknown names.
     pub fn by_name(name: &str) -> Self {
         match name {
             "codex" => Self::codex(),
             "claude" => Self::claude(),
             "openclaw" => Self::openclaw(),
             "high-contrast" => Self::high_contrast(),
-            _ => Self::agentscope(),
+            _ => Self::scopewarden(),
         }
     }
 
@@ -65,20 +65,20 @@ impl Theme {
     #[allow(dead_code)]
     pub fn next_name(current: &str) -> &'static str {
         match current {
-            "agentscope" => "codex",
+            "scopewarden" => "codex",
             "codex" => "claude",
             "claude" => "openclaw",
             "openclaw" => "high-contrast",
-            _ => "agentscope",
+            _ => "scopewarden",
         }
     }
 
     // ── Theme definitions ─────────────────────────────────────────────────────
 
     /// Dark purple AI security cockpit.
-    pub fn agentscope() -> Self {
+    pub fn scopewarden() -> Self {
         Self {
-            name: "agentscope",
+            name: "scopewarden",
             bg: Color::Rgb(8, 11, 18),
             panel: Color::Rgb(13, 17, 26),
             user_bubble: Color::Rgb(28, 24, 52),
@@ -246,23 +246,23 @@ mod tests {
         assert_eq!(Theme::by_name("claude").name, "claude");
         assert_eq!(Theme::by_name("openclaw").name, "openclaw");
         assert_eq!(Theme::by_name("high-contrast").name, "high-contrast");
-        assert_eq!(Theme::by_name("agentscope").name, "agentscope");
+        assert_eq!(Theme::by_name("scopewarden").name, "scopewarden");
     }
 
     #[test]
     fn theme_by_name_fallback() {
-        assert_eq!(Theme::by_name("unknown").name, "agentscope");
-        assert_eq!(Theme::by_name("").name, "agentscope");
+        assert_eq!(Theme::by_name("unknown").name, "scopewarden");
+        assert_eq!(Theme::by_name("").name, "scopewarden");
     }
 
     #[test]
     fn theme_cycle_order() {
-        assert_eq!(Theme::next_name("agentscope"), "codex");
+        assert_eq!(Theme::next_name("scopewarden"), "codex");
         assert_eq!(Theme::next_name("codex"), "claude");
         assert_eq!(Theme::next_name("claude"), "openclaw");
         assert_eq!(Theme::next_name("openclaw"), "high-contrast");
-        assert_eq!(Theme::next_name("high-contrast"), "agentscope");
-        // unknown falls back to agentscope
-        assert_eq!(Theme::next_name("unknown"), "agentscope");
+        assert_eq!(Theme::next_name("high-contrast"), "scopewarden");
+        // unknown falls back to scopewarden
+        assert_eq!(Theme::next_name("unknown"), "scopewarden");
     }
 }

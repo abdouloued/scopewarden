@@ -1,4 +1,4 @@
-//! All terminal output for AgentScope.
+//! All terminal output for ScopeWarden.
 //! Implements the exact visual design from the UI spec:
 //! dark-terminal aesthetic, EXPECTED / SUSPICIOUS / BLOCKED tags,
 //! red BLOCK banner, LLM judge verdict, summary stats.
@@ -117,7 +117,7 @@ impl Printer {
         self.blank();
         println!(
             "  {} {}",
-            theme::purple().apply_to("agentscope"),
+            theme::purple().apply_to("scopewarden"),
             theme::dim().apply_to("v0.1.0"),
         );
         self.blank();
@@ -137,7 +137,7 @@ impl Printer {
         println!(
             "  {} {}",
             theme::green().apply_to("✓"),
-            theme::muted().apply_to("Session started — run agentscope check when done"),
+            theme::muted().apply_to("Session started — run scopewarden check when done"),
         );
         self.blank();
     }
@@ -255,7 +255,7 @@ impl Printer {
         println!(
             "  {}  {}",
             theme::dim().apply_to("→ full forensics:"),
-            theme::muted().apply_to(&format!("agentscope audit {}", &session.id[..12])),
+            theme::muted().apply_to(&format!("scopewarden audit {}", &session.id[..12])),
         );
 
         self.blank();
@@ -488,7 +488,7 @@ impl Printer {
         println!(
             "  {}  {}  {}",
             theme::dim().apply_to("│"),
-            style("AgentScope Session Report").white().bold(),
+            style("ScopeWarden Session Report").white().bold(),
             theme::dim().apply_to("                          │"),
         );
         println!(
@@ -631,7 +631,7 @@ impl Printer {
             println!(
                 "    {}  {}",
                 style("2.").dim(),
-                theme::muted().apply_to("Run: agentscope check"),
+                theme::muted().apply_to("Run: scopewarden check"),
             );
             println!(
                 "    {}  {}",
@@ -673,32 +673,32 @@ impl Printer {
         println!("  {}", theme::dim().apply_to("─── Quick Commands ───"));
         println!(
             "  {}  {}",
-            theme::muted().apply_to("agentscope diff"),
+            theme::muted().apply_to("scopewarden diff"),
             theme::dim().apply_to("— annotated file list"),
         );
         println!(
             "  {}  {}",
-            theme::muted().apply_to("agentscope diff --problems"),
+            theme::muted().apply_to("scopewarden diff --problems"),
             theme::dim().apply_to("— only blocked/suspicious"),
         );
         println!(
             "  {}  {}",
-            theme::muted().apply_to("agentscope judge"),
+            theme::muted().apply_to("scopewarden judge"),
             theme::dim().apply_to("— re-run LLM judge"),
         );
         println!(
             "  {}  {}",
-            theme::muted().apply_to("agentscope judge -m llama3"),
+            theme::muted().apply_to("scopewarden judge -m llama3"),
             theme::dim().apply_to("— judge with a different model"),
         );
         println!(
             "  {}  {}",
-            theme::muted().apply_to("agentscope hook install"),
+            theme::muted().apply_to("scopewarden hook install"),
             theme::dim().apply_to("— auto-check on every commit"),
         );
         println!(
             "  {}  {}",
-            theme::muted().apply_to("agentscope check --json"),
+            theme::muted().apply_to("scopewarden check --json"),
             theme::dim().apply_to("— CI-friendly output"),
         );
 
@@ -785,7 +785,7 @@ impl CheckReport {
         };
 
         let mut md = format!(
-            "## AgentScope — {status}\n\n\
+            "## ScopeWarden — {status}\n\n\
             **Mission:** {mission}\n\
             **Agent:** {agent} · **Session:** `{id}`\n\n\
             | Verdict | Count |\n\

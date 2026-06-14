@@ -1,0 +1,9 @@
+{
+  "marketplace": "scopewarden",
+  "plugins": [
+    {
+      "name": "scopewarden",
+      "path": "."
+    }
+  ]
+}

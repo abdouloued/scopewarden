@@ -394,7 +394,7 @@ async fn evaluate_openrouter(prompt: &str, config: &JudgeConfig) -> Result<Judge
     let response = client
         .post("https://openrouter.ai/api/v1/chat/completions")
         .bearer_auth(api_key)
-        .header("HTTP-Referer", "https://github.com/agentscope")
+        .header("HTTP-Referer", "https://github.com/scopewarden")
         .json(&body)
         .timeout(std::time::Duration::from_secs(60))
         .send()
@@ -429,7 +429,7 @@ async fn chat_openrouter(prompt: &str, config: &JudgeConfig) -> Result<String> {
     let response = client
         .post("https://openrouter.ai/api/v1/chat/completions")
         .bearer_auth(api_key)
-        .header("HTTP-Referer", "https://github.com/agentscope")
+        .header("HTTP-Referer", "https://github.com/scopewarden")
         .json(&body)
         .timeout(std::time::Duration::from_secs(60))
         .send()

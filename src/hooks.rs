@@ -1,4 +1,4 @@
-//! Git hook management for AgentScope.
+//! Git hook management for ScopeWarden.
 //! Installs/uninstalls a pre-commit hook that enforces scope policy.
 
 use anyhow::Result;
@@ -10,24 +10,24 @@ use crate::output::Printer;
 const HOOK_PATH: &str = ".git/hooks/pre-commit";
 const HOOK_BACKUP: &str = ".git/hooks/pre-commit.bak";
 
-const HOOK_MARKER: &str = "# AgentScope pre-commit hook";
+const HOOK_MARKER: &str = "# ScopeWarden pre-commit hook";
 
 const HOOK_SCRIPT: &str = r#"#!/bin/sh
-# AgentScope pre-commit hook
+# ScopeWarden pre-commit hook
 # Automatically checks scope compliance before every commit.
 # To skip: git commit --no-verify
 
-if [ -f ".agentscope/session.json" ]; then
+if [ -f ".scopewarden/session.json" ]; then
     echo ""
-    echo "🔍 AgentScope: checking scope compliance..."
+    echo "🔍 ScopeWarden: checking scope compliance..."
     echo ""
 
-    agentscope check 2>/dev/null
+    scopewarden check 2>/dev/null
     EXIT_CODE=$?
 
     if [ $EXIT_CODE -ne 0 ]; then
         echo ""
-        echo "❌ AgentScope: commit BLOCKED — policy violations found"
+        echo "❌ ScopeWarden: commit BLOCKED — policy violations found"
         echo ""
         echo "   Fix the violations, then commit again."
         echo "   Or skip this check with: git commit --no-verify"
@@ -36,7 +36,7 @@ if [ -f ".agentscope/session.json" ]; then
     fi
 
     echo ""
-    echo "✅ AgentScope: all changes in scope — proceeding with commit"
+    echo "✅ ScopeWarden: all changes in scope — proceeding with commit"
     echo ""
 fi
 "#;
@@ -55,7 +55,7 @@ pub async fn install() -> Result<()> {
     if hook_path.exists() {
         let existing = fs::read_to_string(hook_path)?;
         if existing.contains(HOOK_MARKER) {
-            p.warn("AgentScope pre-commit hook is already installed");
+            p.warn("ScopeWarden pre-commit hook is already installed");
             return Ok(());
         }
 
@@ -76,7 +76,7 @@ pub async fn install() -> Result<()> {
     }
 
     p.success("Installed pre-commit hook");
-    p.hint("Every commit will now run `agentscope check` automatically.");
+    p.hint("Every commit will now run `scopewarden check` automatically.");
     p.hint("Skip with: git commit --no-verify");
 
     Ok(())
@@ -93,7 +93,7 @@ pub async fn uninstall() -> Result<()> {
 
     let contents = fs::read_to_string(hook_path)?;
     if !contents.contains(HOOK_MARKER) {
-        p.warn("Pre-commit hook exists but was NOT installed by AgentScope — skipping");
+        p.warn("Pre-commit hook exists but was NOT installed by ScopeWarden — skipping");
         p.hint("Remove it manually if needed.");
         return Ok(());
     }
@@ -104,9 +104,9 @@ pub async fn uninstall() -> Result<()> {
     let backup_path = Path::new(HOOK_BACKUP);
     if backup_path.exists() {
         fs::rename(backup_path, hook_path)?;
-        p.success("Removed AgentScope hook, restored previous hook from backup");
+        p.success("Removed ScopeWarden hook, restored previous hook from backup");
     } else {
-        p.success("Removed AgentScope pre-commit hook");
+        p.success("Removed ScopeWarden pre-commit hook");
     }
 
     Ok(())
@@ -122,7 +122,7 @@ pub async fn status() -> Result<()> {
             console::style("○").dim(),
             console::style("not installed").dim(),
         );
-        p.hint("Install with: agentscope hook install");
+        p.hint("Install with: scopewarden hook install");
         return Ok(());
     }
 
@@ -131,17 +131,17 @@ pub async fn status() -> Result<()> {
         println!(
             "  {} pre-commit hook: {}",
             console::style("●").green(),
-            console::style("installed (AgentScope)").green().bold(),
+            console::style("installed (ScopeWarden)").green().bold(),
         );
-        p.hint("Every commit runs `agentscope check` automatically.");
-        p.hint("Remove with: agentscope hook uninstall");
+        p.hint("Every commit runs `scopewarden check` automatically.");
+        p.hint("Remove with: scopewarden hook uninstall");
     } else {
         println!(
             "  {} pre-commit hook: {}",
             console::style("●").yellow(),
             console::style("installed (third-party)").yellow(),
         );
-        p.hint("A non-AgentScope hook is present. Install will back it up first.");
+        p.hint("A non-ScopeWarden hook is present. Install will back it up first.");
     }
 
     Ok(())

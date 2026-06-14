@@ -2,11 +2,11 @@ use clap::{Parser, Subcommand, ValueEnum};
 
 #[derive(Parser)]
 #[command(
-    name = "agentscope",
+    name = "scopewarden",
     version,
     about = "Did your AI agent do only what you asked?",
-    long_about = "AgentScope is a scope firewall and audit layer for AI coding agents.\nIt records or detects your mission, watches Git changes,\nand blocks policy violations before they reach git.",
-    after_help = "COMMON FLOWS:\n  agentscope init\n  agentscope start \"Fix the rate-limit bug in api/middleware.ts\" --agent codex\n  agentscope watch\n  agentscope check\n\nAGENT-AWARE FLOW:\n  agentscope agents doctor\n  agentscope agents detect\n  agentscope attach --agent auto\n  agentscope attach --agent auto --apply\n  agentscope monitor --agent auto\n\nOTHER USEFUL COMMANDS:\n  agentscope judge -m qwen3.5:2b\n  agentscope launchers list\n  agentscope launchers test codex\n  agentscope diff --problems\n  agentscope report --markdown\n  agentscope hook install\n  agentscope mcp\n  agentscope skills install --agent all\n  agentscope plugins install --agent all\n",
+    long_about = "ScopeWarden is a scope firewall and audit layer for AI coding agents.\nIt records or detects your mission, watches Git changes,\nand blocks policy violations before they reach git.",
+    after_help = "COMMON FLOWS:\n  scopewarden init\n  scopewarden start \"Fix the rate-limit bug in api/middleware.ts\" --agent codex\n  scopewarden watch\n  scopewarden check\n\nAGENT-AWARE FLOW:\n  scopewarden agents doctor\n  scopewarden agents detect\n  scopewarden attach --agent auto\n  scopewarden attach --agent auto --apply\n  scopewarden monitor --agent auto\n\nOTHER USEFUL COMMANDS:\n  scopewarden judge -m qwen3.5:2b\n  scopewarden launchers list\n  scopewarden launchers test codex\n  scopewarden diff --problems\n  scopewarden report --markdown\n  scopewarden hook install\n  scopewarden mcp\n  scopewarden skills install --agent all\n  scopewarden plugins install --agent all\n",
     styles = clap_styles(),
 )]
 pub struct Cli {
@@ -79,7 +79,7 @@ pub enum Commands {
         action: LauncherAction,
     },
 
-    /// View and edit agentscope configuration
+    /// View and edit scopewarden configuration
     Config {
         #[command(subcommand)]
         action: ConfigAction,
@@ -111,7 +111,7 @@ pub enum Commands {
         action: AgentsAction,
     },
 
-    /// Manage AgentScope-owned chat sessions
+    /// Manage ScopeWarden-owned chat sessions
     Chat {
         #[command(subcommand)]
         action: ChatAction,
@@ -129,7 +129,7 @@ pub enum Commands {
         #[arg(long, default_value = "auto")]
         agent: String,
 
-        /// Write .agentscope/session.json instead of printing a dry run
+        /// Write .scopewarden/session.json instead of printing a dry run
         #[arg(long)]
         apply: bool,
     },
@@ -145,7 +145,7 @@ pub enum Commands {
         auto_attach: bool,
     },
 
-    /// Run the AgentScope JSON-RPC MCP server
+    /// Run the ScopeWarden JSON-RPC MCP server
     Mcp,
 
     /// Install or list agent instruction files
@@ -178,7 +178,7 @@ pub enum Commands {
         agent: AgentKind,
     },
 
-    /// Initialize a new agentscope.yaml config in the current repo
+    /// Initialize a new scopewarden.yaml config in the current repo
     Init {
         /// Config preset for your workflow
         #[arg(long, value_enum, default_value = "solo")]
@@ -263,7 +263,7 @@ pub enum ConfigAction {
     /// Show current configuration
     Show,
 
-    /// Set a config value (e.g. agentscope config set model qwen3.5:2b)
+    /// Set a config value (e.g. scopewarden config set model qwen3.5:2b)
     Set {
         /// Config key (model, provider, endpoint, max_files, max_lines, judge.enabled, team.enabled, agents.auto_detect, agents.auto_attach)
         key: String,
@@ -272,7 +272,7 @@ pub enum ConfigAction {
         value: String,
     },
 
-    /// Open agentscope.yaml in your $EDITOR
+    /// Open scopewarden.yaml in your $EDITOR
     Edit,
 
     /// Reset config to a preset
@@ -290,9 +290,9 @@ pub enum ConfigAction {
 
 #[derive(Subcommand, Clone, Debug)]
 pub enum HookAction {
-    /// Install a pre-commit hook that runs `agentscope check`
+    /// Install a pre-commit hook that runs `scopewarden check`
     Install,
-    /// Remove the AgentScope pre-commit hook
+    /// Remove the ScopeWarden pre-commit hook
     Uninstall,
     /// Show current hook status
     Status,
@@ -335,13 +335,13 @@ pub enum IntegrationAction {
 
 #[derive(Subcommand, Clone, Debug)]
 pub enum ChatAction {
-    /// Create a new AgentScope chat session
+    /// Create a new ScopeWarden chat session
     New {
         /// Optional chat title
         title: Option<String>,
     },
 
-    /// List AgentScope chat sessions
+    /// List ScopeWarden chat sessions
     #[command(alias = "ls")]
     List,
 
@@ -351,7 +351,7 @@ pub enum ChatAction {
         chat_id: String,
     },
 
-    /// Soft-delete a chat into .agentscope/chats/archive
+    /// Soft-delete a chat into .scopewarden/chats/archive
     Delete {
         /// Chat ID to delete
         chat_id: String,
@@ -394,7 +394,7 @@ pub enum SessionsAction {
         /// Agent name, e.g. codex or claude
         agent: String,
 
-        /// Session ID from `agentscope sessions list`
+        /// Session ID from `scopewarden sessions list`
         session_id: String,
     },
 }

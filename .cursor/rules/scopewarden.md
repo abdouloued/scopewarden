@@ -1,7 +1,6 @@
-# ScopeWarden plugin · codex
+# ScopeWarden skill · cursor
 
-ScopeWarden is a scope firewall and audit cockpit for AI coding agents.
-It checks whether your Git changes match the active mission.
+This file instructs `cursor` to use ScopeWarden as a scope firewall before and after making changes.
 
 ## When to run ScopeWarden
 

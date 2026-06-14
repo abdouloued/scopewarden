@@ -1,7 +1,7 @@
 {
   "mcpServers": {
-    "agentscope": {
-      "command": "agentscope",
+    "scopewarden": {
+      "command": "scopewarden",
       "args": ["mcp"],
       "env": {}
     }

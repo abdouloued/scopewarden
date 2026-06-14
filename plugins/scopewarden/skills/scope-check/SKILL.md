@@ -7,12 +7,12 @@ user-invocable: true
 
 # Scope Check
 
-Run `agentscope check` to audit all current Git changes against the active mission policy.
+Run `scopewarden check` to audit all current Git changes against the active mission policy.
 
 ```bash
-agentscope check              # policy check + scope audit
-agentscope check --json       # machine-readable output
-agentscope diff --problems    # show only suspicious/blocked files
+scopewarden check              # policy check + scope audit
+scopewarden check --json       # machine-readable output
+scopewarden diff --problems    # show only suspicious/blocked files
 ```
 
 ## Interpreting results
@@ -25,13 +25,13 @@ agentscope diff --problems    # show only suspicious/blocked files
 ## If files are BLOCKED
 
 Stop. Do not include them in the commit. Tell the user:
-> "The file `<path>` is BLOCKED by AgentScope policy. It matches a blocked pattern in `agentscope.yaml`. This is a hard stop — the file must be removed from the change set."
+> "The file `<path>` is BLOCKED by ScopeWarden policy. It matches a blocked pattern in `scopewarden.yaml`. This is a hard stop — the file must be removed from the change set."
 
 ## If files are SUSPICIOUS
 
 Run the judge and report back:
 ```bash
-agentscope judge
+scopewarden judge
 ```
 
 Then tell the user what the judge said before proceeding.

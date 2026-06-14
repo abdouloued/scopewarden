@@ -43,12 +43,12 @@ pub fn is_tty() -> bool {
 pub async fn run_watch() -> Result<()> {
     if !is_tty() {
         anyhow::bail!(
-            "agentscope watch requires a real terminal (TTY).\n\
+            "scopewarden watch requires a real terminal (TTY).\n\
              You appear to be running inside a sandboxed or piped environment.\n\n\
              Alternatives:\n  \
-             agentscope monitor      — plain-text polling monitor (works everywhere)\n  \
-             agentscope check        — one-shot policy check\n  \
-             agentscope diff --problems — quick diff, problems only"
+             scopewarden monitor      — plain-text polling monitor (works everywhere)\n  \
+             scopewarden check        — one-shot policy check\n  \
+             scopewarden diff --problems — quick diff, problems only"
         );
     }
     enable_raw_mode()?;
@@ -249,16 +249,16 @@ const COMMAND_SPECS: &[CommandSpec] = &[
     CommandSpec {
         name: "/allow",
         args: "[file|glob]",
-        description: "Persist an allow override in agentscope.yaml",
+        description: "Persist an allow override in scopewarden.yaml",
     },
     CommandSpec {
         name: "/block",
         args: "[file|glob]",
-        description: "Persist a blocked pattern in agentscope.yaml",
+        description: "Persist a blocked pattern in scopewarden.yaml",
     },
     CommandSpec {
         name: "/theme",
-        args: "[agentscope|codex|claude|openclaw|high-contrast]",
+        args: "[scopewarden|codex|claude|openclaw|high-contrast]",
         description: "List or switch the TUI theme",
     },
     CommandSpec {
@@ -1074,10 +1074,10 @@ async fn run_app<B: ratatui::backend::Backend>(
                     // Sessions mode: n = new mission hint
                     (KeyCode::Char('n'), _) if state.mode == AppMode::Sessions => {
                         state.push_log(
-                            "to start a mission: agentscope start \"<goal>\" --agent <agent>",
+                            "to start a mission: scopewarden start \"<goal>\" --agent <agent>",
                             state.theme.accent,
                         );
-                        state.set_flash("run agentscope start to create a mission");
+                        state.set_flash("run scopewarden start to create a mission");
                     }
                     // Pane resize: [ = shrink file list, ] = grow file list
                     (KeyCode::Char('['), _) => {
@@ -1254,7 +1254,7 @@ fn render_header(
 
     let status_line = Line::from(vec![
         Span::styled(
-            "agentscope",
+            "scopewarden",
             Style::default()
                 .fg(theme.accent)
                 .add_modifier(Modifier::BOLD),
@@ -1446,7 +1446,7 @@ fn render_agent_missions(f: &mut Frame, area: Rect, state: &WatchState) {
 
     let lines = if state.active_missions.is_empty() {
         vec![Line::from(Span::styled(
-            "  no agent missions detected — run: agentscope start \"mission\"",
+            "  no agent missions detected — run: scopewarden start \"mission\"",
             Style::default().fg(theme.text_subtle),
         ))]
     } else {
@@ -3389,7 +3389,7 @@ fn autocomplete_command_input(input: &str, state: &WatchState) -> String {
 
 #[cfg(test)]
 fn autocomplete_first(input: &str) -> String {
-    let state = WatchState::new("agentscope");
+    let state = WatchState::new("scopewarden");
     autocomplete_command_input(input, &state)
 }
 
@@ -4245,7 +4245,7 @@ fn try_answer_chat_locally(
 
     // Self-description / install / feature questions answered from built-in knowledge
     let asks_self = lower.contains("what are you")
-        || lower.contains("what is agentscope")
+        || lower.contains("what is scopewarden")
         || lower.contains("how do i install")
         || lower.contains("how to install")
         || lower.contains("how do i use")
@@ -4254,7 +4254,7 @@ fn try_answer_chat_locally(
         || lower.contains("your feature")
         || lower.contains("what feature")
         || lower.contains("tell me about yourself")
-        || lower.contains("how does agentscope work")
+        || lower.contains("how does scopewarden work")
         || lower.contains("what do you do");
     if asks_self {
         return Some(chat_capability_context(config));
@@ -4301,15 +4301,15 @@ async fn answer_chat_message_async(
     let capabilities = chat_capability_context(&config);
     let session_context = assistant_session_context(&config);
     let prompt = format!(
-        "You are the read-only chat assistant inside AgentScope, a coding-agent cockpit.\n\
-         Stay practical and answer from the provided AgentScope context first. If the user asks about sessions, skills, plugins, themes, commands, policy, scope, or changed files, use the facts below and do not invent counts.\n\
+        "You are the read-only chat assistant inside ScopeWarden, a coding-agent cockpit.\n\
+         Stay practical and answer from the provided ScopeWarden context first. If the user asks about sessions, skills, plugins, themes, commands, policy, scope, or changed files, use the facts below and do not invent counts.\n\
          You can explain and inspect; you cannot modify files, drive Codex/Claude/Gemini/Copilot, or install services from this chat.\n\
          Keep answers concise and conversational. Do not repeat a branded sender label in your prose.\n\
          Format for a terminal: use short paragraphs and newline-separated bullets. Do not pack bullets into one paragraph.\n\n\
          Active mission: \"{mission}\"\n\
          Scope snapshot: {scope_stats}\n\
          Selected file: {selected_context}\n\n\
-         AgentScope capabilities:\n{capabilities}\n\n\
+         ScopeWarden capabilities:\n{capabilities}\n\n\
          Local assistant session index:\n{session_context}\n\n\
          Conversation:\n{history}",
         mission = mission,
@@ -4427,16 +4427,16 @@ fn selected_chat_file_context(state: &WatchState, files: Option<&[AnnotatedFile]
 }
 
 fn chat_capability_context(config: &config::Config) -> String {
-    let skills = integration_asset_names(".agentscope/skill");
-    let plugins = integration_asset_names(".agentscope/plugin");
+    let skills = integration_asset_names(".scopewarden/skill");
+    let plugins = integration_asset_names(".scopewarden/plugin");
     format!(
-        "AgentScope is a Rust CLI that acts as a scope firewall and audit layer for AI coding agents.\n\
+        "ScopeWarden is a Rust CLI that acts as a scope firewall and audit layer for AI coding agents.\n\
          It records your mission, watches Git changes, applies deterministic policy, and optionally \
          asks a local LLM judge whether the diff still matches the mission.\n\n\
          INSTALLATION:\n\
-         - cargo install agentscope  (or: cargo build --release in repo)\n\
+         - cargo install scopewarden  (or: cargo build --release in repo)\n\
          - Requires Git in PATH. Optional: Ollama for local LLM judging.\n\
-         - Run `agentscope init` in any Git repo to create agentscope.yaml\n\n\
+         - Run `scopewarden init` in any Git repo to create scopewarden.yaml\n\n\
          MODES (keyboard):\n\
          - 1 = Review   — see every changed file, its verdict, and the decision panel\n\
          - 2 = Chat     — ask questions, run slash commands, get scope answers\n\
@@ -4450,26 +4450,26 @@ fn chat_capability_context(config: &config::Config) -> String {
          - BLOCKED    — matched a blocked policy pattern (e.g. .env, *.key, src/auth/**)\n\
          - IGNORED    — clean / no tracked changes\n\n\
          CLI COMMANDS:\n\
-         agentscope init              create agentscope.yaml\n\
-         agentscope start \"mission\"   start a manual session\n\
-         agentscope watch             open TUI (default)\n\
-         agentscope check [--json]    check current diff against policy\n\
-         agentscope diff [--problems] show diff filtered to problems\n\
-         agentscope judge [-m model]  run LLM judge on current diff\n\
-         agentscope model list/set/test/pull  manage Ollama judge models\n\
-         agentscope config show/set/edit/reset  manage config\n\
-         agentscope hook install/uninstall/status  manage pre-commit hook\n\
-         agentscope agents detect/doctor/context  inspect agent context\n\
-         agentscope monitor --agent auto  watch + auto-attach\n\
-         agentscope chat new/list/show/delete/restore/purge  manage chat logs\n\
-         agentscope sessions list/latest/show  inspect agent sessions\n\n\
+         scopewarden init              create scopewarden.yaml\n\
+         scopewarden start \"mission\"   start a manual session\n\
+         scopewarden watch             open TUI (default)\n\
+         scopewarden check [--json]    check current diff against policy\n\
+         scopewarden diff [--problems] show diff filtered to problems\n\
+         scopewarden judge [-m model]  run LLM judge on current diff\n\
+         scopewarden model list/set/test/pull  manage Ollama judge models\n\
+         scopewarden config show/set/edit/reset  manage config\n\
+         scopewarden hook install/uninstall/status  manage pre-commit hook\n\
+         scopewarden agents detect/doctor/context  inspect agent context\n\
+         scopewarden monitor --agent auto  watch + auto-attach\n\
+         scopewarden chat new/list/show/delete/restore/purge  manage chat logs\n\
+         scopewarden sessions list/latest/show  inspect agent sessions\n\n\
          CHAT SLASH COMMANDS:\n\
          /explain selected   explain the currently selected file's verdict\n\
          /report             show full scope summary\n\
          /filter suspicious  show only suspicious+blocked files in Review\n\
          /sessions [agent]   list local agent sessions\n\
          /latest [agent]     show latest session for an agent\n\
-         /theme <name>       switch theme (agentscope/codex/claude/openclaw/high-contrast)\n\
+         /theme <name>       switch theme (scopewarden/codex/claude/openclaw/high-contrast)\n\
          /judge-provider     list or switch judge provider\n\
          /judge-model        list or set judge model\n\
          /new-chat <title>   start a new chat log\n\
@@ -4477,7 +4477,7 @@ fn chat_capability_context(config: &config::Config) -> String {
          /chats              list saved chat logs\n\
          /delete-chat        archive current chat\n\
          /help               show all slash commands\n\n\
-         POLICY (agentscope.yaml):\n\
+         POLICY (scopewarden.yaml):\n\
          - blocked: glob patterns always blocked (e.g. .env, *.key, src/auth/**)\n\
          - warn: patterns that warn but don't block\n\
          - max_files_changed: hard limit on file count (0=disabled)\n\
@@ -4489,7 +4489,7 @@ fn chat_capability_context(config: &config::Config) -> String {
          - Ollama must be running locally (http://localhost:11434)\n\n\
          SUPPORTED AGENTS: {agents}\n\
          OLLAMA LAUNCH: {launches}\n\
-         THEMES: agentscope, codex, claude, openclaw, high-contrast\n\
+         THEMES: scopewarden, codex, claude, openclaw, high-contrast\n\
          PROJECT SKILLS: {skills}\n\
          PROJECT PLUGINS: {plugins}\n\
          CONFIGURED JUDGE: {provider} / {model}",
@@ -4816,7 +4816,7 @@ fn sender_color(sender: &str, theme: &Theme) -> Color {
     match sender {
         "YOU" => theme.accent,
         "assistant" => theme.text,
-        "AGENTSCOPE" => theme.success,
+        "SCOPEWARDEN" => theme.success,
         "JUDGE" => theme.accent,
         "CLAUDE" => theme.agent_claude,
         "CODEX" | "CODEX APP" => theme.agent_codex,
@@ -4958,7 +4958,7 @@ fn chat_render_lines(state: &WatchState, width: u16, max_w: usize) -> Vec<Line<'
             };
 
             // Show a sender label only for non-user, non-assistant named senders
-            // (SYSTEM, AGENTSCOPE, JUDGE, CLAUDE, CODEX). User ("YOU") and
+            // (SYSTEM, SCOPEWARDEN, JUDGE, CLAUDE, CODEX). User ("YOU") and
             // plain assistant messages are distinguished by background alone.
             let is_user = msg.sender == "YOU";
             let is_assistant = msg.sender == "assistant";
@@ -5331,7 +5331,7 @@ mod command_tests {
             verdict: FileVerdict::Unasked,
             matched_agents: vec![],
         }];
-        let state = WatchState::new("agentscope");
+        let state = WatchState::new("scopewarden");
         let backend = TestBackend::new(80, 8);
         let mut terminal = Terminal::new(backend).unwrap();
 
@@ -5370,7 +5370,7 @@ mod command_tests {
             },
             matched_agents: vec![],
         }];
-        let state = WatchState::new("agentscope");
+        let state = WatchState::new("scopewarden");
         let backend = TestBackend::new(80, 8);
         let mut terminal = Terminal::new(backend).unwrap();
 
@@ -5430,7 +5430,7 @@ mod command_tests {
                 matched_agents: vec![],
             },
         ];
-        let mut state = WatchState::new("agentscope");
+        let mut state = WatchState::new("scopewarden");
         state.active_missions = vec![
             ActiveMission {
                 agent: "codex".into(),
@@ -5487,7 +5487,7 @@ mod command_tests {
             verdict: FileVerdict::InScope,
             matched_agents: vec![],
         }];
-        let mut state = WatchState::new("agentscope");
+        let mut state = WatchState::new("scopewarden");
         state.started_at = Instant::now() - Duration::from_secs(10);
         state.active_missions = vec![ActiveMission {
             agent: "codex".into(),
@@ -5555,7 +5555,7 @@ mod command_tests {
                 matched_agents: vec![],
             },
         ];
-        let state = WatchState::new("agentscope");
+        let state = WatchState::new("scopewarden");
         let backend = TestBackend::new(80, 3);
         let mut terminal = Terminal::new(backend).unwrap();
 
@@ -5616,7 +5616,7 @@ mod command_tests {
                 matched_agents: vec![],
             },
         ];
-        let state = WatchState::new("agentscope");
+        let state = WatchState::new("scopewarden");
         let backend = TestBackend::new(80, 3);
         let mut terminal = Terminal::new(backend).unwrap();
 
@@ -5670,7 +5670,7 @@ mod command_tests {
                 matched_agents: vec![],
             },
         ];
-        let mut state = WatchState::new("agentscope");
+        let mut state = WatchState::new("scopewarden");
         state.active_missions = vec![ActiveMission {
             agent: "codex".into(),
             mission: "Polish the terminal UI without changing functionality".into(),
@@ -5715,7 +5715,7 @@ mod command_tests {
             },
             matched_agents: vec![],
         }];
-        let state = WatchState::new("agentscope");
+        let state = WatchState::new("scopewarden");
         let backend = TestBackend::new(80, 10);
         let mut terminal = Terminal::new(backend).unwrap();
 
@@ -5754,7 +5754,7 @@ mod command_tests {
             },
             matched_agents: vec![],
         }];
-        let state = WatchState::new("agentscope");
+        let state = WatchState::new("scopewarden");
         let backend = TestBackend::new(80, 9);
         let mut terminal = Terminal::new(backend).unwrap();
 
@@ -5798,7 +5798,7 @@ mod command_tests {
 
     #[test]
     fn autocomplete_uses_selected_value_for_provider_and_ollama_model() {
-        let mut state = WatchState::new("agentscope");
+        let mut state = WatchState::new("scopewarden");
         state.command_selected = 1;
         assert_eq!(
             autocomplete_command_input("/judge-provider ", &state),

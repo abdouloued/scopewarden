@@ -20,7 +20,7 @@ pub async fn list_models() -> Result<()> {
     println!();
     println!(
         "  {} {}",
-        style("agentscope models").cyan().bold(),
+        style("scopewarden models").cyan().bold(),
         style("— available LLM judges").dim(),
     );
     println!();
@@ -194,27 +194,27 @@ pub async fn list_models() -> Result<()> {
     println!("  {}", style("── Quick Commands ──").dim());
     println!(
         "  {}  {}",
-        style("  agentscope model set qwen3.5:2b").cyan(),
+        style("  scopewarden model set qwen3.5:2b").cyan(),
         style("— set default Ollama model").dim()
     );
     println!(
         "  {}  {}",
-        style("  agentscope model set -p claude claude-sonnet-4-20250514").cyan(),
+        style("  scopewarden model set -p claude claude-sonnet-4-20250514").cyan(),
         style("— use Claude").dim()
     );
     println!(
         "  {}  {}",
-        style("  agentscope model test").cyan(),
+        style("  scopewarden model test").cyan(),
         style("— test current model").dim()
     );
     println!(
         "  {}  {}",
-        style("  agentscope model pull llama3").cyan(),
+        style("  scopewarden model pull llama3").cyan(),
         style("— download a model").dim()
     );
     println!(
         "  {}  {}",
-        style("  agentscope judge -m gemma4:e2b").cyan(),
+        style("  scopewarden judge -m gemma4:e2b").cyan(),
         style("— one-off judge with any model").dim()
     );
     println!();
@@ -222,7 +222,7 @@ pub async fn list_models() -> Result<()> {
     Ok(())
 }
 
-/// Set the default model (updates agentscope.yaml)
+/// Set the default model (updates scopewarden.yaml)
 pub async fn set_model(
     model: String,
     provider: Option<crate::cli::JudgeProviderArg>,
@@ -248,7 +248,7 @@ pub async fn set_model(
         config.judge.endpoint = ep;
     }
 
-    // Write back to agentscope.yaml
+    // Write back to scopewarden.yaml
     write_config(&config)?;
 
     let provider_name = match config.judge.provider {
@@ -374,7 +374,7 @@ pub async fn pull_model(model: String) -> Result<()> {
     if status.success() {
         println!();
         p.success(&format!("Model {} is ready", model));
-        p.hint(&format!("Set as default: agentscope model set {}", model));
+        p.hint(&format!("Set as default: scopewarden model set {}", model));
     } else {
         println!();
         p.warn(&format!("Failed to pull {} — check ollama logs", model));
@@ -401,7 +401,7 @@ pub async fn config_show() -> Result<()> {
     println!();
     println!(
         "  {} {}",
-        style("agentscope config").cyan().bold(),
+        style("scopewarden config").cyan().bold(),
         style("— current settings").dim(),
     );
     println!();
@@ -529,12 +529,12 @@ pub async fn config_show() -> Result<()> {
     println!(
         "  {}  {}",
         style("config file").dim(),
-        style("agentscope.yaml").cyan(),
+        style("scopewarden.yaml").cyan(),
     );
     println!(
         "  {}  {}",
         style("edit with  ").dim(),
-        style("agentscope config edit").cyan(),
+        style("scopewarden config edit").cyan(),
     );
     println!();
 
@@ -627,10 +627,10 @@ pub async fn config_set(key: String, value: String) -> Result<()> {
 /// Open config in $EDITOR
 pub async fn config_edit() -> Result<()> {
     let p = Printer::new();
-    let config_path = "agentscope.yaml";
+    let config_path = "scopewarden.yaml";
 
     if !std::path::Path::new(config_path).exists() {
-        anyhow::bail!("No agentscope.yaml found. Run: agentscope init");
+        anyhow::bail!("No scopewarden.yaml found. Run: scopewarden init");
     }
 
     let editor = std::env::var("EDITOR")
@@ -717,7 +717,7 @@ fn format_size(bytes: u64) -> String {
 
 fn write_config(config: &config::Config) -> Result<()> {
     let yaml = serde_yaml::to_string(config)?;
-    let path = "agentscope.yaml";
+    let path = "scopewarden.yaml";
 
     // Preserve header comment if file exists
     let header = if std::path::Path::new(path).exists() {
@@ -728,7 +728,7 @@ fn write_config(config: &config::Config) -> Result<()> {
             .collect::<Vec<_>>()
             .join("\n")
     } else {
-        "# AgentScope configuration\n# Docs: https://agentscope.dev/config".to_string()
+        "# ScopeWarden configuration\n# Docs: https://scopewarden.dev/config".to_string()
     };
 
     let content = if header.is_empty() {

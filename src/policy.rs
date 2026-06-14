@@ -4,7 +4,7 @@ use std::path::Path;
 use crate::config::PolicyConfig;
 use crate::git::FileDiff;
 
-/// How AgentScope classifies a changed file relative to the mission
+/// How ScopeWarden classifies a changed file relative to the mission
 #[derive(Debug, Clone, PartialEq)]
 pub enum FileVerdict {
     /// Explicitly allowed by persistent policy override

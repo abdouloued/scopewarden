@@ -1,59 +1,59 @@
 # Quickstart
 
-Use this when you want AgentScope running in a real coding session.
+Use this when you want ScopeWarden running in a real coding session.
 
 ## Manual mission
 
 ```bash
-agentscope init
-agentscope start "Fix checkout button loading state" --agent codex
+scopewarden init
+scopewarden start "Fix checkout button loading state" --agent codex
 ```
 
 Run your coding agent normally.
 
 ```bash
-agentscope watch
-agentscope check
+scopewarden watch
+scopewarden check
 ```
 
 ## Agent-aware mission
 
 ```bash
-agentscope init
-agentscope agents doctor
-agentscope agents detect
-agentscope attach --agent auto
+scopewarden init
+scopewarden agents doctor
+scopewarden agents detect
+scopewarden attach --agent auto
 ```
 
 If the dry run looks right:
 
 ```bash
-agentscope attach --agent auto --apply
-agentscope monitor --agent auto
+scopewarden attach --agent auto --apply
+scopewarden monitor --agent auto
 ```
 
 ## Before commit
 
 ```bash
-agentscope diff --problems
-agentscope check
+scopewarden diff --problems
+scopewarden check
 ```
 
 Optional:
 
 ```bash
-agentscope judge -m qwen3.5:2b
-agentscope report --markdown
+scopewarden judge -m qwen3.5:2b
+scopewarden report --markdown
 ```
 
 ## If something is missing
 
 ```bash
-agentscope agents doctor
+scopewarden agents doctor
 ```
 
-Then either update `agentscope.yaml` with a custom source path, or skip detection for this session:
+Then either update `scopewarden.yaml` with a custom source path, or skip detection for this session:
 
 ```bash
-agentscope start "the exact mission" --agent codex
+scopewarden start "the exact mission" --agent codex
 ```

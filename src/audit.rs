@@ -24,7 +24,7 @@ pub async fn run(range: String, session_id: Option<String>) -> Result<()> {
     println!();
     println!(
         "  {} {}  {}",
-        console::style("agentscope").color256(135),
+        console::style("scopewarden").color256(135),
         console::style("audit").bold(),
         console::style(&range).dim(),
     );

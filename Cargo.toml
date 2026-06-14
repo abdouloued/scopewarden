@@ -1,20 +1,20 @@
 [package]
-name = "agentscope"
+name = "scopewarden"
 version = "0.1.0"
 edition = "2021"
-authors = ["AgentScope Contributors"]
+authors = ["ScopeWarden Contributors"]
 description = "Scope firewall and audit layer for AI coding agents"
 license-file = "LICENSE"
-repository = "https://github.com/abdouloued/agentscopev2"
-homepage = "https://abdouloued.github.io/agentscopev2"
-documentation = "https://github.com/abdouloued/agentscopev2#readme"
+repository = "https://github.com/abdouloued/scopewarden"
+homepage = "https://abdouloued.github.io/scopewarden"
+documentation = "https://github.com/abdouloued/scopewarden#readme"
 keywords = ["ai", "agents", "git", "cli", "developer-tools"]
 categories = ["command-line-utilities", "development-tools"]
 readme = "README.md"
 rust-version = "1.75"
 
 [[bin]]
-name = "agentscope"
+name = "scopewarden"
 path = "src/main.rs"
 
 [dependencies]

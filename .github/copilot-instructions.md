@@ -1,28 +1,28 @@
-# AgentScope plugin · copilot-cli
+# ScopeWarden plugin · copilot-cli
 
-AgentScope is a scope firewall and audit cockpit for AI coding agents.
+ScopeWarden is a scope firewall and audit cockpit for AI coding agents.
 It checks whether your Git changes match the active mission.
 
-## When to run AgentScope
+## When to run ScopeWarden
 
 | Trigger | Command |
 |---------|--------|
-| Before starting work | `agentscope status` |
-| While working | `agentscope watch` (live TUI cockpit) |
-| Before finishing | `agentscope check` |
-| Before committing | `agentscope diff --problems` |
+| Before starting work | `scopewarden status` |
+| While working | `scopewarden watch` (live TUI cockpit) |
+| Before finishing | `scopewarden check` |
+| Before committing | `scopewarden diff --problems` |
 
 ## Quick reference
 
 ```
-agentscope init                          # one-time repo setup
-agentscope start "your mission"          # record what you're doing
-agentscope watch                         # live cockpit (1=review 2=chat 3=dash 4=sessions 5=live)
-agentscope check                         # policy check + scope audit
-agentscope check --json                  # machine-readable output
-agentscope judge                         # ask the LLM judge
-agentscope diff --problems               # show suspicious/blocked files only
-agentscope attach --agent auto --apply   # infer mission from this agent's logs
+scopewarden init                          # one-time repo setup
+scopewarden start "your mission"          # record what you're doing
+scopewarden watch                         # live cockpit (1=review 2=chat 3=dash 4=sessions 5=live)
+scopewarden check                         # policy check + scope audit
+scopewarden check --json                  # machine-readable output
+scopewarden judge                         # ask the LLM judge
+scopewarden diff --problems               # show suspicious/blocked files only
+scopewarden attach --agent auto --apply   # infer mission from this agent's logs
 ```
 
 ## Status labels
@@ -42,23 +42,23 @@ agentscope attach --agent auto --apply   # infer mission from this agent's logs
 | `Enter` | Open diff overlay for selected file |
 | `j` | Run judge on selected file |
 | `a` / `b` | Allow / block selected file |
-| `t` | Cycle themes (agentscope/codex/claude/openclaw/high-contrast) |
+| `t` | Cycle themes (scopewarden/codex/claude/openclaw/high-contrast) |
 | `?` | Help overlay |
 | `q` | Quit |
 
 ## Judge providers
 
-AgentScope supports Ollama (local/private), Claude, OpenAI, Gemini, and OpenRouter.
+ScopeWarden supports Ollama (local/private), Claude, OpenAI, Gemini, and OpenRouter.
 
 ```
-agentscope config set judge.provider ollama      # local, private
-agentscope config set judge.provider claude      # requires ANTHROPIC_API_KEY
-agentscope config set judge.provider openai      # requires OPENAI_API_KEY
-agentscope config set judge.provider gemini      # requires GEMINI_API_KEY
-agentscope config set judge.provider openrouter  # requires OPENROUTER_API_KEY
+scopewarden config set judge.provider ollama      # local, private
+scopewarden config set judge.provider claude      # requires ANTHROPIC_API_KEY
+scopewarden config set judge.provider openai      # requires OPENAI_API_KEY
+scopewarden config set judge.provider gemini      # requires GEMINI_API_KEY
+scopewarden config set judge.provider openrouter  # requires OPENROUTER_API_KEY
 ```
 
-## Policy config (`agentscope.yaml`)
+## Policy config (`scopewarden.yaml`)
 
 ```yaml
 policy:
@@ -80,4 +80,4 @@ Blocked patterns are enforced deterministically — no model can override them.
 
 ## More info
 
-Run `agentscope --help` or visit https://github.com/abdouloued/agentscopev2
+Run `scopewarden --help` or visit https://github.com/abdouloued/scopewarden

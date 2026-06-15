@@ -6,7 +6,7 @@ use clap::{Parser, Subcommand, ValueEnum};
     version,
     about = "Did your AI agent do only what you asked?",
     long_about = "ScopeWarden is a scope firewall and audit layer for AI coding agents.\nIt records or detects your mission, watches Git changes,\nand blocks policy violations before they reach git.",
-    after_help = "COMMON FLOWS:\n  scopewarden init\n  scopewarden start \"Fix the rate-limit bug in api/middleware.ts\" --agent codex\n  scopewarden watch\n  scopewarden check\n\nAGENT-AWARE FLOW:\n  scopewarden agents doctor\n  scopewarden agents detect\n  scopewarden attach --agent auto\n  scopewarden attach --agent auto --apply\n  scopewarden monitor --agent auto\n\nOTHER USEFUL COMMANDS:\n  scopewarden judge -m qwen3.5:2b\n  scopewarden launchers list\n  scopewarden launchers test codex\n  scopewarden diff --problems\n  scopewarden report --markdown\n  scopewarden hook install\n  scopewarden mcp\n  scopewarden skills install --agent all\n  scopewarden plugins install --agent all\n",
+    after_help = "COMMON FLOWS:\n  scopewarden init\n  scopewarden start \"Fix the rate-limit bug in api/middleware.ts\" --agent codex\n  scopewarden watch\n  scopewarden check\n\nAGENT-AWARE FLOW:\n  scopewarden agents doctor\n  scopewarden agents detect\n  scopewarden attach --agent auto\n  scopewarden attach --agent auto --apply\n  scopewarden monitor --agent auto\n\nOTHER USEFUL COMMANDS:\n  scopewarden judge -m qwen3.5:2b\n  scopewarden diff --problems\n  scopewarden report --markdown\n  scopewarden hook install\n  scopewarden mcp\n  scopewarden skills install --agent all\n  scopewarden plugins install --agent all\n",
     styles = clap_styles(),
 )]
 pub struct Cli {
@@ -72,13 +72,6 @@ pub enum Commands {
         action: ModelAction,
     },
 
-    /// Detect and smoke-test local AI launcher apps
-    #[command(alias = "launcher", alias = "smoke")]
-    Launchers {
-        #[command(subcommand)]
-        action: LauncherAction,
-    },
-
     /// View and edit scopewarden configuration
     Config {
         #[command(subcommand)]
@@ -109,12 +102,6 @@ pub enum Commands {
     Agents {
         #[command(subcommand)]
         action: AgentsAction,
-    },
-
-    /// Manage ScopeWarden-owned chat sessions
-    Chat {
-        #[command(subcommand)]
-        action: ChatAction,
     },
 
     /// Browse local assistant sessions discovered from agent folders
@@ -227,35 +214,6 @@ pub enum ModelAction {
     },
 }
 
-// ── Launcher smoke-test subcommands ─────────────────────────────────────────
-
-#[derive(Subcommand, Clone, Debug)]
-pub enum LauncherAction {
-    /// List supported launchers and installation status
-    #[command(alias = "ls")]
-    List,
-
-    /// Run safe startup smoke tests for all launchers or one selected launcher
-    Test {
-        /// Optional launcher: claude-code, codex-app, openclaw, hermes-agent, codex, opencode
-        app: Option<String>,
-
-        /// Per-launcher timeout in seconds
-        #[arg(long, default_value_t = 8)]
-        timeout: u64,
-
-        /// Print only the concise summary line
-        #[arg(long)]
-        summary: bool,
-    },
-
-    /// Alias for `test --summary`
-    Summary {
-        /// Optional launcher: claude-code, codex-app, openclaw, hermes-agent, codex, opencode
-        app: Option<String>,
-    },
-}
-
 // ── Config subcommands ──────────────────────────────────────────────────────
 
 #[derive(Subcommand, Clone, Debug)]
@@ -330,47 +288,6 @@ pub enum IntegrationAction {
         /// Agent to install, or all
         #[arg(long, default_value = "all")]
         agent: String,
-    },
-}
-
-#[derive(Subcommand, Clone, Debug)]
-pub enum ChatAction {
-    /// Create a new ScopeWarden chat session
-    New {
-        /// Optional chat title
-        title: Option<String>,
-    },
-
-    /// List ScopeWarden chat sessions
-    #[command(alias = "ls")]
-    List,
-
-    /// Show chat metadata and transcript
-    Show {
-        /// Chat ID to show
-        chat_id: String,
-    },
-
-    /// Soft-delete a chat into .scopewarden/chats/archive
-    Delete {
-        /// Chat ID to delete
-        chat_id: String,
-    },
-
-    /// Restore a soft-deleted chat
-    Restore {
-        /// Chat ID to restore
-        chat_id: String,
-    },
-
-    /// Permanently delete an archived chat
-    Purge {
-        /// Chat ID to purge
-        chat_id: String,
-
-        /// Confirm permanent deletion
-        #[arg(long)]
-        yes: bool,
     },
 }
 

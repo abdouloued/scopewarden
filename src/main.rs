@@ -7,7 +7,6 @@ mod config;
 mod git;
 mod hooks;
 mod judge;
-mod launchers;
 mod models;
 mod output;
 mod policy;
@@ -58,15 +57,6 @@ async fn main() -> Result<()> {
             cli::ModelAction::Test { model } => models::test_model(model).await,
             cli::ModelAction::Pull { model } => models::pull_model(model).await,
         },
-        Commands::Launchers { action } => match action {
-            cli::LauncherAction::List => launchers::list_command().await,
-            cli::LauncherAction::Test {
-                app,
-                timeout,
-                summary,
-            } => launchers::test_command(app, timeout, summary).await,
-            cli::LauncherAction::Summary { app } => launchers::test_command(app, 8, true).await,
-        },
         Commands::Config { action } => match action {
             cli::ConfigAction::Show => models::config_show().await,
             cli::ConfigAction::Set { key, value } => models::config_set(key, value).await,
@@ -89,7 +79,6 @@ async fn main() -> Result<()> {
             cli::AgentsAction::Doctor => agents::doctor_command().await,
             cli::AgentsAction::Context { agent } => agents::context_command(agent).await,
         },
-        Commands::Chat { action } => chat::chat_command(action).await,
         Commands::Sessions { action } => assistant_sessions::sessions_command(action).await,
         Commands::Attach { agent, apply } => agents::attach_command(agent, apply).await,
         Commands::Monitor { agent, auto_attach } => {

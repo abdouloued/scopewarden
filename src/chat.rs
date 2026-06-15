@@ -8,7 +8,7 @@ use std::{
 };
 use ulid::Ulid;
 
-use crate::{cli::ChatAction, config};
+use crate::config;
 
 pub const CHATS_DIR: &str = ".scopewarden/chats";
 pub const CHAT_INDEX: &str = ".scopewarden/chats/index.json";
@@ -44,55 +44,6 @@ struct ChatIndex {
     chats: Vec<ChatSessionMeta>,
 }
 
-pub async fn chat_command(action: ChatAction) -> Result<()> {
-    match action {
-        ChatAction::New { title } => {
-            let config = config::load_or_default();
-            let meta = create_chat(title, &config)?;
-            println!("  created chat {}  {}", meta.id, meta.title);
-        }
-        ChatAction::List => {
-            for chat in list_chats(false)? {
-                println!(
-                    "  {}  {:<22} {} / {}  {}",
-                    chat.id,
-                    truncate(&chat.title, 22),
-                    chat.provider,
-                    chat.model,
-                    truncate(&chat.last_message_preview, 50)
-                );
-            }
-        }
-        ChatAction::Show { chat_id } => {
-            let meta = get_chat(&chat_id, true)?;
-            println!("  {}  {}", meta.id, meta.title);
-            println!("  provider/model  {} / {}", meta.provider, meta.model);
-            println!("  updated          {}", meta.updated_at);
-            for message in load_messages(&chat_id, meta.archived)? {
-                println!(
-                    "\n{} {}:\n{}",
-                    message.timestamp, message.role, message.content
-                );
-            }
-        }
-        ChatAction::Delete { chat_id } => {
-            soft_delete_chat(&chat_id)?;
-            println!("  deleted chat {} (archived)", chat_id);
-        }
-        ChatAction::Restore { chat_id } => {
-            restore_chat(&chat_id)?;
-            println!("  restored chat {}", chat_id);
-        }
-        ChatAction::Purge { chat_id, yes } => {
-            if !yes {
-                anyhow::bail!("Refusing to purge without --yes");
-            }
-            purge_chat(&chat_id)?;
-            println!("  purged chat {}", chat_id);
-        }
-    }
-    Ok(())
-}
 
 pub fn create_chat(title: Option<String>, config: &config::Config) -> Result<ChatSessionMeta> {
     ensure_chat_root()?;
@@ -169,6 +120,7 @@ pub fn append_message(chat_id: &str, role: &str, content: &str) -> Result<ChatMe
     Ok(message)
 }
 
+#[allow(dead_code)]
 pub fn load_messages(chat_id: &str, archived: bool) -> Result<Vec<ChatMessage>> {
     let path = chat_dir(chat_id, archived).join("messages.jsonl");
     if !path.exists() {
@@ -201,6 +153,7 @@ pub fn soft_delete_chat(chat_id: &str) -> Result<()> {
     Ok(())
 }
 
+#[allow(dead_code)]
 pub fn restore_chat(chat_id: &str) -> Result<()> {
     let mut meta = get_chat(chat_id, true)?;
     if !meta.archived {
@@ -222,6 +175,7 @@ pub fn restore_chat(chat_id: &str) -> Result<()> {
     Ok(())
 }
 
+#[allow(dead_code)]
 pub fn purge_chat(chat_id: &str) -> Result<()> {
     let mut index = read_index()?;
     let meta = index

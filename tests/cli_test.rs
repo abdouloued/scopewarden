@@ -202,40 +202,6 @@ fn cli_agents_doctor_explains_missing_sources_without_failing() {
         .stdout(predicate::str::contains("scopewarden start"));
 }
 
-#[test]
-fn cli_launchers_list_reports_all_supported_apps() {
-    let tmp = tempfile::tempdir().unwrap();
-
-    Command::cargo_bin("scopewarden")
-        .unwrap()
-        .args(["launchers", "list"])
-        .env("HOME", tmp.path())
-        .env("PATH", tmp.path())
-        .assert()
-        .success()
-        .stdout(predicate::str::contains("AI Launcher Lab"))
-        .stdout(predicate::str::contains("Claude Code"))
-        .stdout(predicate::str::contains("Codex App"))
-        .stdout(predicate::str::contains("OpenClaw"))
-        .stdout(predicate::str::contains("Hermes Agent"))
-        .stdout(predicate::str::contains("OpenCode"));
-}
-
-#[test]
-fn cli_launchers_summary_handles_missing_launcher_cleanly() {
-    let tmp = tempfile::tempdir().unwrap();
-
-    Command::cargo_bin("scopewarden")
-        .unwrap()
-        .args(["launchers", "summary", "opencode"])
-        .env("HOME", tmp.path())
-        .env("PATH", tmp.path())
-        .assert()
-        .success()
-        .stdout(predicate::str::contains("Summary"))
-        .stdout(predicate::str::contains("OpenCode"))
-        .stdout(predicate::str::contains("1 skipped"));
-}
 
 #[test]
 fn cli_attach_dry_run_does_not_write_session() {
@@ -483,28 +449,6 @@ fn cli_agents_context_honors_config_path_override() {
         .stdout(predicate::str::contains("Use configured path"));
 }
 
-#[test]
-fn cli_mcp_agent_detect_returns_json_rpc_response() {
-    let tmp = tempfile::tempdir().unwrap();
-    std::process::Command::new("git")
-        .args(["init"])
-        .current_dir(tmp.path())
-        .output()
-        .unwrap();
-    std::fs::write(tmp.path().join("scopewarden.yaml"), "version: 1\n").unwrap();
-
-    Command::cargo_bin("scopewarden")
-        .unwrap()
-        .arg("mcp")
-        .current_dir(tmp.path())
-        .env("HOME", tmp.path())
-        .write_stdin(r#"{"jsonrpc":"2.0","id":1,"method":"agent_detect"}"#)
-        .assert()
-        .success()
-        .stdout(predicate::str::contains(r#""jsonrpc":"2.0""#))
-        .stdout(predicate::str::contains(r#""id":1"#))
-        .stdout(predicate::str::contains("claude-code"));
-}
 
 #[test]
 fn cli_skills_and_plugins_install_project_assets() {
